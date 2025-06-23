@@ -121,7 +121,7 @@ function highlightWord(svg, dataStr, d, positions, idToIndex, svgId) {
     svg.append("text")
       .attr("class", "arc-label")
       .attr("x", (positions[idx] + positions[headIdx]) / 2)
-      .attr("y", y - arcHeight - 5)
+      .attr("y", y - arcHeight - 20)
       .text(d.deprel);
   }
 
