@@ -1,4 +1,4 @@
-import { sentences, wordMap } from './data.js';
+import { sentences, wordMap } from './matt2.2a.js';
 
 const tokenY = 150;
 const arcHeight = 40;
