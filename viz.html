@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dependency Parse Viewer</title>
+  <title>Dependency Parse Viewer (Multiple Sentences)</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus&display=swap" rel="stylesheet">
   <style>
@@ -19,7 +19,7 @@
     }
     .arc {
       fill: none;
-      stroke: lightgrey;
+      stroke: #ccc;
       stroke-width: 1.5px;
       marker-end: url(#arrowhead);
     }
@@ -39,13 +39,27 @@
       fill: blue;
       font-style: italic;
     }
+    .features {
+      font-size: 12px;
+      fill: green;
+      text-anchor: middle;
+    }
+    svg {
+      display: block;
+      margin-bottom: 60px;
+    }
   </style>
 </head>
 <body>
-<svg id="svg" width="1200" height="300"></svg>
+
+<svg id="svg1" width="1200" height="340"></svg>
+<svg id="svg2" width="1200" height="340"></svg>
 
 <script>
-const data = `1	εἴδομεν	ὁράω	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	0	root
+const sentences = [
+  {
+    svgId: "svg1",
+    data: `1	εἴδομεν	ὁράω	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	0	root
 2	γὰρ	γάρ	ADV	Df	_	1	discourse
 3	αὐτοῦ	αὐτός	PRON	Pp	Case=Gen|Gender=Masc|Number=Sing|Person=3|PronType=Prs	5	det
 4	τὸν	ὁ	DET	S-	Case=Acc|Definite=Def|Gender=Masc|Number=Sing|PronType=Dem	5	det
@@ -56,147 +70,146 @@ const data = `1	εἴδομεν	ὁράω	VERB	V-	Aspect=Perf|Mood=Ind|Number=Pl
 9	καὶ	καί	CCONJ	C-	_	10	cc
 10	ἤλθομεν	ἔρχομαι	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	1	conj
 11	προσκυνῆσαι	προσκυνέω	VERB	V-	Aspect=Perf|Tense=Past|VerbForm=Inf|Voice=Act	10	xcomp
-12	αὐτῷ	αὐτός	PRON	Pp	Case=Dat|Gender=Masc|Number=Sing|Person=3|PronType=Prs	11	obl:arg`;
+12	αὐτῷ	αὐτός	PRON	Pp	Case=Dat|Gender=Masc|Number=Sing|Person=3|PronType=Prs	11	obl:arg`
+  },
+  {
+    svgId: "svg2",
+    data: `1	vidimus	video	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	0	root
+2	enim	enim	ADV	Df	_	1	discourse
+3	stellam	stella	NOUN	Nb	Case=Acc|Gender=Fem|Number=Sing	1	obj
+4	eius	is	PRON	Pp	Case=Gen|Gender=Masc|Number=Sing|Person=3|PronType=Prs	3	det
+5	in	in	ADP	R-	_	6	case
+6	oriente	oriens	NOUN	Nb	Case=Abl|Gender=Masc|Number=Sing	1	obl
+7	et	et	CCONJ	C-	_	8	cc
+8	venimus	venio	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	1	conj
+9	adorare	adoro	VERB	V-	Tense=Pres|VerbForm=Inf|Voice=Act	8	advcl
+10	eum	is	PRON	Pp	Case=Acc|Gender=Masc|Number=Sing|Person=3|PronType=Prs	9	obj`
+  }
+];
 
-const svg = d3.select("#svg");
-const margin = { top: 60, bottom: 80, left: 50, right: 50 };
-const height = +svg.attr("height");
-const arcHeight = 50;
-const tokenY = height - margin.bottom;
-
-const defs = svg.append("defs");
-
-// Arrow markers
-defs.append("marker")
-  .attr("id", "arrowhead")
-  .attr("viewBox", "0 -5 10 10")
-  .attr("refX", 10)
-  .attr("refY", 0)
-  .attr("markerWidth", 6)
-  .attr("markerHeight", 6)
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M0,-5L10,0L0,5")
-  .attr("fill", "lightgrey");
-
-defs.append("marker")
-  .attr("id", "arrowhead-blue")
-  .attr("viewBox", "0 -5 10 10")
-  .attr("refX", 10)
-  .attr("refY", 0)
-  .attr("markerWidth", 6)
-  .attr("markerHeight", 6)
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M0,-5L10,0L0,5")
-  .attr("fill", "blue");
-
-defs.append("marker")
-  .attr("id", "arrowhead-red")
-  .attr("viewBox", "0 -5 10 10")
-  .attr("refX", 10)
-  .attr("refY", 0)
-  .attr("markerWidth", 6)
-  .attr("markerHeight", 6)
-  .attr("orient", "auto")
-  .append("path")
-  .attr("d", "M0,-5L10,0L0,5")
-  .attr("fill", "red");
-
-const tokens = data.split("\n").map(line => {
-  const [id, form, lemma, upos, xpos, feats, head, deprel] = line.split("\t");
-  return {
-    id: +id,
-    form,
-    head: +head,
-    deprel
-  };
-});
-
-// Measure token widths
-const ctx = document.createElement("canvas").getContext("2d");
-ctx.font = "24px Gentium Plus";
-tokens.forEach(d => {
-  d.width = ctx.measureText(d.form).width;
-});
-
-const space = 20;
-let currentX = margin.left;
-const positions = tokens.map(t => {
-  const x = currentX + t.width / 2;
-  currentX += t.width + space;
-  return x;
-});
-
-// Draw tokens
-svg.selectAll(".token")
-  .data(tokens)
-  .enter()
-  .append("text")
-  .attr("class", d => "token" + (d.head === 0 ? " root" : ""))
-  .attr("x", (_, i) => positions[i])
-  .attr("y", tokenY)
-  .attr("text-anchor", "middle")
-  .text(d => d.form)
-  .on("mouseover", highlight)
-  .on("mouseout", clearHighlight);
-
-// Default arcs
-svg.selectAll(".arc")
-  .data(tokens.filter(d => d.head !== 0))
-  .enter()
-  .append("path")
-  .attr("class", "arc")
-  .attr("d", (d, i) => arcPath(i, tokens.findIndex(t => t.id === d.head)));
-
-function arcPath(depIdx, headIdx) {
-  const x1 = positions[depIdx];
-  const x2 = positions[headIdx];
-  const y = tokenY - 30;
-  const radius = Math.abs(x2 - x1) / 2;
-  return `M${x1},${y} A${radius},${arcHeight} 0 0,${x1 < x2 ? 1 : 0} ${x2},${y}`;
+// Shared arrowheads
+const globalDefs = d3.select("body").append("svg").attr("width", 0).attr("height", 0).append("defs");
+function defineArrow(defs, id, color) {
+  defs.append("marker")
+    .attr("id", id)
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 10)
+    .attr("refY", 0)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto")
+    .append("path")
+    .attr("d", "M0,-5L10,0L0,5")
+    .attr("fill", color);
 }
+defineArrow(globalDefs, "arrowhead", "#ccc");
+defineArrow(globalDefs, "arrowhead-blue", "blue");
+defineArrow(globalDefs, "arrowhead-red", "red");
 
-function highlight(event, d) {
-  clearHighlight();
-  const idx = tokens.findIndex(t => t.id === d.id);
-  const headIdx = tokens.findIndex(t => t.id === d.head);
-  const y = tokenY - 30;
+sentences.forEach(renderSentence);
 
-  if (d.head !== 0) {
-    svg.append("path")
-      .attr("class", "arc arc-highlight-out")
-      .attr("d", arcPath(idx, headIdx))
-      .attr("id", "highlight-out");
+function renderSentence({ svgId, data }) {
+  const svg = d3.select(`#${svgId}`);
+  const margin = { top: 60, bottom: 100, left: 50, right: 50 };
+  const height = +svg.attr("height");
+  const arcHeight = 50;
+  const tokenY = height - margin.bottom;
 
-    // Label
-    const x1 = positions[idx];
+  const tokens = data.split("\n").map(line => {
+    const [id, form, lemma, upos, xpos, feats, head, deprel] = line.split("\t");
+    return { id: +id, form, lemma, upos, feats, head: +head, deprel };
+  });
+
+  const ctx = document.createElement("canvas").getContext("2d");
+  ctx.font = "24px Gentium Plus";
+  tokens.forEach(t => t.width = ctx.measureText(t.form).width);
+
+  const space = 20;
+  let currentX = margin.left;
+  const positions = tokens.map(t => {
+    const x = currentX + t.width / 2;
+    currentX += t.width + space;
+    return x;
+  });
+
+  svg.selectAll(".token")
+    .data(tokens)
+    .enter()
+    .append("text")
+    .attr("class", d => "token" + (d.head === 0 ? " root" : ""))
+    .attr("x", (_, i) => positions[i])
+    .attr("y", tokenY)
+    .attr("text-anchor", "middle")
+    .text(d => d.form)
+    .on("mouseover", highlight)
+    .on("mouseout", clearHighlight);
+
+  svg.selectAll(".arc")
+    .data(tokens.filter(t => t.head !== 0))
+    .enter()
+    .append("path")
+    .attr("class", "arc")
+    .attr("d", (d, i) => arcPath(i, tokens.findIndex(t => t.id === d.head)));
+
+  function arcPath(depIdx, headIdx) {
+    const x1 = positions[depIdx];
     const x2 = positions[headIdx];
-    const midX = (x1 + x2) / 2;
-    const labelY = y - Math.max(arcHeight, 20);
-    svg.append("text")
-      .attr("class", "arc-label")
-      .attr("x", midX)
-      .attr("y", labelY)
-      .text(d.deprel)
-      .attr("id", "dep-label");
+    const y = tokenY - 30;
+    const radius = Math.abs(x2 - x1) / 2;
+    return `M${x1},${y} A${radius},${arcHeight} 0 0,${x1 < x2 ? 1 : 0} ${x2},${y}`;
   }
 
-  // Incoming arcs
-  tokens.forEach((t, i) => {
-    if (t.head === d.id) {
-      svg.append("path")
-        .attr("class", "arc arc-highlight-in")
-        .attr("d", arcPath(i, idx))
-        .attr("id", "highlight-in-" + t.id);
-    }
-  });
-}
+  function highlight(event, d) {
+    clearHighlight();
+    const idx = tokens.findIndex(t => t.id === d.id);
+    const headIdx = tokens.findIndex(t => t.id === d.head);
+    const y = tokenY - 30;
+    const x = positions[idx];
 
-function clearHighlight() {
-  svg.selectAll("#highlight-out").remove();
-  svg.selectAll('[id^="highlight-in-"]').remove();
-  svg.selectAll("#dep-label").remove();
+    if (d.head !== 0) {
+      svg.append("path")
+        .attr("class", "arc arc-highlight-out")
+        .attr("d", arcPath(idx, headIdx))
+        .attr("id", "highlight-out");
+
+      const labelX = (x + positions[headIdx]) / 2;
+      svg.append("text")
+        .attr("class", "arc-label")
+        .attr("x", labelX)
+        .attr("y", y - arcHeight - 5)
+        .text(d.deprel)
+        .attr("id", "dep-label");
+    }
+
+    tokens.forEach((t, i) => {
+      if (t.head === d.id) {
+        svg.append("path")
+          .attr("class", "arc arc-highlight-in")
+          .attr("d", arcPath(i, idx))
+          .attr("id", "highlight-in-" + t.id);
+      }
+    });
+
+    const featLines = (d.feats && d.feats !== "_") ? d.feats.split("|") : [];
+    const lines = [d.upos, ...featLines];
+
+    lines.forEach((line, i) => {
+      svg.append("text")
+        .attr("class", "features")
+        .attr("x", x)
+        .attr("y", tokenY + 20 + i * 14)
+        .attr("text-anchor", "middle")
+        .attr("id", `upos-feats-line-${i}`)
+        .text(line);
+    });
+  }
+
+  function clearHighlight() {
+    svg.selectAll("#highlight-out").remove();
+    svg.selectAll('[id^="highlight-in-"]').remove();
+    svg.selectAll("#dep-label").remove();
+    svg.selectAll('[id^="upos-feats-line-"]').remove();
+  }
 }
 </script>
 </body>
