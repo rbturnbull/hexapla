@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dependency Parse Viewer (Multiple Sentences)</title>
+  <title>Dependency Parse Viewer (Fixed)</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus&display=swap" rel="stylesheet">
   <style>
@@ -87,25 +87,6 @@ const sentences = [
   }
 ];
 
-// Shared arrowheads
-const globalDefs = d3.select("body").append("svg").attr("width", 0).attr("height", 0).append("defs");
-function defineArrow(defs, id, color) {
-  defs.append("marker")
-    .attr("id", id)
-    .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 10)
-    .attr("refY", 0)
-    .attr("markerWidth", 6)
-    .attr("markerHeight", 6)
-    .attr("orient", "auto")
-    .append("path")
-    .attr("d", "M0,-5L10,0L0,5")
-    .attr("fill", color);
-}
-defineArrow(globalDefs, "arrowhead", "#ccc");
-defineArrow(globalDefs, "arrowhead-blue", "blue");
-defineArrow(globalDefs, "arrowhead-red", "red");
-
 sentences.forEach(renderSentence);
 
 function renderSentence({ svgId, data }) {
@@ -115,10 +96,19 @@ function renderSentence({ svgId, data }) {
   const arcHeight = 50;
   const tokenY = height - margin.bottom;
 
+  // Add marker definitions inside each SVG
+  const defs = svg.append("defs");
+  defineArrow(defs, "arrowhead", "#ccc");
+  defineArrow(defs, "arrowhead-blue", "blue");
+  defineArrow(defs, "arrowhead-red", "red");
+
   const tokens = data.split("\n").map(line => {
     const [id, form, lemma, upos, xpos, feats, head, deprel] = line.split("\t");
     return { id: +id, form, lemma, upos, feats, head: +head, deprel };
   });
+
+  // Fix: ID → index map
+  const idToIndex = Object.fromEntries(tokens.map((t, i) => [t.id, i]));
 
   const ctx = document.createElement("canvas").getContext("2d");
   ctx.font = "24px Gentium Plus";
@@ -149,7 +139,7 @@ function renderSentence({ svgId, data }) {
     .enter()
     .append("path")
     .attr("class", "arc")
-    .attr("d", (d, i) => arcPath(i, tokens.findIndex(t => t.id === d.head)));
+    .attr("d", d => arcPath(idToIndex[d.id], idToIndex[d.head]));
 
   function arcPath(depIdx, headIdx) {
     const x1 = positions[depIdx];
@@ -161,8 +151,8 @@ function renderSentence({ svgId, data }) {
 
   function highlight(event, d) {
     clearHighlight();
-    const idx = tokens.findIndex(t => t.id === d.id);
-    const headIdx = tokens.findIndex(t => t.id === d.head);
+    const idx = idToIndex[d.id];
+    const headIdx = idToIndex[d.head];
     const y = tokenY - 30;
     const x = positions[idx];
 
@@ -209,6 +199,20 @@ function renderSentence({ svgId, data }) {
     svg.selectAll('[id^="highlight-in-"]').remove();
     svg.selectAll("#dep-label").remove();
     svg.selectAll('[id^="upos-feats-line-"]').remove();
+  }
+
+  function defineArrow(defs, id, color) {
+    defs.append("marker")
+      .attr("id", id)
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 10)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .attr("fill", color);
   }
 }
 </script>
