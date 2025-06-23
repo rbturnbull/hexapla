@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dependency Parse Viewer</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: "Gentium Plus", serif;
+    }
+    .token {
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .root {
+      fill: blue;
+      font-weight: bold;
+    }
+    .arc {
+      fill: none;
+      stroke: lightgrey;
+      stroke-width: 1.5px;
+    }
+    .arc-highlight-in {
+      stroke: red;
+      stroke-width: 2.5px;
+    }
+    .arc-highlight-out {
+      stroke: blue;
+      stroke-width: 2.5px;
+    }
+  </style>
+</head>
+<body>
+<svg id="svg" width="1200" height="300"></svg>
+
+<script>
+const data = `1	εἴδομεν	ὁράω	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	0	root
+2	γὰρ	γάρ	ADV	Df	_	1	discourse
+3	αὐτοῦ	αὐτός	PRON	Pp	Case=Gen|Gender=Masc|Number=Sing|Person=3|PronType=Prs	5	det
+4	τὸν	ὁ	DET	S-	Case=Acc|Definite=Def|Gender=Masc|Number=Sing|PronType=Dem	5	det
+5	ἀστέρα	ἀστήρ	NOUN	Nb	Case=Acc|Gender=Masc|Number=Sing	1	obj
+6	ἐν	ἐν	ADP	R-	_	8	case
+7	τῇ	ὁ	DET	S-	Case=Dat|Definite=Def|Gender=Fem|Number=Sing|PronType=Dem	8	det
+8	ἀνατολῇ	ἀνατολή	NOUN	Nb	Case=Dat|Gender=Fem|Number=Sing	1	obl
+9	καὶ	καί	CCONJ	C-	_	10	cc
+10	ἤλθομεν	ἔρχομαι	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	1	conj
+11	προσκυνῆσαι	προσκυνέω	VERB	V-	Aspect=Perf|Tense=Past|VerbForm=Inf|Voice=Act	10	xcomp
+12	αὐτῷ	αὐτός	PRON	Pp	Case=Dat|Gender=Masc|Number=Sing|Person=3|PronType=Prs	11	obl:arg`;
+
+const svg = d3.select("#svg");
+const margin = { top: 60, bottom: 80, left: 50, right: 50 };
+const height = +svg.attr("height");
+const arcHeight = 50;
+
+const tokens = data.split("\n").map(line => {
+  const [id, form, lemma, upos, xpos, feats, head, deprel] = line.split("\t");
+  return {
+    id: +id,
+    form,
+    head: +head,
+    deprel
+  };
+});
+
+// compute word widths dynamically
+const ctx = document.createElement("canvas").getContext("2d");
+ctx.font = "24px Gentium Plus";
+tokens.forEach(d => {
+  d.width = ctx.measureText(d.form).width;
+});
+
+const totalWidth = tokens.reduce((acc, t) => acc + t.width, 0);
+const space = 20;
+const positions = [];
+let currentX = margin.left;
+
+tokens.forEach((t, i) => {
+  positions.push(currentX + t.width / 2);
+  currentX += t.width + space;
+});
+
+const tokenY = height - margin.bottom;
+
+// draw words
+svg.selectAll(".token")
+  .data(tokens)
+  .enter()
+  .append("text")
+  .attr("class", d => "token" + (d.head === 0 ? " root" : ""))
+  .attr("x", (_, i) => positions[i])
+  .attr("y", tokenY)
+  .attr("text-anchor", "middle")
+  .text(d => d.form)
+  .on("mouseover", highlight)
+  .on("mouseout", clearHighlight);
+
+// draw default arcs
+svg.selectAll(".arc")
+  .data(tokens.filter(d => d.head !== 0))
+  .enter()
+  .append("path")
+  .attr("class", "arc")
+  .attr("d", (d, i) => arcPath(i, tokens.findIndex(t => t.id === d.head)));
+
+function arcPath(depIdx, headIdx) {
+  const x1 = positions[depIdx];
+  const x2 = positions[headIdx];
+  const y1 = tokenY - 30;
+  const y2 = tokenY - 30;
+  const radius = Math.abs(x2 - x1) / 2;
+  const arc = `M${x1},${y1} A${radius},${arcHeight} 0 0,${x1 < x2 ? 1 : 0} ${x2},${y2}`;
+  return arc;
+}
+
+function highlight(event, d) {
+  clearHighlight();
+
+  const idx = tokens.findIndex(t => t.id === d.id);
+  const headIdx = tokens.findIndex(t => t.id === d.head);
+
+  if (d.head !== 0) {
+    svg.append("path")
+      .attr("class", "arc arc-highlight-out")
+      .attr("d", arcPath(idx, headIdx))
+      .attr("id", "highlight-out");
+  }
+
+  tokens.forEach((t, i) => {
+    if (t.head === d.id) {
+      svg.append("path")
+        .attr("class", "arc arc-highlight-in")
+        .attr("d", arcPath(i, idx))
+        .attr("id", "highlight-in-" + t.id);
+    }
+  });
+}
+
+function clearHighlight() {
+  svg.selectAll("#highlight-out").remove();
+  svg.selectAll('[id^="highlight-in-"]').remove();
+}
+</script>
+</body>
+</html>
