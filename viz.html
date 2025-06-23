@@ -21,14 +21,23 @@
       fill: none;
       stroke: lightgrey;
       stroke-width: 1.5px;
+      marker-end: url(#arrowhead);
     }
     .arc-highlight-in {
       stroke: red;
       stroke-width: 2.5px;
+      marker-end: url(#arrowhead-red);
     }
     .arc-highlight-out {
       stroke: blue;
       stroke-width: 2.5px;
+      marker-end: url(#arrowhead-blue);
+    }
+    .arc-label {
+      font-size: 14px;
+      text-anchor: middle;
+      fill: blue;
+      font-style: italic;
     }
   </style>
 </head>
@@ -53,6 +62,46 @@ const svg = d3.select("#svg");
 const margin = { top: 60, bottom: 80, left: 50, right: 50 };
 const height = +svg.attr("height");
 const arcHeight = 50;
+const tokenY = height - margin.bottom;
+
+const defs = svg.append("defs");
+
+// Arrow markers
+defs.append("marker")
+  .attr("id", "arrowhead")
+  .attr("viewBox", "0 -5 10 10")
+  .attr("refX", 10)
+  .attr("refY", 0)
+  .attr("markerWidth", 6)
+  .attr("markerHeight", 6)
+  .attr("orient", "auto")
+  .append("path")
+  .attr("d", "M0,-5L10,0L0,5")
+  .attr("fill", "lightgrey");
+
+defs.append("marker")
+  .attr("id", "arrowhead-blue")
+  .attr("viewBox", "0 -5 10 10")
+  .attr("refX", 10)
+  .attr("refY", 0)
+  .attr("markerWidth", 6)
+  .attr("markerHeight", 6)
+  .attr("orient", "auto")
+  .append("path")
+  .attr("d", "M0,-5L10,0L0,5")
+  .attr("fill", "blue");
+
+defs.append("marker")
+  .attr("id", "arrowhead-red")
+  .attr("viewBox", "0 -5 10 10")
+  .attr("refX", 10)
+  .attr("refY", 0)
+  .attr("markerWidth", 6)
+  .attr("markerHeight", 6)
+  .attr("orient", "auto")
+  .append("path")
+  .attr("d", "M0,-5L10,0L0,5")
+  .attr("fill", "red");
 
 const tokens = data.split("\n").map(line => {
   const [id, form, lemma, upos, xpos, feats, head, deprel] = line.split("\t");
@@ -64,26 +113,22 @@ const tokens = data.split("\n").map(line => {
   };
 });
 
-// compute word widths dynamically
+// Measure token widths
 const ctx = document.createElement("canvas").getContext("2d");
 ctx.font = "24px Gentium Plus";
 tokens.forEach(d => {
   d.width = ctx.measureText(d.form).width;
 });
 
-const totalWidth = tokens.reduce((acc, t) => acc + t.width, 0);
 const space = 20;
-const positions = [];
 let currentX = margin.left;
-
-tokens.forEach((t, i) => {
-  positions.push(currentX + t.width / 2);
+const positions = tokens.map(t => {
+  const x = currentX + t.width / 2;
   currentX += t.width + space;
+  return x;
 });
 
-const tokenY = height - margin.bottom;
-
-// draw words
+// Draw tokens
 svg.selectAll(".token")
   .data(tokens)
   .enter()
@@ -96,7 +141,7 @@ svg.selectAll(".token")
   .on("mouseover", highlight)
   .on("mouseout", clearHighlight);
 
-// draw default arcs
+// Default arcs
 svg.selectAll(".arc")
   .data(tokens.filter(d => d.head !== 0))
   .enter()
@@ -107,26 +152,37 @@ svg.selectAll(".arc")
 function arcPath(depIdx, headIdx) {
   const x1 = positions[depIdx];
   const x2 = positions[headIdx];
-  const y1 = tokenY - 30;
-  const y2 = tokenY - 30;
+  const y = tokenY - 30;
   const radius = Math.abs(x2 - x1) / 2;
-  const arc = `M${x1},${y1} A${radius},${arcHeight} 0 0,${x1 < x2 ? 1 : 0} ${x2},${y2}`;
-  return arc;
+  return `M${x1},${y} A${radius},${arcHeight} 0 0,${x1 < x2 ? 1 : 0} ${x2},${y}`;
 }
 
 function highlight(event, d) {
   clearHighlight();
-
   const idx = tokens.findIndex(t => t.id === d.id);
   const headIdx = tokens.findIndex(t => t.id === d.head);
+  const y = tokenY - 30;
 
   if (d.head !== 0) {
     svg.append("path")
       .attr("class", "arc arc-highlight-out")
       .attr("d", arcPath(idx, headIdx))
       .attr("id", "highlight-out");
+
+    // Label
+    const x1 = positions[idx];
+    const x2 = positions[headIdx];
+    const midX = (x1 + x2) / 2;
+    const labelY = y - Math.max(arcHeight, 20);
+    svg.append("text")
+      .attr("class", "arc-label")
+      .attr("x", midX)
+      .attr("y", labelY)
+      .text(d.deprel)
+      .attr("id", "dep-label");
   }
 
+  // Incoming arcs
   tokens.forEach((t, i) => {
     if (t.head === d.id) {
       svg.append("path")
@@ -140,6 +196,7 @@ function highlight(event, d) {
 function clearHighlight() {
   svg.selectAll("#highlight-out").remove();
   svg.selectAll('[id^="highlight-in-"]').remove();
+  svg.selectAll("#dep-label").remove();
 }
 </script>
 </body>
