@@ -10,4 +10,3 @@ const sentences = [
     data: `{{ latin}}`
 }
 ];
-  
