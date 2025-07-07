@@ -1,1 +1,73 @@
-05.yaml
+languages:
+  - Greek
+  - Latin
+
+verses:
+  ICor6_1:
+    mapping:
+      greek-1: latin-1     # Τολμᾷ (dares) ↔ audet
+      greek-2: latin-2     # τις (someone) ↔ aliquis
+      greek-3: latin-3     # ὑμῶν (of you) ↔ vestrum
+      greek-4: latin-5     # πρᾶγμα (matter) ↔ negotium
+      greek-5: latin-4     # ἔχων (having) ↔ habens
+      greek-6: latin-6     # πρὸς (toward) ↔ adversus
+      greek-7: latin-7     # τὸν (the) ↔ alterum (matches in gender/case with the head)
+      greek-8: latin-7     # ἕτερον (the other) ↔ alterum
+      greek-9: latin-8     # κρίνεσθαι (to be judged) ↔ iudicari
+      greek-10: latin-9    # ἐπὶ (upon) ↔ apud
+      greek-11: latin-10   # τῶν (the) ↔ iniquos
+      greek-12: latin-10   # ἀδίκων (unjust) ↔ iniquos
+      greek-13: latin-11   # καὶ ↔ et
+      greek-14: latin-12   # οὐχὶ ↔ non
+      greek-15: latin-13   # ἐπὶ ↔ apud
+      greek-16: latin-14   # τῶν ↔ sanctos
+      greek-17: latin-14   # ἁγίων ↔ sanctos
+
+      latin-1: greek-1
+      latin-2: greek-2
+      latin-3: greek-3
+      latin-4: greek-5
+      latin-5: greek-4
+      latin-6: greek-6
+      latin-7: greek-8
+      latin-8: greek-9
+      latin-9: greek-10
+      latin-10: greek-12
+      latin-11: greek-13
+      latin-12: greek-14
+      latin-13: greek-15
+      latin-14: greek-17
+    Greek: |
+      1	Τολμᾷ	τολμάω	VERB	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act	0	root	_	ref=1COR_6.1
+      2	τις	τὶς	PRON	Px	Case=Nom|Gender=Masc|Number=Sing	1	nsubj	_	ref=1COR_6.1
+      3	ὑμῶν	ὑμεῖς	PRON	Pp	Case=Gen|Gender=Masc|Number=Plur|Person=2|PronType=Prs	2	nmod	_	ref=1COR_6.1
+      4	πρᾶγμα	πρᾶγμα	NOUN	Nb	Case=Acc|Gender=Neut|Number=Sing	5	obj	_	ref=1COR_6.1
+      5	ἔχων	ἔχω	VERB	V-	Case=Nom|Gender=Masc|Number=Sing|Tense=Pres|VerbForm=Part|Voice=Act	1	advcl	_	ref=1COR_6.1
+      6	πρὸς	πρός	ADP	R-	_	8	case	_	ref=1COR_6.1
+      7	τὸν	ὁ	DET	S-	Case=Acc|Definite=Def|Gender=Masc|Number=Sing|PronType=Dem	8	det	_	ref=1COR_6.1
+      8	ἕτερον	ἕτερος	ADJ	A-	Case=Acc|Degree=Pos|Gender=Masc|Number=Sing	5	advmod	_	ref=1COR_6.1
+      9	κρίνεσθαι	κρίνω	VERB	V-	Tense=Pres|VerbForm=Inf|Voice=Pass	1	xcomp	_	ref=1COR_6.1
+      10	ἐπὶ	ἐπί	ADP	R-	_	12	case	_	ref=1COR_6.1
+      11	τῶν	ὁ	DET	S-	Case=Gen|Definite=Def|Number=Plur|PronType=Dem	12	det	_	ref=1COR_6.1
+      12	ἀδίκων	ἄδικος	ADJ	A-	Case=Gen|Degree=Pos|Gender=Masc|Number=Plur	9	advmod	_	ref=1COR_6.1
+      13	καὶ	καί	CCONJ	C-	_	17	cc	_	ref=1COR_6.1
+      14	οὐχὶ	οὐχί	ADV	Df	Polarity=Neg	17	advmod	_	ref=1COR_6.1
+      15	ἐπὶ	ἐπί	ADP	R-	_	17	case	_	ref=1COR_6.1
+      16	τῶν	ὁ	DET	S-	Case=Gen|Definite=Def|Number=Plur|PronType=Dem	17	det	_	ref=1COR_6.1
+      17	ἁγίων	ἅγιος	ADJ	A-	Case=Gen|Degree=Pos|Gender=Masc|Number=Plur	12	conj	_	ref=1COR_6.1
+    Latin: |
+      1	audet	audeo	VERB	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act	0	root	_	ref=1COR_6.1
+      2	aliquis	aliquis	PRON	Px	Case=Nom|Gender=Masc|Number=Sing	1	nsubj	_	ref=1COR_6.1
+      3	vestrum	vos	PRON	Pp	Case=Gen|Gender=Masc|Number=Plur|Person=2|PronType=Prs	2	nmod	_	ref=1COR_6.1
+      4	habens	habeo	VERB	V-	Case=Nom|Gender=Masc|Number=Sing|Tense=Pres|VerbForm=Part|Voice=Act	1	advcl	_	ref=1COR_6.1
+      5	negotium	negotium	NOUN	Nb	Case=Acc|Gender=Neut|Number=Sing	4	obj	_	ref=1COR_6.1
+      6	adversus	adversus	ADP	R-	_	7	case	_	ref=1COR_6.1
+      7	alterum	alter	ADJ	A-	Case=Acc|Degree=Pos|Gender=Masc|Number=Sing	5	amod	_	ref=1COR_6.1
+      8	iudicari	iudico	VERB	V-	Tense=Pres|VerbForm=Inf|Voice=Pass	1	xcomp	_	ref=1COR_6.1
+      9	apud	apud	ADP	R-	_	10	case	_	ref=1COR_6.1
+      10	iniquos	iniquus	ADJ	A-	Case=Acc|Degree=Pos|Gender=Masc|Number=Plur	8	advmod	_	ref=1COR_6.1
+      11	et	et	CCONJ	C-	_	14	cc	_	ref=1COR_6.1
+      12	non	non	ADV	Df	Polarity=Neg	14	advmod	_	ref=1COR_6.1
+      13	apud	apud	ADP	R-	_	14	case	_	ref=1COR_6.1
+      14	sanctos	sanctus	ADJ	A-	Case=Acc|Degree=Pos|Gender=Masc|Number=Plur	10	conj	_	ref=1COR_6.1
+
