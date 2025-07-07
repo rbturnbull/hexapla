@@ -5,6 +5,8 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 DATA_DIR = Path("data")
 WEBSITE_DIR = Path("website")
+MSS_DIR = WEBSITE_DIR/"mss"
+
 env = Environment(
     loader=FileSystemLoader("templates"),
     autoescape=select_autoescape(),
@@ -18,7 +20,7 @@ for path in DATA_DIR.glob("*.yaml"):
     print(my_data)
     siglum = path.with_suffix("").name
 
-    ms_dir = WEBSITE_DIR / siglum
+    ms_dir = MSS_DIR / siglum
     ms_dir.mkdir(parents=True, exist_ok=True)
 
     verse_list = list(my_data["verses"].keys())
