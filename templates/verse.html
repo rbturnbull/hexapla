@@ -82,6 +82,15 @@
         .sidebar-brand-icon {
             width: 100%;
         }
+        #sidebar-ss a {
+            color: white;
+        }
+        #sidebar-ss h3 {
+            color: white;
+            padding-top: 15px;
+            padding-left: 20px;
+            font-size: 1.2rem;
+        }
       </style>
     
 </head>
@@ -96,6 +105,28 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="sidebar-ss">
             <a href="../../../"><img src="../../../img/Logo-Arcs.jpg" alt="Polyglottarium Logo" class="sidebar-brand-icon"></a>
             <p></p>
+            <h3>Greek-Latin</h3>
+            <ul>
+                <li><a class="nav-item" href="../../../mss/05/"><span>05</span></a></li>
+                <li><a class="nav-item" href="../../../mss/06/"><span>06</span></a></li>
+                <li><a class="nav-item" href="../../../mss/010/"><span>010</span></a></li>
+                <li><a class="nav-item" href="../../../mss/012/"><span>012</span></a></li>
+                <li><a class="nav-item" href="../../../mss/037/"><span>037</span></a></li>
+                <li><a class="nav-item" href="../../../mss/0319/"><span>0319</span></a></li>
+                <li><a class="nav-item" href="../../../mss/0320/"><span>0320</span></a></li>
+            </ul>
+            <div id="greek-coptic" class="category">
+                <h3>Greek-Coptic</h3>
+                <ul>
+                    <li><a href="./mss/029">029</a></li>
+                </ul>
+              </div>
+              <div id="greek-arabic" class="category">
+                <h3>Greek-Arabic</h3>
+                <ul>
+                    <li><a href="./mss/l2211">l2211</a></li>
+                </ul>
+              </div>    
             <li class="nav-item">
                 <a class="nav-link" href="../../../mss/{{ siglum }}/">
                     <i class="fa-solid fa-book-open"></i> <span>{{ siglum }}</span>
@@ -104,7 +135,7 @@
             {% for verse in verse_list %}
             <li class="nav-item">
                 <a class="nav-link" href="../../../mss/{{ siglum }}/{{ verse }}">
-                    <i class="fa-solid fa-book"></i> <span>{{ verse }}</span>
+                    <span>{{ verse }}</span>
                 </a>
             </li>
             {% endfor %}
