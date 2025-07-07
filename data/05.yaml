@@ -35,7 +35,7 @@ verses:
       6	rex	rex	NOUN	Nb	Case=Nom|Gender=Masc|Number=Sing	2	nsubj
       7	Iudaeorum	Iudaei	NOUN	Nb	Case=Gen|Gender=Masc|Number=Plur	6	nmod
 
-  Mt2_2a:
+  Mt2_2b:
     mapping:
       greek-1: latin-1
       greek-2: latin-2
