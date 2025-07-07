@@ -118,27 +118,15 @@
             <div id="greek-coptic" class="category">
                 <h3>Greek-Coptic</h3>
                 <ul>
-                    <li><a href="./mss/029">029</a></li>
+                    <li><a href="../../../mss/029">029</a></li>
                 </ul>
               </div>
               <div id="greek-arabic" class="category">
                 <h3>Greek-Arabic</h3>
                 <ul>
-                    <li><a href="./mss/l2211">l2211</a></li>
+                    <li><a href="../../../mss/l2211">l2211</a></li>
                 </ul>
               </div>    
-            <li class="nav-item">
-                <a class="nav-link" href="../../../mss/{{ siglum }}/">
-                    <i class="fa-solid fa-book-open"></i> <span>{{ siglum }}</span>
-                </a>
-            </li>
-            {% for verse in verse_list %}
-            <li class="nav-item">
-                <a class="nav-link" href="../../../mss/{{ siglum }}/{{ verse }}">
-                    <span>{{ verse }}</span>
-                </a>
-            </li>
-            {% endfor %}
         </ul>
         <!-- End of Sidebar -->
 
@@ -146,7 +134,12 @@
         <div id="content-wrapper" class="d-flex flex-column">
             <!-- Topbar -->
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                <h1>{{ siglum }} - {{ verse }}</h1>
+                <h1>{{ siglum }}</h1>
+                <select id="verseSelector" class="form-select" style="width: 200px; margin-left: auto;">
+                    {% for x in verse_list %}
+                    <option value="{{ x }}" {% if x == verse %}selected{% endif %}>{{ x }}</option>
+                    {% endfor %}
+                </select>
                 <ul class="navbar-nav ml-auto">
                 </ul>
             </nav>
@@ -194,6 +187,13 @@
     <!-- Custom scripts for all pages-->
     <script src="../../../js/sb-admin-2.min.js"></script>
     
+    <script>
+        // Redirect to the first verse in the list
+        document.getElementById('verseSelector').addEventListener('change', function() {
+            const selectedVerse = this.value;
+            window.location.href = `../${selectedVerse}`;
+        });
+    </script>
 </body>
 
 </html>
