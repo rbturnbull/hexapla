@@ -71,3 +71,89 @@ verses:
       13	apud	apud	ADP	R-	_	14	case	_	ref=1COR_6.1
       14	sanctos	sanctus	ADJ	A-	Case=Acc|Degree=Pos|Gender=Masc|Number=Plur	10	conj	_	ref=1COR_6.1
 
+  ICor6_2a:
+    mapping:
+      greek-1: latin-1     # ἢ ↔ an (disjunctive/interrogative particle)
+      greek-2: latin-2     # οὐκ ↔ nescitis (negation implied in nescitis)
+      greek-3: latin-2     # οἴδατε ↔ nescitis (know ↔ not know)
+      greek-4: latin-3     # ὅτι ↔ quoniam (that/because)
+      greek-5: latin-4     # οἱ ↔ sancti (determiner for "the saints")
+      greek-6: latin-4     # ἅγιοι ↔ sancti (saints)
+      greek-7: latin-6     # τὸν ↔ mundo (determiner for "the world")
+      greek-8: latin-6     # κόσμον ↔ mundo (world)
+      greek-9: latin-7     # κρινοῦσιν ↔ iudicabunt (will judge)
+
+      latin-1: greek-1
+      latin-2: greek-3
+      latin-3: greek-4
+      latin-4: greek-6
+      latin-6: greek-8
+      latin-7: greek-9
+    Greek: |
+      1	ἢ	ἤ	CCONJ	C-	_	3	cc	_	ref=1COR_6.2
+      2	οὐκ	οὐ	ADV	Df	Polarity=Neg	3	advmod	_	ref=1COR_6.2
+      3	οἴδατε	οἶδα	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=2|Tense=Past|VerbForm=Fin|Voice=Act	0	root	_	ref=1COR_6.2
+      4	ὅτι	ὅτι	SCONJ	G-	_	9	mark	_	ref=1COR_6.2
+      5	οἱ	ὁ	DET	S-	Case=Nom|Definite=Def|Gender=Masc|Number=Plur|PronType=Dem	6	det	_	ref=1COR_6.2
+      6	ἅγιοι	ἅγιος	ADJ	A-	Case=Nom|Degree=Pos|Gender=Masc|Number=Plur	9	nsubj	_	ref=1COR_6.2
+      7	τὸν	ὁ	DET	S-	Case=Acc|Definite=Def|Gender=Masc|Number=Sing|PronType=Dem	8	det	_	ref=1COR_6.2
+      8	κόσμον	κόσμος	NOUN	Nb	Case=Acc|Gender=Masc|Number=Sing	9	obj	_	ref=1COR_6.2
+      9	κρινοῦσιν	κρίνω	VERB	V-	Mood=Ind|Number=Plur|Person=3|Tense=Fut|VerbForm=Fin|Voice=Act	3	ccomp	_	ref=1COR_6.2
+    Latin: |
+      1	an	an	ADV	Du	PronType=Int	2	advmod	_	ref=1COR_6.2
+      2	nescitis	nescio	VERB	V-	Mood=Ind|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin|Voice=Act	0	root	_	ref=1COR_6.2
+      3	quoniam	quoniam	SCONJ	G-	_	7	mark	_	ref=1COR_6.2
+      4	sancti	sanctus	ADJ	A-	Case=Nom|Degree=Pos|Gender=Masc|Number=Plur	7	nsubj	_	ref=1COR_6.2
+      5	de	de	ADP	R-	_	6	case	_	ref=1COR_6.2
+      6	mundo	mundus	NOUN	Nb	Case=Abl|Gender=Masc|Number=Sing	7	obl	_	ref=1COR_6.2
+      7	iudicabunt	iudico	VERB	V-	Mood=Ind|Number=Plur|Person=3|Tense=Fut|VerbForm=Fin|Voice=Act	2	ccomp	_	ref=1COR_6.2
+      
+  ICor6_2b:
+    mapping:
+      greek-1: latin-1     # καὶ ↔ et
+      greek-2: latin-2     # εἰ ↔ si
+      greek-3: latin-3     # ἐν ↔ in
+      greek-4: latin-4     # ὑμῖν ↔ vobis
+      greek-5: latin-5     # κρίνεται ↔ iudicabitur
+      greek-6: latin-6     # ὁ ↔ mundus (determiner)
+      greek-7: latin-6     # κόσμος ↔ mundus
+      greek-8: latin-7     # ἀνάξιοί ↔ indigni
+      greek-9: latin-8     # ἐστε ↔ estis
+      greek-10: latin-12   # κριτηρίων ↔ iudicetis (object of judging)
+      greek-11: latin-11   # ἐλαχίστων ↔ minimis
+
+      latin-1: greek-1
+      latin-2: greek-2
+      latin-3: greek-3
+      latin-4: greek-4
+      latin-5: greek-5
+      latin-6: greek-7
+      latin-7: greek-8
+      latin-8: greek-9
+      latin-11: greek-11
+      latin-12: greek-10
+    Greek: |
+      1	καὶ	καί	CCONJ	C-	_	8	cc	_	ref=1COR_6.2
+      2	εἰ	εἰ	SCONJ	G-	_	5	mark	_	ref=1COR_6.2
+      3	ἐν	ἐν	ADP	R-	_	4	case	_	ref=1COR_6.2
+      4	ὑμῖν	ὑμεῖς	PRON	Pp	Case=Dat|Gender=Masc|Number=Plur|Person=2|PronType=Prs	5	obl	_	ref=1COR_6.2
+      5	κρίνεται	κρίνω	VERB	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Pass	8	advcl	_	ref=1COR_6.2
+      6	ὁ	ὁ	DET	S-	Case=Nom|Definite=Def|Gender=Masc|Number=Sing|PronType=Dem	7	det	_	ref=1COR_6.2
+      7	κόσμος	κόσμος	NOUN	Nb	Case=Nom|Gender=Masc|Number=Sing	5	nsubj:pass	_	ref=1COR_6.2
+      8	ἀνάξιοί	ἀνάξιος	ADJ	A-	Case=Nom|Degree=Pos|Gender=Masc|Number=Plur	0	root	_	ref=1COR_6.2
+      9	ἐστε	εἰμί	AUX	V-	Mood=Ind|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin|Voice=Act	8	cop	_	ref=1COR_6.2|LId=1
+      10	κριτηρίων	κριτήριον	NOUN	Nb	Case=Gen|Gender=Neut|Number=Plur	8	obl:arg	_	ref=1COR_6.2
+      11	ἐλαχίστων	ἐλάχιστος	ADJ	A-	Case=Gen|Degree=Sup|Number=Plur	10	amod	_	ref=1COR_6.2
+    Latin: |
+      1	et	et	CCONJ	C-	_	7	cc	_	ref=1COR_6.2
+      2	si	si	SCONJ	G-	_	5	mark	_	ref=1COR_6.2
+      3	in	in	ADP	R-	_	4	case	_	ref=1COR_6.2
+      4	vobis	vos	PRON	Pp	Case=Abl|Gender=Masc|Number=Plur|Person=2|PronType=Prs	5	obl	_	ref=1COR_6.2
+      5	iudicabitur	iudico	VERB	V-	Mood=Ind|Number=Sing|Person=3|Tense=Fut|VerbForm=Fin|Voice=Pass	7	advcl	_	ref=1COR_6.2
+      6	mundus	mundus	NOUN	Nb	Case=Nom|Gender=Masc|Number=Sing	5	nsubj:pass	_	ref=1COR_6.2
+      7	indigni	indignus	ADJ	A-	Case=Nom|Degree=Pos|Gender=Masc|Number=Plur	0	root	_	ref=1COR_6.2
+      8	estis	sum	AUX	V-	Mood=Ind|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin|Voice=Act	7	cop	_	ref=1COR_6.2
+      9	qui	qui	PRON	Pr	Case=Nom|Gender=Masc|Number=Plur|PronType=Rel	12	nsubj	_	ref=1COR_6.2
+      10	de	de	ADP	R-	_	11	case	_	ref=1COR_6.2
+      11	minimis	parvus	ADJ	A-	Case=Abl|Degree=Sup|Gender=Neut|Number=Plur	12	obl	_	ref=1COR_6.2
+      12	iudicetis	iudico	VERB	V-	Mood=Sub|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin|Voice=Act	7	nsubj	_	ref=1COR_6.2
