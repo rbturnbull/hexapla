@@ -30,4 +30,3 @@ const sentences = [
 10	eum	is	PRON	Pp	Case=Acc|Gender=Masc|Number=Sing|Person=3|PronType=Prs	9	obj`
 }
 ];
-  

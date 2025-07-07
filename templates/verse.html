@@ -28,7 +28,7 @@
 
     <!-- Custom styles for this template-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/sb-admin-2.min.css">    
+    <link rel="stylesheet" href="../../css/sb-admin-2.min.css">    
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus&display=swap" rel="stylesheet">
       
@@ -94,16 +94,16 @@
         <!-- Sidebar -->
         <!-- <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar"> -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="sidebar-ss">
-            <a href="/"><img src="/img/Logo-Arcs.jpg" alt="Polyglottarium Logo" class="sidebar-brand-icon"></a>
+            <a href="../../"><img src="../../img/Logo-Arcs.jpg" alt="Polyglottarium Logo" class="sidebar-brand-icon"></a>
             <p></p>
             <li class="nav-item">
-                <a class="nav-link" href="/{{ siglum }}/">
+                <a class="nav-link" href="../../{{ siglum }}/">
                     <i class="fa-solid fa-book-open"></i> <span>{{ siglum }}</span>
                 </a>
             </li>
             {% for verse in verse_list %}
             <li class="nav-item">
-                <a class="nav-link" href="/{{ siglum }}/{{ verse }}">
+                <a class="nav-link" href="../../{{ siglum }}/{{ verse }}">
                     <i class="fa-solid fa-book"></i> <span>{{ verse }}</span>
                 </a>
             </li>
@@ -125,7 +125,7 @@
                 <svg id="greek" width="1200" height="340"></svg>
                 <svg id="latin" width="1200" height="340"></svg>
                 <script src="./{{ siglum }}-{{ verse }}.js"></script>
-                <script type="module" src="/js/navigator.js"></script>
+                <script type="module" src="../../js/navigator.js"></script>
                             </div>
             <!-- End of Main Content -->
         </div>
@@ -161,7 +161,7 @@
     <!-- <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script> -->
     <!-- Custom scripts for all pages-->
-    <script src="/js/sb-admin-2.min.js"></script>
+    <script src="../../js/sb-admin-2.min.js"></script>
     
 </body>
 

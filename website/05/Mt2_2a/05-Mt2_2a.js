@@ -22,4 +22,3 @@ const sentences = [
 7	Iudaeorum	Iudaei	NOUN	Nb	Case=Gen|Gender=Masc|Number=Plur	6	nmod`
 }
 ];
-  
