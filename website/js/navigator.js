@@ -1,7 +1,7 @@
-import { datasets } from './data.js';
+// import { datasets } from './data.js';
 
-const selectedDataset = datasets.matt2_2a;
-const { sentences, wordMap } = selectedDataset;
+// const selectedDataset = datasets.matt2_2a;
+// const { sentences, wordMap } = selectedDataset;
 
 const tokenY = 150;
 const arcHeight = 40;
@@ -164,16 +164,16 @@ function clearSVGs() {
   d3.selectAll("svg").selectAll("*").remove();
 }
 
-function loadDataset(name) {
-  const { sentences, wordMap } = datasets[name];
-  window.currentWordMap = wordMap;
-  clearSVGs();
-  sentences.forEach(renderSentence);
-}
+// function loadDataset(name) {
+//   const { sentences, wordMap } = datasets[name];
+//   window.currentWordMap = wordMap;
+//   clearSVGs();
+//   sentences.forEach(renderSentence);
+// }
 
-document.getElementById("datasetSelector").addEventListener("change", (e) => {
-  loadDataset(e.target.value);
-});
+// document.getElementById("datasetSelector").addEventListener("change", (e) => {
+//   loadDataset(e.target.value);
+// });
 
-// Load default
-loadDataset("matt2_2a");
+// // Load default
+// loadDataset("matt2_2a");

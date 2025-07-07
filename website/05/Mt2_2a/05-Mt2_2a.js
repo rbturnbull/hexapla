@@ -1,6 +1,6 @@
-export const wordMap = {"greek-1": "latin-1", "greek-2": "latin-2", "greek-3": "latin-3", "greek-4": "latin-4", "greek-5": "latin-6", "greek-6": "latin-7", "greek-7": "latin-7", "latin-1": "greek-1", "latin-2": "greek-2", "latin-3": "greek-3", "latin-4": "greek-4", "latin-6": "greek-5", "latin-7": "greek-7"};
+const wordMap = {"greek-1": "latin-1", "greek-2": "latin-2", "greek-3": "latin-3", "greek-4": "latin-4", "greek-5": "latin-6", "greek-6": "latin-7", "greek-7": "latin-7", "latin-1": "greek-1", "latin-2": "greek-2", "latin-3": "greek-3", "latin-4": "greek-4", "latin-6": "greek-5", "latin-7": "greek-7"};
   
-export const sentences = [
+const sentences = [
 {
     svgId: "greek",
     data: `1	ποῦ	ποῦ	ADV	Du	PronType=Int	2	advmod

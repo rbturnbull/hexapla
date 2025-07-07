@@ -122,9 +122,10 @@
             <!-- End of Topbar -->
             <!-- Main Content -->
             <div id="content">
-                <svg id="svg1" width="1200" height="340"></svg>
-                <svg id="svg2" width="1200" height="340"></svg>
-                <script type="module" src="navigator.js"></script>
+                <svg id="greek" width="1200" height="340"></svg>
+                <svg id="latin" width="1200" height="340"></svg>
+                <script src="./{{ siglum }}-{{ verse }}.js"></script>
+                <script type="module" src="/js/navigator.js"></script>
                             </div>
             <!-- End of Main Content -->
         </div>
@@ -161,7 +162,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script> -->
     <!-- Custom scripts for all pages-->
     <script src="/js/sb-admin-2.min.js"></script>
-    <script src="./{{ siglum }}-{{ verse }}.js"></script>
+    
 </body>
 
 </html>

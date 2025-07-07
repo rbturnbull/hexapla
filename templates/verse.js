@@ -1,6 +1,6 @@
-export const wordMap = {{ mapping | tojson }};
+const wordMap = {{ mapping | tojson }};
   
-export const sentences = [
+const sentences = [
 {
     svgId: "greek",
     data: `{{ greek }}`

@@ -1,6 +1,6 @@
-export const wordMap = {"greek-1": "latin-1", "greek-10": "latin-8", "greek-11": "latin-9", "greek-12": "latin-10", "greek-2": "latin-2", "greek-3": "latin-4", "greek-4": "latin-3", "greek-5": "latin-3", "greek-6": "latin-5", "greek-7": "latin-6", "greek-8": "latin-6", "greek-9": "latin-7", "latin-1": "greek-1", "latin-10": "greek-12", "latin-2": "greek-2", "latin-3": "greek-5", "latin-4": "greek-3", "latin-5": "greek-6", "latin-6": "greek-8", "latin-7": "greek-9", "latin-8": "greek-10", "latin-9": "greek-11"};
+const wordMap = {"greek-1": "latin-1", "greek-10": "latin-8", "greek-11": "latin-9", "greek-12": "latin-10", "greek-2": "latin-2", "greek-3": "latin-4", "greek-4": "latin-3", "greek-5": "latin-3", "greek-6": "latin-5", "greek-7": "latin-6", "greek-8": "latin-6", "greek-9": "latin-7", "latin-1": "greek-1", "latin-10": "greek-12", "latin-2": "greek-2", "latin-3": "greek-5", "latin-4": "greek-3", "latin-5": "greek-6", "latin-6": "greek-8", "latin-7": "greek-9", "latin-8": "greek-10", "latin-9": "greek-11"};
   
-export const sentences = [
+const sentences = [
 {
     svgId: "greek",
     data: `1	εἴδομεν	ὁράω	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	0	root
