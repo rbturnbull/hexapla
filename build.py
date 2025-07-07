@@ -12,6 +12,7 @@ env = Environment(
     autoescape=select_autoescape(),
 )
 
+ms_template = env.get_template("ms.html")
 verse_template = env.get_template("verse.html")
 verse_js_template = env.get_template("verse.js")
 
@@ -24,6 +25,13 @@ for path in DATA_DIR.glob("*.yaml"):
     ms_dir.mkdir(parents=True, exist_ok=True)
 
     verse_list = list(my_data["verses"].keys())
+
+    ms_path = ms_dir / "index.html"
+    ms_html = ms_template.render(
+        siglum=siglum,
+        verse_list=verse_list,
+    )
+    ms_path.write_text(ms_html, encoding="utf-8")
 
     for verse_index, verse in enumerate(my_data["verses"]):
         verse_data = my_data["verses"][verse]
