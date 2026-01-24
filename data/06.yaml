@@ -1,6 +1,6 @@
 languages:
-  - Greek
-  - Latin
+  - greek
+  - latin
 
 verses:
   ICor6_1:
@@ -37,7 +37,7 @@ verses:
       latin-12: greek-14
       latin-13: greek-15
       latin-14: greek-17
-    Greek: |
+    greek: |
       1	Τολμᾷ	τολμάω	VERB	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act	0	root	_	ref=1COR_6.1
       2	τις	τὶς	PRON	Px	Case=Nom|Gender=Masc|Number=Sing	1	nsubj	_	ref=1COR_6.1
       3	ὑμῶν	ὑμεῖς	PRON	Pp	Case=Gen|Gender=Masc|Number=Plur|Person=2|PronType=Prs	2	nmod	_	ref=1COR_6.1
@@ -55,7 +55,7 @@ verses:
       15	ἐπὶ	ἐπί	ADP	R-	_	17	case	_	ref=1COR_6.1
       16	τῶν	ὁ	DET	S-	Case=Gen|Definite=Def|Number=Plur|PronType=Dem	17	det	_	ref=1COR_6.1
       17	ἁγίων	ἅγιος	ADJ	A-	Case=Gen|Degree=Pos|Gender=Masc|Number=Plur	12	conj	_	ref=1COR_6.1
-    Latin: |
+    latin: |
       1	audet	audeo	VERB	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act	0	root	_	ref=1COR_6.1
       2	aliquis	aliquis	PRON	Px	Case=Nom|Gender=Masc|Number=Sing	1	nsubj	_	ref=1COR_6.1
       3	vestrum	vos	PRON	Pp	Case=Gen|Gender=Masc|Number=Plur|Person=2|PronType=Prs	2	nmod	_	ref=1COR_6.1
@@ -89,7 +89,7 @@ verses:
       latin-4: greek-6
       latin-6: greek-8
       latin-7: greek-9
-    Greek: |
+    greek: |
       1	ἢ	ἤ	CCONJ	C-	_	3	cc	_	ref=1COR_6.2
       2	οὐκ	οὐ	ADV	Df	Polarity=Neg	3	advmod	_	ref=1COR_6.2
       3	οἴδατε	οἶδα	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=2|Tense=Past|VerbForm=Fin|Voice=Act	0	root	_	ref=1COR_6.2
@@ -99,7 +99,7 @@ verses:
       7	τὸν	ὁ	DET	S-	Case=Acc|Definite=Def|Gender=Masc|Number=Sing|PronType=Dem	8	det	_	ref=1COR_6.2
       8	κόσμον	κόσμος	NOUN	Nb	Case=Acc|Gender=Masc|Number=Sing	9	obj	_	ref=1COR_6.2
       9	κρινοῦσιν	κρίνω	VERB	V-	Mood=Ind|Number=Plur|Person=3|Tense=Fut|VerbForm=Fin|Voice=Act	3	ccomp	_	ref=1COR_6.2
-    Latin: |
+    latin: |
       1	an	an	ADV	Du	PronType=Int	2	advmod	_	ref=1COR_6.2
       2	nescitis	nescio	VERB	V-	Mood=Ind|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin|Voice=Act	0	root	_	ref=1COR_6.2
       3	quoniam	quoniam	SCONJ	G-	_	7	mark	_	ref=1COR_6.2
@@ -132,7 +132,7 @@ verses:
       latin-8: greek-9
       latin-11: greek-11
       latin-12: greek-10
-    Greek: |
+    greek: |
       1	καὶ	καί	CCONJ	C-	_	8	cc	_	ref=1COR_6.2
       2	εἰ	εἰ	SCONJ	G-	_	5	mark	_	ref=1COR_6.2
       3	ἐν	ἐν	ADP	R-	_	4	case	_	ref=1COR_6.2
@@ -144,7 +144,7 @@ verses:
       9	ἐστε	εἰμί	AUX	V-	Mood=Ind|Number=Plur|Person=2|Tense=Pres|VerbForm=Fin|Voice=Act	8	cop	_	ref=1COR_6.2|LId=1
       10	κριτηρίων	κριτήριον	NOUN	Nb	Case=Gen|Gender=Neut|Number=Plur	8	obl:arg	_	ref=1COR_6.2
       11	ἐλαχίστων	ἐλάχιστος	ADJ	A-	Case=Gen|Degree=Sup|Number=Plur	10	amod	_	ref=1COR_6.2
-    Latin: |
+    latin: |
       1	et	et	CCONJ	C-	_	7	cc	_	ref=1COR_6.2
       2	si	si	SCONJ	G-	_	5	mark	_	ref=1COR_6.2
       3	in	in	ADP	R-	_	4	case	_	ref=1COR_6.2

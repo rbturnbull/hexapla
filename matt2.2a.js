@@ -1,24 +1,23 @@
-// data.js
 export const wordMap = {
-    "svg1-1": "svg2-1",
-    "svg1-2": "svg2-2",
-    "svg1-3": "svg2-3",
-    "svg1-4": "svg2-4",
-    "svg1-5": "svg2-6",
-    "svg1-6": "svg2-7",
-    "svg1-7": "svg2-7",
+    "greek-1": "latin-1",
+    "greek-2": "latin-2",
+    "greek-3": "latin-3",
+    "greek-4": "latin-4",
+    "greek-5": "latin-6",
+    "greek-6": "latin-7",
+    "greek-7": "latin-7",
   
-    "svg2-1": "svg1-1",
-    "svg2-2": "svg1-2",
-    "svg2-3": "svg1-3",
-    "svg2-4": "svg1-4",
-    "svg2-6": "svg1-5",
-    "svg2-7": "svg1-7"
+    "latin-1": "greek-1",
+    "latin-2": "greek-2",
+    "latin-3": "greek-3",
+    "latin-4": "greek-4",
+    "latin-6": "greek-5",
+    "latin-7": "greek-7"
   };
   
   export const sentences = [
     {
-      svgId: "svg1",
+      svgId: "greek",
       data: `1\tποῦ\tποῦ\tADV\tDu\tPronType=Int\t2\tadvmod
   2\tἐστιν\tεἰμί\tAUX\tV-\tMood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act\t0\troot
   3\tὁ\tὁ\tDET\tS-\tCase=Nom|Definite=Def|Gender=Masc|Number=Sing|PronType=Dem\t5\tdet
@@ -28,7 +27,7 @@ export const wordMap = {
   7\tἸουδαίων\tἸουδαῖος\tADJ\tA-\tCase=Gen|Degree=Pos|Gender=Masc|Number=Plur\t5\tnmod`
     },
     {
-      svgId: "svg2",
+      svgId: "latin",
       data: `1\tubi\tubi\tADV\tDu\tPronType=Int\t2\tadvmod
   2\test\tsum\tAUX\tV-\tMood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act\t0\troot
   3\tqui\tqui\tPRON\tPr\tCase=Nom|Gender=Masc|Number=Sing|PronType=Rel\t4\tnsubj

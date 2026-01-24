@@ -1,6 +1,6 @@
 languages:
-  - Greek
-  - Latin
+  - greek
+  - latin
 
 verses:
   Mt2_2a:
@@ -18,7 +18,7 @@ verses:
       latin-4: greek-4
       latin-6: greek-5
       latin-7: greek-7
-    Greek: |
+    greek: |
       1	ποῦ	ποῦ	ADV	Du	PronType=Int	2	advmod
       2	ἐστιν	εἰμί	AUX	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act	0	root
       3	ὁ	ὁ	DET	S-	Case=Nom|Definite=Def|Gender=Masc|Number=Sing|PronType=Dem	5	det
@@ -26,7 +26,7 @@ verses:
       5	βασιλεὺς	βασιλεύς	NOUN	Nb	Case=Nom|Gender=Masc|Number=Sing	2	nsubj
       6	τῶν	ὁ	DET	S-	Case=Gen|Definite=Def|Gender=Masc|Number=Plur|PronType=Dem	7	det
       7	Ἰουδαίων	Ἰουδαῖος	ADJ	A-	Case=Gen|Degree=Pos|Gender=Masc|Number=Plur	5	nmod
-    Latin: |
+    latin: |
       1	ubi	ubi	ADV	Du	PronType=Int	2	advmod
       2	est	sum	AUX	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act	0	root
       3	qui	qui	PRON	Pr	Case=Nom|Gender=Masc|Number=Sing|PronType=Rel	4	nsubj
@@ -59,7 +59,7 @@ verses:
       latin-8: greek-10
       latin-9: greek-11
       latin-10: greek-12
-    Greek: |
+    greek: |
       1	εἴδομεν	ὁράω	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	0	root
       2	γὰρ	γάρ	ADV	Df	_	1	discourse
       3	αὐτοῦ	αὐτός	PRON	Pp	Case=Gen|Gender=Masc|Number=Sing|Person=3|PronType=Prs	5	det
@@ -72,7 +72,7 @@ verses:
       10	ἤλθομεν	ἔρχομαι	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	1	conj
       11	προσκυνῆσαι	προσκυνέω	VERB	V-	Aspect=Perf|Tense=Past|VerbForm=Inf|Voice=Act	10	xcomp
       12	αὐτῷ	αὐτός	PRON	Pp	Case=Dat|Gender=Masc|Number=Sing|Person=3|PronType=Prs	11	obl:arg
-    Latin: |
+    latin: |
       1	vidimus	video	VERB	V-	Aspect=Perf|Mood=Ind|Number=Plur|Person=1|Tense=Past|VerbForm=Fin|Voice=Act	0	root
       2	enim	enim	ADV	Df	_	1	discourse
       3	stellam	stella	NOUN	Nb	Case=Acc|Gender=Fem|Number=Sing	1	obj

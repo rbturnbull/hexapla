@@ -3,6 +3,7 @@
 from pathlib import Path
 import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from collections import defaultdict
 
 
 DATA_DIR = Path("data")
@@ -35,13 +36,40 @@ for path in DATA_DIR.glob("*.yaml"):
     )
     ms_path.write_text(ms_html, encoding="utf-8")
 
+    languages = my_data['languages']
+
+    # Build glossary
+    glossary = defaultdict(lambda: defaultdict(list))
+    for verse_index, verse in enumerate(my_data["verses"]):
+        verse_data = my_data["verses"][verse]
+
+        mapping = verse_data["mapping"]
+
+        lemmas = dict()
+        for language in languages:
+            language_data = verse_data[language].strip()
+            
+            for index, line in enumerate(language_data.split("\n"), start=1):
+                components = line.split('\t')
+                assert len(components) > 5
+                lemma = components[2]
+                lemmas[f"{language}-{index}"] = lemma
+
+        # for key, lemma in lemmas.items():
+        #     language = key.split("-")[0]
+        #     if key not in mapping:
+        #         breakpoint()
+        #     mapped = mapping[key]
+        #     mapped_lemma = lemmas[mapped]
+        #     glossary[language][lemma].append( mapped_lemma )
+
     for verse_index, verse in enumerate(my_data["verses"]):
         verse_data = my_data["verses"][verse]
         verse_path = ms_dir / verse / f"index.html"
         verse_path.parent.mkdir(parents=True, exist_ok=True)
 
-        greek = verse_data['Greek'].strip()
-        latin = verse_data['Latin'].strip()
+        greek = verse_data['greek'].strip()
+        latin = verse_data['latin'].strip()
         mapping = verse_data["mapping"]
 
         verse_html = verse_template.render(
