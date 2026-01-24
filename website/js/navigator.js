@@ -42,7 +42,8 @@ function computePositions(tokens, rtl, noSpaceAfter) {
 function renderSentence(sentence) {
   const svg = d3.select(`#${sentence.svgId}`);
   if (sentence.rtl) {
-    svg.attr("direction", "rtl");
+    svg.attr("direction", "rtl")
+      .attr("style", "direction: rtl; unicode-bidi: bidi-override;");
   }
   const tokens = sentence.data.split("\n").map(line => {
     const [id, form, , upos, , feats, head, deprel] = line.split("\t");
@@ -88,6 +89,8 @@ function renderSentence(sentence) {
 
   groups.append("text")
     .attr("text-anchor", "middle")
+    .attr("direction", sentence.rtl ? "rtl" : "ltr")
+    .attr("unicode-bidi", sentence.rtl ? "bidi-override" : null)
     .attr("class", d => `token${d.head === 0 ? " root" : ""}`)
     .text(d => d.form);
 }
