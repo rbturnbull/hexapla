@@ -5,30 +5,52 @@
 
 const tokenY = 150;
 const arcHeight = 40;
+const spacing = 20;
 
 function arcPath(x1, x2, y = tokenY - 30) {
   const radius = Math.abs(x2 - x1) / 2;
   return `M${x1},${y} A${radius},${arcHeight} 0 0,${x1 < x2 ? 1 : 0} ${x2},${y}`;
 }
 
+function computePositions(tokens, rtl, noSpaceAfter) {
+  const ctx = document.createElement("canvas").getContext("2d");
+  ctx.font = "24px Gentium Plus";
+  tokens.forEach(t => t.width = ctx.measureText(t.form).width);
+  const noSpaceAfterSet = new Set(noSpaceAfter || []);
+  if (rtl) {
+    const totalWidth = tokens.reduce((sum, t, i) => {
+      const gap = i < tokens.length - 1 && !noSpaceAfterSet.has(t.id) ? spacing : 0;
+      return sum + t.width + gap;
+    }, 0);
+    let rightEdge = 50 + totalWidth;
+    return tokens.map((t, i) => {
+      const x = rightEdge - t.width / 2;
+      const gap = i < tokens.length - 1 && !noSpaceAfterSet.has(t.id) ? spacing : 0;
+      rightEdge -= t.width + gap;
+      return x;
+    });
+  }
+  let currentX = 50;
+  return tokens.map((t, i) => {
+    const x = currentX + t.width / 2;
+    const gap = i < tokens.length - 1 && !noSpaceAfterSet.has(t.id) ? spacing : 0;
+    currentX += t.width + gap;
+    return x;
+  });
+}
+
 function renderSentence(sentence) {
   const svg = d3.select(`#${sentence.svgId}`);
+  if (sentence.rtl) {
+    svg.attr("direction", "rtl");
+  }
   const tokens = sentence.data.split("\n").map(line => {
     const [id, form, , upos, , feats, head, deprel] = line.split("\t");
     return { id: +id, form, upos, feats, head: +head, deprel };
   });
 
   const idToIndex = Object.fromEntries(tokens.map((t, i) => [t.id, i]));
-  const ctx = document.createElement("canvas").getContext("2d");
-  ctx.font = "24px Gentium Plus";
-  tokens.forEach(t => t.width = ctx.measureText(t.form).width);
-  const spacing = 20;
-  let currentX = 50;
-  const positions = tokens.map(t => {
-    const x = currentX + t.width / 2;
-    currentX += t.width + spacing;
-    return x;
-  });
+  const positions = computePositions(tokens, sentence.rtl, sentence.noSpaceAfter);
 
   const defs = svg.append("defs");
   defs.selectAll("marker")
@@ -84,15 +106,7 @@ function highlight(event, d, sentence, positions, idToIndex) {
       return { id: +id, form, upos, feats, head: +head, deprel };
     });
     const pairIdToIndex = Object.fromEntries(pairTokens.map((t, i) => [t.id, i]));
-    const ctx = document.createElement("canvas").getContext("2d");
-    ctx.font = "24px Gentium Plus";
-    pairTokens.forEach(t => t.width = ctx.measureText(t.form).width);
-    let cx = 50;
-    const pairPositions = pairTokens.map(t => {
-      const x = cx + t.width / 2;
-      cx += t.width + 20;
-      return x;
-    });
+    const pairPositions = computePositions(pairTokens, pairSentence.rtl, pairSentence.noSpaceAfter);
     const pairSvg = d3.select(`#${pairSvgId}`);
     const pairD = pairTokens.find(t => t.id === +pairTokenId);
     highlightWord(pairSvg, pairSentence.data, pairD, pairPositions, pairIdToIndex, pairSvgId);

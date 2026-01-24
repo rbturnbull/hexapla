@@ -19,17 +19,37 @@ ms_template = env.get_template("ms.html")
 verse_template = env.get_template("verse.html")
 verse_js_template = env.get_template("verse.js")
 
-def normalize_conllu(conllu):
+ARABIC_RE = re.compile(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]")
+
+
+def contains_arabic(text):
+    return bool(ARABIC_RE.search(text))
+
+
+def parse_conllu(conllu):
     lines = []
+    no_space_after = set()
     for line in conllu.splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
             continue
         token_id = line.split("\t", 1)[0]
-        if "-" in token_id or "." in token_id:
+        if "-" in token_id:
+            try:
+                start, end = token_id.split("-", 1)
+                start_id = int(start)
+                end_id = int(end)
+            except ValueError:
+                continue
+            for tok_id in range(start_id, end_id):
+                no_space_after.add(tok_id)
+            continue
+        if "." in token_id:
             continue
         lines.append(line)
-    return "\n".join(lines)
+    normalized = "\n".join(lines)
+    rtl = contains_arabic(normalized)
+    return normalized, sorted(no_space_after), rtl
 
 
 def build_alignment_mapping(alignment, first_svg_id, second_svg_id):
@@ -78,8 +98,12 @@ for path in DATA_DIR.glob("*.yaml"):
         first_svg_id = svg_id_for(first_language)
         second_svg_id = svg_id_for(second_language)
 
-        greek = normalize_conllu(verse_data[first_language].get("conllu", "").strip())
-        latin = normalize_conllu(verse_data[second_language].get("conllu", "").strip())
+        greek, greek_no_space_after, greek_rtl = parse_conllu(
+            verse_data[first_language].get("conllu", "").strip()
+        )
+        latin, latin_no_space_after, latin_rtl = parse_conllu(
+            verse_data[second_language].get("conllu", "").strip()
+        )
         alignment = verse_data.get("alignment", "")
         mapping = build_alignment_mapping(alignment, first_svg_id, second_svg_id)
 
@@ -91,6 +115,8 @@ for path in DATA_DIR.glob("*.yaml"):
             lang_b_label=second_language,
             lang_a_id=first_svg_id,
             lang_b_id=second_svg_id,
+            lang_a_rtl=greek_rtl,
+            lang_b_rtl=latin_rtl,
         )
         verse_path.write_text(verse_html, encoding="utf-8")
         print(f"Generated {verse_path}")
@@ -105,5 +131,9 @@ for path in DATA_DIR.glob("*.yaml"):
             latin=latin,
             lang_a_id=first_svg_id,
             lang_b_id=second_svg_id,
+            lang_a_rtl=greek_rtl,
+            lang_b_rtl=latin_rtl,
+            lang_a_no_space_after=greek_no_space_after,
+            lang_b_no_space_after=latin_no_space_after,
         )
         verse_js.write_text(verse_js_content, encoding="utf-8")
