@@ -146,8 +146,10 @@
             <!-- End of Topbar -->
             <!-- Main Content -->
             <div id="content">
-                <svg id="greek" width="1800" height="340"></svg>
-                <svg id="latin" width="1800" height="340"></svg>
+                <h3>{{ lang_a_label }}</h3>
+                <svg id="{{ lang_a_id }}" width="1800" height="340"></svg>
+                <h3>{{ lang_b_label }}</h3>
+                <svg id="{{ lang_b_id }}" width="1800" height="340"></svg>
                 <script src="./{{ siglum }}-{{ verse }}.js"></script>
                 <script type="module" src="../../../js/navigator.js"></script>
                             </div>

@@ -2,11 +2,11 @@ const wordMap = {{ mapping | tojson }};
   
 const sentences = [
 {
-    svgId: "greek",
-    data: `{{ greek }}`
+    svgId: "{{ lang_a_id }}",
+    data: {{ greek | tojson }}
 },
 {
-    svgId: "latin",
-    data: `{{ latin}}`
+    svgId: "{{ lang_b_id }}",
+    data: {{ latin | tojson }}
 }
 ];
