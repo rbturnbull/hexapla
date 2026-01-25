@@ -7,9 +7,14 @@ const tokenY = 150;
 const arcHeight = 40;
 const spacing = 20;
 
-function arcPath(x1, x2, y = tokenY - 30) {
+function arcHeightForDistance(distance, minHeight = 30, maxHeight = 80) {
+  const raw = maxHeight - (maxHeight - minHeight) * Math.exp(-(distance - 1)/5);
+  return Math.max(minHeight, Math.min(maxHeight, raw));
+}
+
+function arcPath(x1, x2, height, y = tokenY - 30) {
   const radius = Math.abs(x2 - x1) / 2;
-  return `M${x1},${y} A${radius},${arcHeight} 0 0,${x1 < x2 ? 1 : 0} ${x2},${y}`;
+  return `M${x1},${y} A${radius},${height} 0 0,${x1 < x2 ? 1 : 0} ${x2},${y}`;
 }
 
 function computePositions(tokens, rtl, noSpaceAfter, svgWidth) {
@@ -79,7 +84,11 @@ function renderSentence(sentence) {
     .enter().append("path")
       .attr("class", "arc")
       .attr("marker-end", "url(#arrowhead)")
-      .attr("d", d => arcPath(positions[idToIndex[d.id]], positions[idToIndex[d.head]]));
+      .attr("d", d => {
+        const distance = Math.abs(idToIndex[d.id] - idToIndex[d.head]);
+        const height = arcHeightForDistance(distance);
+        return arcPath(positions[idToIndex[d.id]], positions[idToIndex[d.head]], height);
+      });
 
   const groups = svg.selectAll(".token")
     .data(tokens).enter()
@@ -139,23 +148,27 @@ function highlightWord(svg, dataStr, d, positions, idToIndex, svgId) {
 
   if (d.head !== 0) {
     const headIdx = idToIndex[d.head];
+    const distance = Math.abs(idToIndex[d.id] - idToIndex[d.head]);
+    const height = arcHeightForDistance(distance);
     svg.append("path")
       .attr("class", "arc arc-highlight-out")
       .attr("marker-end", "url(#arrowhead-blue)")
-      .attr("d", arcPath(positions[idx], positions[headIdx]));
+      .attr("d", arcPath(positions[idx], positions[headIdx], height));
     svg.append("text")
       .attr("class", "arc-label")
       .attr("x", (positions[idx] + positions[headIdx]) / 2)
-      .attr("y", y - arcHeight - 20)
+      .attr("y", y - height - 20)
       .text(d.deprel);
   }
 
   tokens.forEach((t, i) => {
     if (t.head === d.id) {
+      const distance = Math.abs(i - idx);
+      const height = arcHeightForDistance(distance);
       svg.append("path")
         .attr("class", "arc arc-highlight-in")
         .attr("marker-end", "url(#arrowhead-red)")
-        .attr("d", arcPath(positions[i], positions[idx]));
+        .attr("d", arcPath(positions[i], positions[idx], height));
     }
   });
 
