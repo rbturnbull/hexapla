@@ -77,11 +77,22 @@ for path in DATA_DIR.glob("*.yaml"):
     ms_dir.mkdir(parents=True, exist_ok=True)
 
     verse_list = list(my_data.keys())
+    verse_items = []
+    for verse in verse_list:
+        verse_data = my_data.get(verse) or {}
+        language_keys = [key for key in verse_data.keys() if key != "alignment"]
+        verbose = None
+        for language in language_keys:
+            verbose = verse_data.get(language, {}).get("verse")
+            if verbose:
+                break
+        verse_items.append({"id": verse, "label": verbose or verse})
 
     ms_path = ms_dir / "index.html"
     ms_html = ms_template.render(
         siglum=siglum,
         verse_list=verse_list,
+        verse_items=verse_items,
     )
     ms_path.write_text(ms_html, encoding="utf-8")
 
@@ -111,6 +122,7 @@ for path in DATA_DIR.glob("*.yaml"):
             siglum=siglum,
             verse_list=verse_list,
             verse=verse,
+            verse_items=verse_items,
             lang_a_label=first_language,
             lang_b_label=second_language,
             lang_a_id=first_svg_id,

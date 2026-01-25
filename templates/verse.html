@@ -151,8 +151,8 @@
                     {% endif %}
                 </div>
                 <select id="verseSelector" class="form-select" style="width: 200px; margin-left: auto;">
-                    {% for x in verse_list %}
-                    <option value="{{ x }}" {% if x == verse %}selected{% endif %}>{{ x }}</option>
+                    {% for item in verse_items %}
+                    <option value="{{ item.id }}" {% if item.id == verse %}selected{% endif %}>{{ item.label }}</option>
                     {% endfor %}
                 </select>
                 <ul class="navbar-nav ml-auto">
@@ -162,9 +162,9 @@
             <!-- Main Content -->
             <div id="content">
                 <h3 class="text-center">{{ lang_a_label }}</h3>
-                <svg id="{{ lang_a_id }}" width="1800" height="340"></svg>
+                <svg id="{{ lang_a_id }}" width="100%" height="340" preserveAspectRatio="xMinYMin meet"></svg>
                 <h3 class="text-center">{{ lang_b_label }}</h3>
-                <svg id="{{ lang_b_id }}" width="1800" height="340"></svg>
+                <svg id="{{ lang_b_id }}" width="100%" height="340" preserveAspectRatio="xMinYMin meet"></svg>
                 <script src="./{{ siglum }}-{{ verse }}.js"></script>
                 <script type="module" src="../../../js/navigator.js"></script>
                             </div>

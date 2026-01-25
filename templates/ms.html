@@ -101,10 +101,10 @@
                     <i class="fa-solid fa-book-open"></i> <span>{{ siglum }}</span>
                 </a>
             </li>
-            {% for verse in verse_list %}
+            {% for item in verse_items %}
             <li class="nav-item">
-                <a class="nav-link" href="../../mss/{{ siglum }}/{{ verse }}">
-                    <i class="fa-solid fa-book"></i> <span>{{ verse }}</span>
+                <a class="nav-link" href="../../mss/{{ siglum }}/{{ item.id }}">
+                    <i class="fa-solid fa-book"></i> <span>{{ item.label }}</span>
                 </a>
             </li>
             {% endfor %}
