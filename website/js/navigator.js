@@ -3,21 +3,31 @@
 // const selectedDataset = datasets.matt2_2a;
 // const { sentences, wordMap } = selectedDataset;
 
-const tokenY = 150;
-const arcHeight = 40;
+const tokenY = 120;
 const spacing = 20;
+const rowGap = 100;
+const defaultMaxWordsPerRow = 12;
 
 function arcHeightForDistance(distance, minHeight = 30, maxHeight = 80) {
   const raw = maxHeight - (maxHeight - minHeight) * Math.exp(-(distance - 1)/5);
   return Math.max(minHeight, Math.min(maxHeight, raw));
 }
 
-function arcPath(x1, x2, height, y = tokenY - 30) {
+function arcPath(x1, x2, height, y, flip = false) {
   const radius = Math.abs(x2 - x1) / 2;
-  return `M${x1},${y} A${radius},${height} 0 0,${x1 < x2 ? 1 : 0} ${x2},${y}`;
+  const sweep = flip ? (x1 < x2 ? 0 : 1) : (x1 < x2 ? 1 : 0);
+  return `M${x1},${y} A${radius},${height} 0 0,${sweep} ${x2},${y}`;
 }
 
-function computePositions(tokens, rtl, noSpaceAfter, svgWidth) {
+function connectorY(rowYs, rowIndex, edge) {
+  const rowY = rowYs[rowIndex];
+  if (edge === "top") {
+    return rowY - 18;
+  }
+  return rowY + 6;
+}
+
+function computeRowPositions(tokens, rtl, noSpaceAfter, svgWidth) {
   const ctx = document.createElement("canvas").getContext("2d");
   ctx.font = "24px Gentium Plus";
   tokens.forEach(t => t.width = ctx.measureText(t.form).width);
@@ -45,6 +55,32 @@ function computePositions(tokens, rtl, noSpaceAfter, svgWidth) {
   });
 }
 
+function computeLayout(tokens, rtl, noSpaceAfter, svgWidth, maxWordsPerRow = defaultMaxWordsPerRow) {
+  const rows = new Array(tokens.length).fill(0);
+  const rowYs = [tokenY];
+  let split = tokens.length;
+  if (tokens.length > maxWordsPerRow) {
+    split = Math.ceil(tokens.length / 2);
+    rowYs.push(tokenY + rowGap);
+    for (let i = split; i < tokens.length; i += 1) {
+      rows[i] = 1;
+    }
+  }
+
+  const topTokens = tokens.slice(0, split);
+  const bottomTokens = tokens.slice(split);
+  const topPositions = computeRowPositions(topTokens, rtl, noSpaceAfter, svgWidth);
+  const bottomPositions = bottomTokens.length
+    ? computeRowPositions(bottomTokens, rtl, noSpaceAfter, svgWidth)
+    : [];
+
+  const positions = [];
+  topPositions.forEach(x => positions.push(x));
+  bottomPositions.forEach(x => positions.push(x));
+
+  return { positions, rows, rowYs, split };
+}
+
 function renderSentence(sentence) {
   const svg = d3.select(`#${sentence.svgId}`);
   if (sentence.rtl) {
@@ -58,7 +94,12 @@ function renderSentence(sentence) {
 
   const idToIndex = Object.fromEntries(tokens.map((t, i) => [t.id, i]));
   const svgWidth = svg.node()?.getBoundingClientRect().width || 1800;
-  const positions = computePositions(tokens, sentence.rtl, sentence.noSpaceAfter, svgWidth);
+  const { positions, rows, rowYs } = computeLayout(
+    tokens,
+    sentence.rtl,
+    sentence.noSpaceAfter,
+    svgWidth
+  );
 
   const defs = svg.append("defs");
   defs.selectAll("marker")
@@ -85,15 +126,27 @@ function renderSentence(sentence) {
       .attr("class", "arc")
       .attr("marker-end", "url(#arrowhead)")
       .attr("d", d => {
-        const distance = Math.abs(idToIndex[d.id] - idToIndex[d.head]);
+        const fromIndex = idToIndex[d.id];
+        const toIndex = idToIndex[d.head];
+        const fromRow = rows[fromIndex];
+        const toRow = rows[toIndex];
+        const x1 = positions[fromIndex];
+        const x2 = positions[toIndex];
+        if (fromRow !== toRow) {
+          const y1 = fromRow === 0 ? connectorY(rowYs, fromRow, "bottom") : connectorY(rowYs, fromRow, "top");
+          const y2 = toRow === 0 ? connectorY(rowYs, toRow, "bottom") : connectorY(rowYs, toRow, "top");
+          return `M${x1},${y1} L${x2},${y2}`;
+        }
+        const distance = Math.abs(fromIndex - toIndex);
         const height = arcHeightForDistance(distance);
-        return arcPath(positions[idToIndex[d.id]], positions[idToIndex[d.head]], height);
+        const y = fromRow === 0 ? rowYs[0] - 30 : rowYs[1] + 30;
+        return arcPath(x1, x2, height, y, fromRow === 1);
       });
 
   const groups = svg.selectAll(".token")
     .data(tokens).enter()
     .append("g")
-      .attr("transform", (d, i) => `translate(${positions[i]},${tokenY})`)
+      .attr("transform", (d, i) => `translate(${positions[i]},${rowYs[rows[i]]})`)
       .attr("data-id", d => `${sentence.svgId}-${d.id}`)
       .on("mouseover", (event, d) => highlight(event, d, sentence, positions, idToIndex))
       .on("mouseout", clearHighlight);
@@ -109,7 +162,7 @@ function renderSentence(sentence) {
 function highlight(event, d, sentence, positions, idToIndex) {
   clearHighlight();
   const svg = d3.select(`#${sentence.svgId}`);
-  highlightWord(svg, sentence.data, d, positions, idToIndex, sentence.svgId);
+  highlightWord(svg, sentence, d, positions, idToIndex, sentence.svgId);
 
   const pairId = wordMap[`${sentence.svgId}-${d.id}`];
   if (pairId) {
@@ -122,20 +175,31 @@ function highlight(event, d, sentence, positions, idToIndex) {
     const pairIdToIndex = Object.fromEntries(pairTokens.map((t, i) => [t.id, i]));
     const pairSvg = d3.select(`#${pairSvgId}`);
     const pairSvgWidth = pairSvg.node()?.getBoundingClientRect().width || 1800;
-    const pairPositions = computePositions(pairTokens, pairSentence.rtl, pairSentence.noSpaceAfter, pairSvgWidth);
+    const { positions: pairPositions, rows: pairRows, rowYs: pairRowYs } = computeLayout(
+      pairTokens,
+      pairSentence.rtl,
+      pairSentence.noSpaceAfter,
+      pairSvgWidth
+    );
     const pairD = pairTokens.find(t => t.id === +pairTokenId);
-    highlightWord(pairSvg, pairSentence.data, pairD, pairPositions, pairIdToIndex, pairSvgId);
+    highlightWord(pairSvg, pairSentence, pairD, pairPositions, pairIdToIndex, pairSvgId, pairRows, pairRowYs);
   }
 }
 
-function highlightWord(svg, dataStr, d, positions, idToIndex, svgId) {
-  const tokens = dataStr.split("\n").map(line => {
+function highlightWord(svg, sentence, d, positions, idToIndex, svgId, rows, rowYs) {
+  const tokens = sentence.data.split("\n").map(line => {
     const [id, form, , upos, , feats, head, deprel] = line.split("\t");
     return { id: +id, form, upos, feats, head: +head, deprel };
   });
+  const svgWidth = svg.node()?.getBoundingClientRect().width || 1800;
+  if (!rows || !rowYs) {
+    ({ rows, rowYs } = computeLayout(tokens, sentence.rtl, sentence.noSpaceAfter, svgWidth));
+  }
   const idx = idToIndex[d.id];
   const x = positions[idx];
-  const y = tokenY - 18;
+  const rowIndex = rows[idx];
+  const rowY = rowYs[rowIndex];
+  const y = rowIndex === 0 ? rowY - 18 : rowY + 18;
   const group = d3.select(`[data-id="${svgId}-${d.id}"]`);
   const text = group.select("text");
   const bbox = text.node().getBBox();
@@ -148,27 +212,49 @@ function highlightWord(svg, dataStr, d, positions, idToIndex, svgId) {
 
   if (d.head !== 0) {
     const headIdx = idToIndex[d.head];
-    const distance = Math.abs(idToIndex[d.id] - idToIndex[d.head]);
-    const height = arcHeightForDistance(distance);
-    svg.append("path")
-      .attr("class", "arc arc-highlight-out")
-      .attr("marker-end", "url(#arrowhead-blue)")
-      .attr("d", arcPath(positions[idx], positions[headIdx], height));
-    svg.append("text")
-      .attr("class", "arc-label")
-      .attr("x", (positions[idx] + positions[headIdx]) / 2)
-      .attr("y", y - height - 20)
-      .text(d.deprel);
+    const headRow = rows[headIdx];
+    if (headRow !== rowIndex) {
+      const y1 = rowIndex === 0 ? connectorY(rowYs, rowIndex, "bottom") : connectorY(rowYs, rowIndex, "top");
+      const y2 = headRow === 0 ? connectorY(rowYs, headRow, "bottom") : connectorY(rowYs, headRow, "top");
+      svg.append("path")
+        .attr("class", "arc arc-highlight-out")
+        .attr("marker-end", "url(#arrowhead-blue)")
+        .attr("d", `M${positions[idx]},${y1} L${positions[headIdx]},${y2}`);
+    } else {
+      const distance = Math.abs(idToIndex[d.id] - idToIndex[d.head]);
+      const height = arcHeightForDistance(distance);
+      const arcY = rowIndex === 0 ? rowY - 30 : rowY + 30;
+      svg.append("path")
+        .attr("class", "arc arc-highlight-out")
+        .attr("marker-end", "url(#arrowhead-blue)")
+        .attr("d", arcPath(positions[idx], positions[headIdx], height, arcY, rowIndex === 1));
+      svg.append("text")
+        .attr("class", "arc-label")
+        .attr("x", (positions[idx] + positions[headIdx]) / 2)
+        .attr("y", rowIndex === 0 ? arcY - height - 20 : arcY + height + 20)
+        .text(d.deprel);
+    }
   }
 
   tokens.forEach((t, i) => {
     if (t.head === d.id) {
-      const distance = Math.abs(i - idx);
-      const height = arcHeightForDistance(distance);
-      svg.append("path")
-        .attr("class", "arc arc-highlight-in")
-        .attr("marker-end", "url(#arrowhead-red)")
-        .attr("d", arcPath(positions[i], positions[idx], height));
+      const childRow = rows[i];
+      if (childRow !== rowIndex) {
+        const y1 = rowIndex === 0 ? connectorY(rowYs, rowIndex, "bottom") : connectorY(rowYs, rowIndex, "top");
+        const y2 = childRow === 0 ? connectorY(rowYs, childRow, "bottom") : connectorY(rowYs, childRow, "top");
+        svg.append("path")
+          .attr("class", "arc arc-highlight-in")
+          .attr("marker-end", "url(#arrowhead-red)")
+          .attr("d", `M${positions[i]},${y2} L${positions[idx]},${y1}`);
+      } else {
+        const distance = Math.abs(i - idx);
+        const height = arcHeightForDistance(distance);
+        const arcY = rowIndex === 0 ? rowY - 30 : rowY + 30;
+        svg.append("path")
+          .attr("class", "arc arc-highlight-in")
+          .attr("marker-end", "url(#arrowhead-red)")
+          .attr("d", arcPath(positions[i], positions[idx], height, arcY, rowIndex === 1));
+      }
     }
   });
 
@@ -178,7 +264,7 @@ function highlightWord(svg, dataStr, d, positions, idToIndex, svgId) {
     svg.append("text")
       .attr("class", "features")
       .attr("x", x)
-      .attr("y", tokenY + 20 + i * 14)
+      .attr("y", rowIndex === 0 ? (rowY + 20 + i * 14) : (rowY - 20 - i * 14))
       .text(line);
   });
 }
