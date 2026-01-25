@@ -12,17 +12,18 @@ function arcPath(x1, x2, y = tokenY - 30) {
   return `M${x1},${y} A${radius},${arcHeight} 0 0,${x1 < x2 ? 1 : 0} ${x2},${y}`;
 }
 
-function computePositions(tokens, rtl, noSpaceAfter) {
+function computePositions(tokens, rtl, noSpaceAfter, svgWidth) {
   const ctx = document.createElement("canvas").getContext("2d");
   ctx.font = "24px Gentium Plus";
   tokens.forEach(t => t.width = ctx.measureText(t.form).width);
   const noSpaceAfterSet = new Set(noSpaceAfter || []);
+  const totalWidth = tokens.reduce((sum, t, i) => {
+    const gap = i < tokens.length - 1 && !noSpaceAfterSet.has(t.id) ? spacing : 0;
+    return sum + t.width + gap;
+  }, 0);
+  const startX = Math.max(50, (svgWidth - totalWidth) / 2);
   if (rtl) {
-    const totalWidth = tokens.reduce((sum, t, i) => {
-      const gap = i < tokens.length - 1 && !noSpaceAfterSet.has(t.id) ? spacing : 0;
-      return sum + t.width + gap;
-    }, 0);
-    let rightEdge = 50 + totalWidth;
+    let rightEdge = startX + totalWidth;
     return tokens.map((t, i) => {
       const x = rightEdge - t.width / 2;
       const gap = i < tokens.length - 1 && !noSpaceAfterSet.has(t.id) ? spacing : 0;
@@ -30,7 +31,7 @@ function computePositions(tokens, rtl, noSpaceAfter) {
       return x;
     });
   }
-  let currentX = 50;
+  let currentX = startX;
   return tokens.map((t, i) => {
     const x = currentX + t.width / 2;
     const gap = i < tokens.length - 1 && !noSpaceAfterSet.has(t.id) ? spacing : 0;
@@ -51,7 +52,8 @@ function renderSentence(sentence) {
   });
 
   const idToIndex = Object.fromEntries(tokens.map((t, i) => [t.id, i]));
-  const positions = computePositions(tokens, sentence.rtl, sentence.noSpaceAfter);
+  const svgWidth = svg.node()?.getBoundingClientRect().width || 1800;
+  const positions = computePositions(tokens, sentence.rtl, sentence.noSpaceAfter, svgWidth);
 
   const defs = svg.append("defs");
   defs.selectAll("marker")
@@ -109,8 +111,9 @@ function highlight(event, d, sentence, positions, idToIndex) {
       return { id: +id, form, upos, feats, head: +head, deprel };
     });
     const pairIdToIndex = Object.fromEntries(pairTokens.map((t, i) => [t.id, i]));
-    const pairPositions = computePositions(pairTokens, pairSentence.rtl, pairSentence.noSpaceAfter);
     const pairSvg = d3.select(`#${pairSvgId}`);
+    const pairSvgWidth = pairSvg.node()?.getBoundingClientRect().width || 1800;
+    const pairPositions = computePositions(pairTokens, pairSentence.rtl, pairSentence.noSpaceAfter, pairSvgWidth);
     const pairD = pairTokens.find(t => t.id === +pairTokenId);
     highlightWord(pairSvg, pairSentence.data, pairD, pairPositions, pairIdToIndex, pairSvgId);
   }

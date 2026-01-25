@@ -134,7 +134,22 @@
         <div id="content-wrapper" class="d-flex flex-column">
             <!-- Topbar -->
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                {% set verse_index = verse_list.index(verse) %}
+                {% set prev_verse = verse_list[verse_index - 1] if verse_index > 0 else None %}
+                {% set next_verse = verse_list[verse_index + 1] if verse_index + 1 < verse_list|length else None %}
                 <h1>{{ siglum }}</h1>
+                <div class="d-flex align-items-center ms-3">
+                    {% if prev_verse %}
+                    <a class="btn btn-outline-secondary me-2" href="../{{ prev_verse }}" title="Previous verse">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    {% endif %}
+                    {% if next_verse %}
+                    <a class="btn btn-outline-secondary me-2" href="../{{ next_verse }}" title="Next verse">
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
                 <select id="verseSelector" class="form-select" style="width: 200px; margin-left: auto;">
                     {% for x in verse_list %}
                     <option value="{{ x }}" {% if x == verse %}selected{% endif %}>{{ x }}</option>
@@ -146,9 +161,9 @@
             <!-- End of Topbar -->
             <!-- Main Content -->
             <div id="content">
-                <h3>{{ lang_a_label }}</h3>
+                <h3 class="text-center">{{ lang_a_label }}</h3>
                 <svg id="{{ lang_a_id }}" width="1800" height="340"></svg>
-                <h3>{{ lang_b_label }}</h3>
+                <h3 class="text-center">{{ lang_b_label }}</h3>
                 <svg id="{{ lang_b_id }}" width="1800" height="340"></svg>
                 <script src="./{{ siglum }}-{{ verse }}.js"></script>
                 <script type="module" src="../../../js/navigator.js"></script>
