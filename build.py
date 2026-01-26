@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from urllib.parse import quote
 import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import re
@@ -29,6 +30,7 @@ def contains_arabic(text):
 def parse_conllu(conllu):
     lines = []
     no_space_after = set()
+    tokens = []
     for line in conllu.splitlines():
         line = line.strip()
         if not line or line.startswith("#"):
@@ -47,9 +49,16 @@ def parse_conllu(conllu):
         if "." in token_id:
             continue
         lines.append(line)
+        parts = line.split("\t")
+        if len(parts) > 2:
+            try:
+                tok_id = int(parts[0])
+            except ValueError:
+                continue
+            tokens.append({"id": tok_id, "lemma": parts[2]})
     normalized = "\n".join(lines)
     rtl = contains_arabic(normalized)
-    return normalized, sorted(no_space_after), rtl
+    return normalized, sorted(no_space_after), rtl, tokens
 
 
 def build_alignment_mapping(alignment, first_svg_id, second_svg_id):
@@ -78,6 +87,10 @@ for path in DATA_DIR.glob("*.yaml"):
 
     verse_list = list(my_data.keys())
     verse_items = []
+    lemma_index = {}
+    language_slugs = {}
+    language_rtl = {}
+    verse_items = []
     for verse in verse_list:
         verse_data = my_data.get(verse) or {}
         language_keys = [key for key in verse_data.keys() if key != "alignment"]
@@ -87,6 +100,47 @@ for path in DATA_DIR.glob("*.yaml"):
             if verbose:
                 break
         verse_items.append({"id": verse, "label": verbose or verse})
+
+        if len(language_keys) >= 2:
+            first_language = language_keys[0]
+            second_language = language_keys[1]
+            first_svg_id = svg_id_for(first_language)
+            second_svg_id = svg_id_for(second_language)
+            language_slugs[first_language] = first_svg_id
+            language_slugs[second_language] = second_svg_id
+
+            lang_a_norm, _, lang_a_rtl, lang_a_tokens = parse_conllu(
+                verse_data.get(first_language, {}).get("conllu", "").strip()
+            )
+            lang_b_norm, _, lang_b_rtl, lang_b_tokens = parse_conllu(
+                verse_data.get(second_language, {}).get("conllu", "").strip()
+            )
+            language_rtl[first_language] = lang_a_rtl or language_rtl.get(first_language, False)
+            language_rtl[second_language] = lang_b_rtl or language_rtl.get(second_language, False)
+
+            mapping = build_alignment_mapping(verse_data.get("alignment", ""), first_svg_id, second_svg_id)
+
+            for token in lang_a_tokens:
+                lemma = token["lemma"]
+                if not lemma or lemma == "_":
+                    continue
+                lemma_data = lemma_index.setdefault(first_language, {}).setdefault(
+                    lemma, {"count": 0, "parallel": 0}
+                )
+                lemma_data["count"] += 1
+                if mapping.get(f"{first_svg_id}-{token['id']}"):
+                    lemma_data["parallel"] += 1
+
+            for token in lang_b_tokens:
+                lemma = token["lemma"]
+                if not lemma or lemma == "_":
+                    continue
+                lemma_data = lemma_index.setdefault(second_language, {}).setdefault(
+                    lemma, {"count": 0, "parallel": 0}
+                )
+                lemma_data["count"] += 1
+                if mapping.get(f"{second_svg_id}-{token['id']}"):
+                    lemma_data["parallel"] += 1
 
     ms_path = ms_dir / "index.html"
     ms_html = ms_template.render(
@@ -109,10 +163,10 @@ for path in DATA_DIR.glob("*.yaml"):
         first_svg_id = svg_id_for(first_language)
         second_svg_id = svg_id_for(second_language)
 
-        greek, greek_no_space_after, greek_rtl = parse_conllu(
+        greek, greek_no_space_after, greek_rtl, greek_tokens = parse_conllu(
             verse_data[first_language].get("conllu", "").strip()
         )
-        latin, latin_no_space_after, latin_rtl = parse_conllu(
+        latin, latin_no_space_after, latin_rtl, latin_tokens = parse_conllu(
             verse_data[second_language].get("conllu", "").strip()
         )
         alignment = verse_data.get("alignment", "")
@@ -147,5 +201,31 @@ for path in DATA_DIR.glob("*.yaml"):
             lang_b_rtl=latin_rtl,
             lang_a_no_space_after=greek_no_space_after,
             lang_b_no_space_after=latin_no_space_after,
+            lang_a_slug=first_svg_id,
+            lang_b_slug=second_svg_id,
+            lang_a_lemmas={t["id"]: t["lemma"] for t in greek_tokens},
+            lang_b_lemmas={t["id"]: t["lemma"] for t in latin_tokens},
         )
         verse_js.write_text(verse_js_content, encoding="utf-8")
+
+    lemma_template = env.get_template("lemma.html")
+    for language, lemmas in lemma_index.items():
+        language_slug = language_slugs.get(language, svg_id_for(language))
+        lemma_items = [
+            {"id": quote(lemma, safe=""), "label": lemma}
+            for lemma in sorted(lemmas.keys())
+        ]
+        for lemma, counts in lemmas.items():
+            lemma_dir = ms_dir / language_slug / lemma
+            lemma_dir.mkdir(parents=True, exist_ok=True)
+            lemma_html = lemma_template.render(
+                siglum=siglum,
+                language=language,
+                language_slug=language_slug,
+                lemma=lemma,
+                lemma_items=lemma_items,
+                occurrences=counts["count"],
+                parallels=counts["parallel"],
+                rtl=language_rtl.get(language, False),
+            )
+            (lemma_dir / "index.html").write_text(lemma_html, encoding="utf-8")

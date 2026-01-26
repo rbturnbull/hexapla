@@ -149,7 +149,8 @@ function renderSentence(sentence) {
       .attr("transform", (d, i) => `translate(${positions[i]},${rowYs[rows[i]]})`)
       .attr("data-id", d => `${sentence.svgId}-${d.id}`)
       .on("mouseover", (event, d) => highlight(event, d, sentence, positions, idToIndex))
-      .on("mouseout", clearHighlight);
+      .on("mouseout", clearHighlight)
+      .on("click", (event, d) => navigateToLemma(sentence, d));
 
   groups.append("text")
     .attr("text-anchor", "middle")
@@ -275,6 +276,18 @@ function clearHighlight() {
   d3.selectAll(".arc-highlight-out").remove();
   d3.selectAll(".arc-label").remove();
   d3.selectAll(".features").remove();
+}
+
+function navigateToLemma(sentence, d) {
+  if (!sentence.lemmaMap || !sentence.languageSlug) {
+    return;
+  }
+  const lemma = sentence.lemmaMap[d.id];
+  if (!lemma || lemma === "_") {
+    return;
+  }
+  const encodedLemma = encodeURIComponent(lemma);
+  window.location.href = `../../${siglum}/${sentence.languageSlug}/${encodedLemma}/`;
 }
 
 sentences.forEach(renderSentence);
