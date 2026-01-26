@@ -27,58 +27,147 @@ function connectorY(rowYs, rowIndex, edge) {
   return rowY + 6;
 }
 
-function computeRowPositions(tokens, rtl, noSpaceAfter, svgWidth) {
+function adjustArabicTaMarbuta(str) {
+  if (str.length > 1 && str.endsWith("ة")) {
+    return str.slice(0, -1) + "ت";
+  }
+  return str;
+}
+
+function buildGroups(tokens, rows, noSpaceAfter, rtl) {
+  const noSpaceAfterSet = new Set(noSpaceAfter || []);
+  const groups = [];
+  const tokenToGroup = new Array(tokens.length).fill(-1);
+  let i = 0;
+  while (i < tokens.length) {
+    const rowIndex = rows[i];
+    let end = i;
+    let text = tokens[i].form;
+    while (
+      end < tokens.length - 1 &&
+      noSpaceAfterSet.has(tokens[end].id) &&
+      rows[end + 1] === rowIndex
+    ) {
+      end += 1;
+      text = adjustArabicTaMarbuta(text) + tokens[end].form;
+    }
+    const tokenIndexes = [];
+    for (let j = i; j <= end; j += 1) {
+      tokenToGroup[j] = groups.length;
+      tokenIndexes.push(j);
+    }
+    groups.push({ rowIndex, tokenIndexes, text, rtl });
+    i = end + 1;
+  }
+  return { groups, tokenToGroup };
+}
+
+function computeGroupPositions(groups, svgWidth) {
   const ctx = document.createElement("canvas").getContext("2d");
   ctx.font = "24px Gentium Plus";
-  tokens.forEach(t => t.width = ctx.measureText(t.form).width);
-  const noSpaceAfterSet = new Set(noSpaceAfter || []);
-  const totalWidth = tokens.reduce((sum, t, i) => {
-    const gap = i < tokens.length - 1 && !noSpaceAfterSet.has(t.id) ? spacing : 0;
-    return sum + t.width + gap;
-  }, 0);
-  const startX = Math.max(50, (svgWidth - totalWidth) / 2);
-  if (rtl) {
-    let rightEdge = startX + totalWidth;
-    return tokens.map((t, i) => {
-      const x = rightEdge - t.width / 2;
-      const gap = i < tokens.length - 1 && !noSpaceAfterSet.has(t.id) ? spacing : 0;
-      rightEdge -= t.width + gap;
-      return x;
-    });
-  }
-  let currentX = startX;
-  return tokens.map((t, i) => {
-    const x = currentX + t.width / 2;
-    const gap = i < tokens.length - 1 && !noSpaceAfterSet.has(t.id) ? spacing : 0;
-    currentX += t.width + gap;
-    return x;
+  const positionsByGroup = new Array(groups.length).fill(null);
+
+  const rows = {};
+  groups.forEach((g, idx) => {
+    const width = ctx.measureText(g.text).width;
+    if (!rows[g.rowIndex]) {
+      rows[g.rowIndex] = [];
+    }
+    rows[g.rowIndex].push({ idx, width, rtl: g.rtl });
   });
+
+  Object.values(rows).forEach((rowGroups) => {
+    const totalWidth = rowGroups.reduce((sum, g, i) => {
+      const gap = i < rowGroups.length - 1 ? spacing : 0;
+      return sum + g.width + gap;
+    }, 0);
+    const rtl = rowGroups[0]?.rtl;
+    const startX = Math.max(50, (svgWidth - totalWidth) / 2);
+    if (rtl) {
+      let rightEdge = startX + totalWidth;
+      rowGroups.forEach((g, i) => {
+        const center = rightEdge - g.width / 2;
+        positionsByGroup[g.idx] = { center, width: g.width, left: rightEdge - g.width, right: rightEdge };
+        const gap = i < rowGroups.length - 1 ? spacing : 0;
+        rightEdge -= g.width + gap;
+      });
+    } else {
+      let currentX = startX;
+      rowGroups.forEach((g, i) => {
+        const center = currentX + g.width / 2;
+        positionsByGroup[g.idx] = { center, width: g.width, left: currentX, right: currentX + g.width };
+        const gap = i < rowGroups.length - 1 ? spacing : 0;
+        currentX += g.width + gap;
+      });
+    }
+  });
+
+  return positionsByGroup;
 }
 
 function computeLayout(tokens, rtl, noSpaceAfter, svgWidth, maxWordsPerRow = defaultMaxWordsPerRow) {
   const rows = new Array(tokens.length).fill(0);
   const rowYs = [tokenY];
   let split = tokens.length;
+  const noSpaceAfterSet = new Set(noSpaceAfter || []);
   if (tokens.length > maxWordsPerRow) {
     split = Math.ceil(tokens.length / 2);
+    while (split < tokens.length && noSpaceAfterSet.has(tokens[split - 1]?.id)) {
+      split += 1;
+    }
     rowYs.push(tokenY + rowGap);
     for (let i = split; i < tokens.length; i += 1) {
       rows[i] = 1;
     }
   }
 
-  const topTokens = tokens.slice(0, split);
-  const bottomTokens = tokens.slice(split);
-  const topPositions = computeRowPositions(topTokens, rtl, noSpaceAfter, svgWidth);
-  const bottomPositions = bottomTokens.length
-    ? computeRowPositions(bottomTokens, rtl, noSpaceAfter, svgWidth)
-    : [];
+  const { groups } = buildGroups(tokens, rows, noSpaceAfter, rtl);
+  const groupPositions = computeGroupPositions(groups, svgWidth);
 
-  const positions = [];
-  topPositions.forEach(x => positions.push(x));
-  bottomPositions.forEach(x => positions.push(x));
+  const positions = new Array(tokens.length).fill(0);
+  const displayPositions = new Array(tokens.length).fill(0);
+  const displayText = tokens.map(t => t.form);
+  const displayOpacity = new Array(tokens.length).fill(1);
+  const displayAnchors = new Array(tokens.length).fill(rtl ? "end" : "middle");
+  const displayDx = new Array(tokens.length).fill(0);
 
-  return { positions, rows, rowYs, split };
+  groups.forEach((group, groupIndex) => {
+    const groupPos = groupPositions[groupIndex];
+    const tokenIndexes = group.tokenIndexes;
+    if (!groupPos) {
+      return;
+    }
+    const totalChars = tokenIndexes.reduce((sum, idx) => sum + tokens[idx].form.length, 0) || 1;
+    let cursor = group.rtl ? groupPos.right : groupPos.left;
+    tokenIndexes.forEach((idx, segIndex) => {
+      const segChars = tokens[idx].form.length || 1;
+      const segWidth = groupPos.width * (segChars / totalChars);
+      let segLeft;
+      let segRight;
+      if (group.rtl) {
+        segRight = cursor;
+        segLeft = cursor - segWidth;
+        cursor = segLeft;
+      } else {
+        segLeft = cursor;
+        segRight = cursor + segWidth;
+        cursor = segRight;
+      }
+      positions[idx] = (segLeft + segRight) / 2;
+      if (segIndex === 0) {
+        displayPositions[idx] = groupPos.center;
+        displayText[idx] = group.text;
+        displayOpacity[idx] = 1;
+        displayAnchors[idx] = "middle";
+        displayDx[idx] = 0;
+      } else {
+        displayPositions[idx] = groupPos.center;
+        displayOpacity[idx] = 0;
+      }
+    });
+  });
+
+  return { positions, rows, rowYs, split, displayPositions, displayText, displayOpacity, displayAnchors, displayDx };
 }
 
 function renderSentence(sentence) {
@@ -94,7 +183,16 @@ function renderSentence(sentence) {
 
   const idToIndex = Object.fromEntries(tokens.map((t, i) => [t.id, i]));
   const svgWidth = svg.node()?.getBoundingClientRect().width || 1800;
-  const { positions, rows, rowYs } = computeLayout(
+  const {
+    positions,
+    rows,
+    rowYs,
+    displayPositions,
+    displayText,
+    displayOpacity,
+    displayAnchors,
+    displayDx
+  } = computeLayout(
     tokens,
     sentence.rtl,
     sentence.noSpaceAfter,
@@ -146,18 +244,20 @@ function renderSentence(sentence) {
   const groups = svg.selectAll(".token")
     .data(tokens).enter()
     .append("g")
-      .attr("transform", (d, i) => `translate(${positions[i]},${rowYs[rows[i]]})`)
+      .attr("transform", (d, i) => `translate(${displayPositions[i]},${rowYs[rows[i]]})`)
       .attr("data-id", d => `${sentence.svgId}-${d.id}`)
       .on("mouseover", (event, d) => highlight(event, d, sentence, positions, idToIndex))
       .on("mouseout", clearHighlight)
       .on("click", (event, d) => navigateToLemma(sentence, d));
 
   groups.append("text")
-    .attr("text-anchor", "middle")
+    .attr("text-anchor", (d, i) => displayAnchors[i])
     .attr("direction", sentence.rtl ? "rtl" : "ltr")
     .attr("unicode-bidi", sentence.rtl ? "bidi-override" : null)
     .attr("class", d => `token${d.head === 0 ? " root" : ""}`)
-    .text(d => d.form);
+    .style("opacity", (d, i) => displayOpacity[i])
+    .attr("dx", (d, i) => displayDx[i])
+    .text((d, i) => displayText[i]);
 }
 
 function highlight(event, d, sentence, positions, idToIndex) {

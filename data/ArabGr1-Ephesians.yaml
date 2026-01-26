@@ -1527,10 +1527,10 @@ B10K2V6:
 
 B10K2V7:
   Arabic:
-    text: كلى يرينا في العالم الاتي فضل غنا نعمته بالخير علينا بيسوع المسيح ⦿
+    text: لكى يرينا في العالم الاتي فضل غنا نعمته بالخير علينا بيسوع المسيح ⦿
     verse: Ephesians 2:7
     conllu: |-
-      1	كلى	كلى	X	U---------	_	2	nsubj	2:nsubj	Vform=كلى|Root=OOV|Translit=klā
+      1	لكى	لكى	X	U---------	_	2	nsubj	2:nsubj	Vform=لكى|Root=OOV|Translit=klā
       2	يرينا	أَرَى	VERB	VIIA-3MS--	Aspect=Imp|Gender=Masc|Mood=Ind|Number=Sing|Person=3|VerbForm=Fin|Voice=Act	0	root	0:root	Vform=يُرِينَا|Gloss=show|Root=r ' y|Translit=yurīnā|LTranslit=ʾarā
       3	في	فِي	ADP	P---------	AdpType=Prep	4	case	4:case	Vform=فِي|Gloss=in|Root=fI|Translit=fī|LTranslit=fī
       4	العالم	عَالَم	NOUN	N------S2D	Case=Gen|Definite=Def|Number=Sing	2	obl	2:obl:فِي:gen	Vform=اَلعَالَمِ|Gloss=world|Root=` l m|Translit=al-ʿālami|LTranslit=ʿālam
