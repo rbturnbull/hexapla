@@ -53,6 +53,19 @@
             margin-top: 20px;
             margin-bottom: 10px;
         }
+        .highlight-main {
+            background: var(--highlight-color);
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+        .highlight-other {
+            background: var(--highlight-color);
+            padding: 0 2px;
+            border-radius: 3px;
+        }
+        :root {
+            --highlight-color: #ffeb3b;
+        }
       </style>
     
 </head>
@@ -105,12 +118,12 @@
                             <ul class="list-group list-group-flush">
                                 {% for ex in item.examples %}
                                 <li class="list-group-item">
-                                    <div><strong>{{ ex.label }}</strong></div>
-                                    {% if ex.text_this %}
-                                    <div {% if rtl %}dir="rtl"{% endif %}>{{ ex.text_this }}</div>
+                                    <div><strong><a href="../../{{ ex.verse_id }}">{{ ex.label }}</a></strong></div>
+                                    {% if ex.text_this_html %}
+                                    <div {% if ex.rtl_this %}dir="rtl"{% endif %}>{{ ex.text_this_html | safe }}</div>
                                     {% endif %}
-                                    {% if ex.text_other %}
-                                    <div>{{ ex.other_language }}: {{ ex.text_other }}</div>
+                                    {% if ex.text_other_html %}
+                                    <div {% if ex.rtl_other %}dir="rtl"{% endif %}>{{ ex.other_language }}: {{ ex.text_other_html | safe }}</div>
                                     {% endif %}
                                 </li>
                                 {% endfor %}
@@ -119,6 +132,19 @@
                         </div>
                     </div>
                     {% endfor %}
+                </div>
+                {% endif %}
+                {% if unaligned_examples %}
+                <div class="mt-5">
+                    <h3 class="text-center">Unaligned Occurrences</h3>
+                    <ul class="list-group">
+                        {% for ex in unaligned_examples %}
+                        <li class="list-group-item">
+                            <div><strong><a href="../../../mss/{{ siglum }}/{{ ex.verse_id }}">{{ ex.label }}</a></strong></div>
+                            <div {% if ex.rtl_this %}dir="rtl"{% endif %}>{{ ex.text_this_html | safe }}</div>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
                 {% endif %}
             </div>

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from urllib.parse import quote
+import html
 import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import re
@@ -55,7 +56,7 @@ def parse_conllu(conllu):
                 tok_id = int(parts[0])
             except ValueError:
                 continue
-            tokens.append({"id": tok_id, "lemma": parts[2]})
+            tokens.append({"id": tok_id, "lemma": parts[2], "form": parts[1]})
     normalized = "\n".join(lines)
     rtl = contains_arabic(normalized)
     return normalized, sorted(no_space_after), rtl, tokens
@@ -77,6 +78,19 @@ def svg_id_for(language):
     svg_id = re.sub(r"[^a-z0-9]+", "-", language.strip().lower()).strip("-")
     return svg_id or "lang"
 
+def render_highlighted_tokens(tokens, highlight_ids, no_space_after, highlight_class):
+    highlight_set = set(highlight_ids or [])
+    no_space_after_set = set(no_space_after or [])
+    parts = []
+    for index, token in enumerate(tokens):
+        form = html.escape(token.get("form", ""))
+        if token.get("id") in highlight_set:
+            form = f'<span class="{highlight_class}">{form}</span>'
+        parts.append(form)
+        if index < len(tokens) - 1 and token.get("id") not in no_space_after_set:
+            parts.append(" ")
+    return "".join(parts)
+
 
 for path in DATA_DIR.glob("*.yaml"):
     my_data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -91,6 +105,8 @@ for path in DATA_DIR.glob("*.yaml"):
     language_slugs = {}
     language_rtl = {}
     verse_label_by_id = {}
+    verse_language_tokens = {}
+    verse_language_no_space_after = {}
     verse_items = []
     for verse in verse_list:
         verse_data = my_data.get(verse) or {}
@@ -112,27 +128,29 @@ for path in DATA_DIR.glob("*.yaml"):
             language_slugs[first_language] = first_svg_id
             language_slugs[second_language] = second_svg_id
 
-            lang_a_norm, _, lang_a_rtl, lang_a_tokens = parse_conllu(
+            _, lang_a_no_space_after, lang_a_rtl, lang_a_tokens = parse_conllu(
                 verse_data.get(first_language, {}).get("conllu", "").strip()
             )
-            lang_b_norm, _, lang_b_rtl, lang_b_tokens = parse_conllu(
+            _, lang_b_no_space_after, lang_b_rtl, lang_b_tokens = parse_conllu(
                 verse_data.get(second_language, {}).get("conllu", "").strip()
             )
+            verse_language_tokens[(verse, first_language)] = lang_a_tokens
+            verse_language_tokens[(verse, second_language)] = lang_b_tokens
+            verse_language_no_space_after[(verse, first_language)] = lang_a_no_space_after
+            verse_language_no_space_after[(verse, second_language)] = lang_b_no_space_after
             language_rtl[first_language] = lang_a_rtl or language_rtl.get(first_language, False)
             language_rtl[second_language] = lang_b_rtl or language_rtl.get(second_language, False)
 
             mapping = build_alignment_mapping(verse_data.get("alignment", ""), first_svg_id, second_svg_id)
             lang_a_id_to_lemma = {t["id"]: t["lemma"] for t in lang_a_tokens}
             lang_b_id_to_lemma = {t["id"]: t["lemma"] for t in lang_b_tokens}
-            lang_a_text = verse_data.get(first_language, {}).get("text", "")
-            lang_b_text = verse_data.get(second_language, {}).get("text", "")
 
             for token in lang_a_tokens:
                 lemma = token["lemma"]
                 if not lemma or lemma == "_":
                     continue
                 lemma_data = lemma_index.setdefault(first_language, {}).setdefault(
-                    lemma, {"count": 0, "parallel": 0, "aligned": {}}
+                    lemma, {"count": 0, "parallel": 0, "aligned": {}, "unaligned": {}}
                 )
                 lemma_data["count"] += 1
                 aligned_key = mapping.get(f"{first_svg_id}-{token['id']}")
@@ -146,23 +164,31 @@ for path in DATA_DIR.glob("*.yaml"):
                             other_lemma, {"count": 0, "examples": {}}
                         )
                         aligned["count"] += 1
-                        aligned["examples"].setdefault(
+                        example = aligned["examples"].setdefault(
                             verse,
                             {
                                 "verse": verse,
                                 "label": verse_label,
-                                "text_this": lang_a_text,
-                                "text_other": lang_b_text,
                                 "other_language": second_language,
+                                "highlight_ids_this": [],
+                                "highlight_ids_other": [],
                             },
                         )
+                        example["highlight_ids_this"].append(token["id"])
+                        example["highlight_ids_other"].append(aligned_id)
+                else:
+                    unaligned = lemma_data["unaligned"].setdefault(
+                        verse,
+                        {"verse": verse, "label": verse_label, "highlight_ids_this": []},
+                    )
+                    unaligned["highlight_ids_this"].append(token["id"])
 
             for token in lang_b_tokens:
                 lemma = token["lemma"]
                 if not lemma or lemma == "_":
                     continue
                 lemma_data = lemma_index.setdefault(second_language, {}).setdefault(
-                    lemma, {"count": 0, "parallel": 0, "aligned": {}}
+                    lemma, {"count": 0, "parallel": 0, "aligned": {}, "unaligned": {}}
                 )
                 lemma_data["count"] += 1
                 aligned_key = mapping.get(f"{second_svg_id}-{token['id']}")
@@ -176,16 +202,24 @@ for path in DATA_DIR.glob("*.yaml"):
                             other_lemma, {"count": 0, "examples": {}}
                         )
                         aligned["count"] += 1
-                        aligned["examples"].setdefault(
+                        example = aligned["examples"].setdefault(
                             verse,
                             {
                                 "verse": verse,
                                 "label": verse_label,
-                                "text_this": lang_b_text,
-                                "text_other": lang_a_text,
                                 "other_language": first_language,
+                                "highlight_ids_this": [],
+                                "highlight_ids_other": [],
                             },
                         )
+                        example["highlight_ids_this"].append(token["id"])
+                        example["highlight_ids_other"].append(aligned_id)
+                else:
+                    unaligned = lemma_data["unaligned"].setdefault(
+                        verse,
+                        {"verse": verse, "label": verse_label, "highlight_ids_this": []},
+                    )
+                    unaligned["highlight_ids_this"].append(token["id"])
 
     ms_path = ms_dir / "index.html"
     ms_html = ms_template.render(
@@ -267,11 +301,57 @@ for path in DATA_DIR.glob("*.yaml"):
             for other_lemma, aligned in sorted(
                 counts.get("aligned", {}).items(), key=lambda item: (-item[1]["count"], item[0])
             ):
+                examples = []
+                for ex in aligned.get("examples", {}).values():
+                    tokens_this = verse_language_tokens.get((ex["verse"], language), [])
+                    tokens_other = verse_language_tokens.get((ex["verse"], ex["other_language"]), [])
+                    no_space_after_this = verse_language_no_space_after.get((ex["verse"], language), [])
+                    no_space_after_other = verse_language_no_space_after.get(
+                        (ex["verse"], ex["other_language"]), []
+                    )
+                    examples.append(
+                        {
+                            "verse_id": ex["verse"],
+                            "label": ex["label"],
+                            "text_this_html": render_highlighted_tokens(
+                                tokens_this,
+                                ex.get("highlight_ids_this", []),
+                                no_space_after_this,
+                                "highlight-main",
+                            ),
+                            "text_other_html": render_highlighted_tokens(
+                                tokens_other,
+                                ex.get("highlight_ids_other", []),
+                                no_space_after_other,
+                                "highlight-other",
+                            ),
+                            "rtl_this": language_rtl.get(language, False),
+                            "rtl_other": language_rtl.get(ex["other_language"], False),
+                            "other_language": ex["other_language"],
+                        }
+                    )
                 aligned_items.append(
                     {
                         "lemma": other_lemma,
                         "count": aligned["count"],
-                        "examples": list(aligned.get("examples", {}).values()),
+                        "examples": examples,
+                    }
+                )
+            unaligned_examples = []
+            for ex in counts.get("unaligned", {}).values():
+                tokens_this = verse_language_tokens.get((ex["verse"], language), [])
+                no_space_after_this = verse_language_no_space_after.get((ex["verse"], language), [])
+                unaligned_examples.append(
+                    {
+                        "verse_id": ex["verse"],
+                        "label": ex["label"],
+                        "text_this_html": render_highlighted_tokens(
+                            tokens_this,
+                            ex.get("highlight_ids_this", []),
+                            no_space_after_this,
+                            "highlight-main",
+                        ),
+                        "rtl_this": language_rtl.get(language, False),
                     }
                 )
             lemma_html = lemma_template.render(
@@ -283,6 +363,7 @@ for path in DATA_DIR.glob("*.yaml"):
                 occurrences=counts["count"],
                 parallels=counts["parallel"],
                 aligned_items=aligned_items,
+                unaligned_examples=unaligned_examples,
                 rtl=language_rtl.get(language, False),
             )
             (lemma_dir / "index.html").write_text(lemma_html, encoding="utf-8")
