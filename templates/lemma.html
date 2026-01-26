@@ -68,7 +68,7 @@
             <p></p>
             <h3>{{ siglum }}</h3>
             <ul>
-                <li><a class="nav-item" href="../../../mss/{{ siglum }}/"><span>Verses</span></a></li>
+                <li><a class="nav-item" href="../../../../mss/{{ siglum }}/"><span>Verses</span></a></li>
             </ul>
         </ul>
         <!-- End of Sidebar -->
@@ -94,6 +94,33 @@
                     <div>Occurrences: {{ occurrences }}</div>
                     <div>Parallels: {{ parallels }}</div>
                 </div>
+                {% if aligned_items %}
+                <div class="mt-5">
+                    <h3 class="text-center">Aligned Lemmas</h3>
+                    {% for item in aligned_items %}
+                    <div class="card my-3">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ item.lemma }} ({{ item.count }})</h4>
+                            {% if item.examples %}
+                            <ul class="list-group list-group-flush">
+                                {% for ex in item.examples %}
+                                <li class="list-group-item">
+                                    <div><strong>{{ ex.label }}</strong></div>
+                                    {% if ex.text_this %}
+                                    <div {% if rtl %}dir="rtl"{% endif %}>{{ ex.text_this }}</div>
+                                    {% endif %}
+                                    {% if ex.text_other %}
+                                    <div>{{ ex.other_language }}: {{ ex.text_other }}</div>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
             <!-- End of Main Content -->
         </div>

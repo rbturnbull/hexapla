@@ -90,6 +90,7 @@ for path in DATA_DIR.glob("*.yaml"):
     lemma_index = {}
     language_slugs = {}
     language_rtl = {}
+    verse_label_by_id = {}
     verse_items = []
     for verse in verse_list:
         verse_data = my_data.get(verse) or {}
@@ -99,7 +100,9 @@ for path in DATA_DIR.glob("*.yaml"):
             verbose = verse_data.get(language, {}).get("verse")
             if verbose:
                 break
-        verse_items.append({"id": verse, "label": verbose or verse})
+        verse_label = verbose or verse
+        verse_items.append({"id": verse, "label": verse_label})
+        verse_label_by_id[verse] = verse_label
 
         if len(language_keys) >= 2:
             first_language = language_keys[0]
@@ -119,28 +122,70 @@ for path in DATA_DIR.glob("*.yaml"):
             language_rtl[second_language] = lang_b_rtl or language_rtl.get(second_language, False)
 
             mapping = build_alignment_mapping(verse_data.get("alignment", ""), first_svg_id, second_svg_id)
+            lang_a_id_to_lemma = {t["id"]: t["lemma"] for t in lang_a_tokens}
+            lang_b_id_to_lemma = {t["id"]: t["lemma"] for t in lang_b_tokens}
+            lang_a_text = verse_data.get(first_language, {}).get("text", "")
+            lang_b_text = verse_data.get(second_language, {}).get("text", "")
 
             for token in lang_a_tokens:
                 lemma = token["lemma"]
                 if not lemma or lemma == "_":
                     continue
                 lemma_data = lemma_index.setdefault(first_language, {}).setdefault(
-                    lemma, {"count": 0, "parallel": 0}
+                    lemma, {"count": 0, "parallel": 0, "aligned": {}}
                 )
                 lemma_data["count"] += 1
-                if mapping.get(f"{first_svg_id}-{token['id']}"):
+                aligned_key = mapping.get(f"{first_svg_id}-{token['id']}")
+                if aligned_key:
                     lemma_data["parallel"] += 1
+                    _, aligned_id_str = aligned_key.rsplit("-", 1)
+                    aligned_id = int(aligned_id_str)
+                    other_lemma = lang_b_id_to_lemma.get(aligned_id)
+                    if other_lemma and other_lemma != "_":
+                        aligned = lemma_data["aligned"].setdefault(
+                            other_lemma, {"count": 0, "examples": {}}
+                        )
+                        aligned["count"] += 1
+                        aligned["examples"].setdefault(
+                            verse,
+                            {
+                                "verse": verse,
+                                "label": verse_label,
+                                "text_this": lang_a_text,
+                                "text_other": lang_b_text,
+                                "other_language": second_language,
+                            },
+                        )
 
             for token in lang_b_tokens:
                 lemma = token["lemma"]
                 if not lemma or lemma == "_":
                     continue
                 lemma_data = lemma_index.setdefault(second_language, {}).setdefault(
-                    lemma, {"count": 0, "parallel": 0}
+                    lemma, {"count": 0, "parallel": 0, "aligned": {}}
                 )
                 lemma_data["count"] += 1
-                if mapping.get(f"{second_svg_id}-{token['id']}"):
+                aligned_key = mapping.get(f"{second_svg_id}-{token['id']}")
+                if aligned_key:
                     lemma_data["parallel"] += 1
+                    _, aligned_id_str = aligned_key.rsplit("-", 1)
+                    aligned_id = int(aligned_id_str)
+                    other_lemma = lang_a_id_to_lemma.get(aligned_id)
+                    if other_lemma and other_lemma != "_":
+                        aligned = lemma_data["aligned"].setdefault(
+                            other_lemma, {"count": 0, "examples": {}}
+                        )
+                        aligned["count"] += 1
+                        aligned["examples"].setdefault(
+                            verse,
+                            {
+                                "verse": verse,
+                                "label": verse_label,
+                                "text_this": lang_b_text,
+                                "text_other": lang_a_text,
+                                "other_language": first_language,
+                            },
+                        )
 
     ms_path = ms_dir / "index.html"
     ms_html = ms_template.render(
@@ -218,6 +263,17 @@ for path in DATA_DIR.glob("*.yaml"):
         for lemma, counts in lemmas.items():
             lemma_dir = ms_dir / language_slug / lemma
             lemma_dir.mkdir(parents=True, exist_ok=True)
+            aligned_items = []
+            for other_lemma, aligned in sorted(
+                counts.get("aligned", {}).items(), key=lambda item: (-item[1]["count"], item[0])
+            ):
+                aligned_items.append(
+                    {
+                        "lemma": other_lemma,
+                        "count": aligned["count"],
+                        "examples": list(aligned.get("examples", {}).values()),
+                    }
+                )
             lemma_html = lemma_template.render(
                 siglum=siglum,
                 language=language,
@@ -226,6 +282,7 @@ for path in DATA_DIR.glob("*.yaml"):
                 lemma_items=lemma_items,
                 occurrences=counts["count"],
                 parallels=counts["parallel"],
+                aligned_items=aligned_items,
                 rtl=language_rtl.get(language, False),
             )
             (lemma_dir / "index.html").write_text(lemma_html, encoding="utf-8")
