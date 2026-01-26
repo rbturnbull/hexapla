@@ -123,8 +123,11 @@ function computeLayout(tokens, rtl, noSpaceAfter, svgWidth, maxWordsPerRow = def
 
   const { groups } = buildGroups(tokens, rows, noSpaceAfter, rtl);
   const groupPositions = computeGroupPositions(groups, svgWidth);
+  const ctx = document.createElement("canvas").getContext("2d");
+  ctx.font = "24px Gentium Plus";
 
   const positions = new Array(tokens.length).fill(0);
+  const segmentBounds = new Array(tokens.length).fill(null);
   const displayPositions = new Array(tokens.length).fill(0);
   const displayText = tokens.map(t => t.form);
   const displayOpacity = new Array(tokens.length).fill(1);
@@ -137,11 +140,14 @@ function computeLayout(tokens, rtl, noSpaceAfter, svgWidth, maxWordsPerRow = def
     if (!groupPos) {
       return;
     }
-    const totalChars = tokenIndexes.reduce((sum, idx) => sum + tokens[idx].form.length, 0) || 1;
+    const totalWeight = tokenIndexes.reduce((sum, idx) => {
+      const width = ctx.measureText(tokens[idx].form).width;
+      return sum + (width || 1);
+    }, 0) || 1;
     let cursor = group.rtl ? groupPos.right : groupPos.left;
     tokenIndexes.forEach((idx, segIndex) => {
-      const segChars = tokens[idx].form.length || 1;
-      const segWidth = groupPos.width * (segChars / totalChars);
+      const segWeight = ctx.measureText(tokens[idx].form).width || 1;
+      const segWidth = groupPos.width * (segWeight / totalWeight);
       let segLeft;
       let segRight;
       if (group.rtl) {
@@ -154,6 +160,7 @@ function computeLayout(tokens, rtl, noSpaceAfter, svgWidth, maxWordsPerRow = def
         cursor = segRight;
       }
       positions[idx] = (segLeft + segRight) / 2;
+      segmentBounds[idx] = { left: segLeft, right: segRight };
       if (segIndex === 0) {
         displayPositions[idx] = groupPos.center;
         displayText[idx] = group.text;
@@ -167,7 +174,18 @@ function computeLayout(tokens, rtl, noSpaceAfter, svgWidth, maxWordsPerRow = def
     });
   });
 
-  return { positions, rows, rowYs, split, displayPositions, displayText, displayOpacity, displayAnchors, displayDx };
+  return {
+    positions,
+    segmentBounds,
+    rows,
+    rowYs,
+    split,
+    displayPositions,
+    displayText,
+    displayOpacity,
+    displayAnchors,
+    displayDx
+  };
 }
 
 function renderSentence(sentence) {
@@ -185,6 +203,7 @@ function renderSentence(sentence) {
   const svgWidth = svg.node()?.getBoundingClientRect().width || 1800;
   const {
     positions,
+    segmentBounds,
     rows,
     rowYs,
     displayPositions,
@@ -245,10 +264,7 @@ function renderSentence(sentence) {
     .data(tokens).enter()
     .append("g")
       .attr("transform", (d, i) => `translate(${displayPositions[i]},${rowYs[rows[i]]})`)
-      .attr("data-id", d => `${sentence.svgId}-${d.id}`)
-      .on("mouseover", (event, d) => highlight(event, d, sentence, positions, idToIndex))
-      .on("mouseout", clearHighlight)
-      .on("click", (event, d) => navigateToLemma(sentence, d));
+      .attr("data-id", d => `${sentence.svgId}-${d.id}`);
 
   groups.append("text")
     .attr("text-anchor", (d, i) => displayAnchors[i])
@@ -256,14 +272,37 @@ function renderSentence(sentence) {
     .attr("unicode-bidi", sentence.rtl ? "bidi-override" : null)
     .attr("class", d => `token${d.head === 0 ? " root" : ""}`)
     .style("opacity", (d, i) => displayOpacity[i])
+    .style("pointer-events", "none")
     .attr("dx", (d, i) => displayDx[i])
     .text((d, i) => displayText[i]);
+
+  const hitHeight = 24;
+  svg.selectAll(".token-hit")
+    .data(tokens)
+    .enter()
+    .append("rect")
+      .attr("class", "token-hit")
+      .attr("x", (d, i) => {
+        const bounds = segmentBounds[i];
+        return bounds ? (bounds.left - 2) : (positions[i] - 10);
+      })
+      .attr("y", (d, i) => rowYs[rows[i]] - hitHeight + 4)
+      .attr("width", (d, i) => {
+        const bounds = segmentBounds[i];
+        return bounds ? (bounds.right - bounds.left + 4) : 20;
+      })
+      .attr("height", hitHeight)
+      .attr("fill", "transparent")
+      .style("cursor", "pointer")
+      .on("mouseover", (event, d) => highlight(event, d, sentence, positions, displayPositions, idToIndex, segmentBounds))
+      .on("mouseout", clearHighlight)
+      .on("click", (event, d) => navigateToLemma(sentence, d));
 }
 
-function highlight(event, d, sentence, positions, idToIndex) {
+function highlight(event, d, sentence, positions, displayPositions, idToIndex, segmentBounds) {
   clearHighlight();
   const svg = d3.select(`#${sentence.svgId}`);
-  highlightWord(svg, sentence, d, positions, idToIndex, sentence.svgId);
+  highlightWord(svg, sentence, d, positions, displayPositions, idToIndex, sentence.svgId, null, null, segmentBounds);
 
   const pairId = wordMap[`${sentence.svgId}-${d.id}`];
   if (pairId) {
@@ -276,40 +315,64 @@ function highlight(event, d, sentence, positions, idToIndex) {
     const pairIdToIndex = Object.fromEntries(pairTokens.map((t, i) => [t.id, i]));
     const pairSvg = d3.select(`#${pairSvgId}`);
     const pairSvgWidth = pairSvg.node()?.getBoundingClientRect().width || 1800;
-    const { positions: pairPositions, rows: pairRows, rowYs: pairRowYs } = computeLayout(
+    const {
+      positions: pairPositions,
+      rows: pairRows,
+      rowYs: pairRowYs,
+      segmentBounds: pairSegmentBounds,
+      displayPositions: pairDisplayPositions
+    } = computeLayout(
       pairTokens,
       pairSentence.rtl,
       pairSentence.noSpaceAfter,
       pairSvgWidth
     );
     const pairD = pairTokens.find(t => t.id === +pairTokenId);
-    highlightWord(pairSvg, pairSentence, pairD, pairPositions, pairIdToIndex, pairSvgId, pairRows, pairRowYs);
+    highlightWord(
+      pairSvg,
+      pairSentence,
+      pairD,
+      pairPositions,
+      pairDisplayPositions,
+      pairIdToIndex,
+      pairSvgId,
+      pairRows,
+      pairRowYs,
+      pairSegmentBounds
+    );
   }
 }
 
-function highlightWord(svg, sentence, d, positions, idToIndex, svgId, rows, rowYs) {
+function highlightWord(svg, sentence, d, positions, displayPositions, idToIndex, svgId, rows, rowYs, segmentBounds) {
   const tokens = sentence.data.split("\n").map(line => {
     const [id, form, , upos, , feats, head, deprel] = line.split("\t");
     return { id: +id, form, upos, feats, head: +head, deprel };
   });
   const svgWidth = svg.node()?.getBoundingClientRect().width || 1800;
-  if (!rows || !rowYs) {
-    ({ rows, rowYs } = computeLayout(tokens, sentence.rtl, sentence.noSpaceAfter, svgWidth));
+  if (!rows || !rowYs || !segmentBounds || !displayPositions) {
+    ({ rows, rowYs, segmentBounds, displayPositions } = computeLayout(
+      tokens,
+      sentence.rtl,
+      sentence.noSpaceAfter,
+      svgWidth
+    ));
   }
   const idx = idToIndex[d.id];
   const x = positions[idx];
+  const displayX = displayPositions ? displayPositions[idx] : positions[idx];
   const rowIndex = rows[idx];
   const rowY = rowYs[rowIndex];
   const y = rowIndex === 0 ? rowY - 18 : rowY + 18;
   const group = d3.select(`[data-id="${svgId}-${d.id}"]`);
-  const text = group.select("text");
-  const bbox = text.node().getBBox();
+  const bounds = segmentBounds[idx];
+  const rectWidth = bounds ? (bounds.right - bounds.left) : 0;
+  const rectHeight = 24;
   group.insert("rect", "text")
     .attr("class", "token-bg")
-    .attr("x", bbox.x - 4)
-    .attr("y", bbox.y - 2)
-    .attr("width", bbox.width + 8)
-    .attr("height", bbox.height + 4);
+    .attr("x", bounds ? (bounds.left - displayX - 4) : -10)
+    .attr("y", -rectHeight + 4)
+    .attr("width", bounds ? (rectWidth + 8) : 20)
+    .attr("height", rectHeight);
 
   if (d.head !== 0) {
     const headIdx = idToIndex[d.head];
