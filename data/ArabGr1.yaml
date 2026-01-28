@@ -1609,7 +1609,6 @@ B10K2V8:
       16-17	ولاكن	_	_	_	_	_	_	_	_
       16	و	وَ	CCONJ	C---------	_	17	cc	17:cc	Gloss=and|LTranslit=wa|Root=wa|Translit=wa|Vform=وَ
       17	لاكن	لٰكِنَّ	CCONJ	C---------	_	18	cc	18:cc	Gloss=but,however|LTranslit=lākinna|Root=l k n|Translit=lākinna|Vform=لٰكِنَّ
-      18-19	موهبه	_	_	_	_	_	_	_	_
       18	موهبه	مَوهِبَة	NOUN	N------S1R	Case=Nom|Definite=Cons|Number=Sing	12	conj	1:conj|12:conj	Gloss=gift,talent|LTranslit=mawhiba|Root=w h b|Translit=mawhiba|Vform=مَوهِبَة
       19	الله	اَللّٰه	NOUN	N------S2D	Case=Gen|Definite=Def|Number=Sing	18	nmod	18:nmod:gen	Gloss=Allah,God|LTranslit=al-lāh|Root=' l h|Translit=al-lāhi|Vform=اَللّٰهِ
     id: B10K2V8
