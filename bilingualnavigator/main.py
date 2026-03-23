@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from typing import Union
 import ssl, certifi
@@ -6,6 +7,7 @@ import typer
 import yaml
 from rich.progress import Progress
 
+from .bible import components_from_verse_ref
 from .tei import read_tei, extract_text, find_elements
 
 DATA_DIR = Path("data")
@@ -98,34 +100,53 @@ def extract_verse(tei_path:Path) -> dict[str, dict[str, str | None]]:
         verse_id = verse.attrib.get("n")
         if not verse_id:
             continue
-        verse_text = extract_text(verse)
+
+        components = components_from_verse_ref(verse_id)
+        breakpoint()
+        verse_text = extract_text(verse).replace("\n", " ").strip()
+        verse_text = re.sub(r"\s+", " ", verse_text)
         verses[verse_id] = {
             "text": verse_text,
         }
     return verses
 
 @app.command()
-def extract():
+def extract(max_verses:int|None = None):
     """ 
     For each transcription TEI file, extract the text from the text for each verse and save as YAML file.
     """
-    for manuscript in DATA_DIR.iterdir():
-        if not manuscript.is_dir():
+    for manuscript_dir in DATA_DIR.iterdir():
+        if not manuscript_dir.is_dir():
             continue
     
         manuscript_verses = dict()
-        for language in manuscript.iterdir():
-            if not language.is_dir():
+        for language_dir in manuscript_dir.iterdir():
+            if not language_dir.is_dir():
                 continue
             
+            language = language_dir.name
             manuscript_verses[language] = dict()
-            for transcription in language.iterdir():
+            for transcription in language_dir.iterdir():
                 if transcription.suffix != ".xml":
                     continue
-                print(f"Extracting {transcription}...")
+                # print(f"Extracting {transcription}...")
                 verses = extract_verse(transcription)
                 manuscript_verses[language].update(verses)
-                breakpoint()
+
+        # Get intersection of verse IDs across all languages, and filter to these if max_verses is set.
+        verse_id_sets = [set(verses.keys()) for verses in manuscript_verses.values()]
+        common_verse_ids = set.intersection(*verse_id_sets) if verse_id_sets else set()
+        verse_ids = sorted(common_verse_ids)
+        if max_verses is not None:
+            verse_ids = verse_ids[:max_verses]
+
+        for language, language_verses in manuscript_verses.items():
+            verses_in_language = {}
+            for verse_id in verse_ids:
+                verses_in_language[verse_id] = language_verses[verse_id]
+            language_path = manuscript_dir / f"{language}.yaml"
+            print(f"Saving {language_path}...")
+            language_path.write_text(yaml.dump(verses_in_language, allow_unicode=True), encoding="utf-8")
 
 
 if __name__ == "__main__":
