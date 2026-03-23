@@ -9,6 +9,7 @@ from rich.progress import Progress
 
 from .bible import read_verse_ref
 from .tei import read_tei, extract_text, find_elements
+from .build import build_from_yaml, build_sidebar_sections
 
 DATA_DIR = Path("data")
 MANUSCRIPT_DATA_PATH = DATA_DIR / "bilingual-mss.yaml"
@@ -151,6 +152,19 @@ def extract(max_verses:int|None = None):
             language_path = manuscript_dir / f"{language}.yaml"
             print(f"Saving {language_path}...")
             language_path.write_text(yaml.dump(verses_in_language, allow_unicode=True), encoding="utf-8")
+
+
+@app.command()
+def build():
+    print("Building website...")
+    sidebar_sections = build_sidebar_sections()
+    for ms_directory in DATA_DIR.iterdir():
+        if not ms_directory.is_dir():
+            continue
+
+        yaml_path = ms_directory / f"{ms_directory.stem}.yaml"
+        if yaml_path.exists():
+            build_from_yaml(yaml_path, sidebar_sections=sidebar_sections)
 
 
 if __name__ == "__main__":
