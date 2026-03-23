@@ -24,6 +24,36 @@ verse_js_template = env.get_template("verse.js")
 ARABIC_RE = re.compile(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]")
 
 
+def gregory_aland_to_intf_id(gregory_aland):
+    m = re.match(r"GA(0?\d+)", gregory_aland)
+    if m:
+        gregory_aland = m.group(1)
+
+    if len(gregory_aland) == 0:
+        print(f"Cannot get GA number.")
+        return
+
+    # Get INTF ID
+    m = re.match(r"P(\d+)", gregory_aland)
+    if m:
+        intf_id = 10000 + int(m.group(1))
+    else:
+        m = re.match(r"0(\d+)", gregory_aland)
+        if m:
+            intf_id = 20000 + int(m.group(1))
+        elif gregory_aland.isdigit():
+            intf_id = 30000 + int(gregory_aland)
+        else:
+            m = re.match(r"L(\d+)", gregory_aland)
+            if m:
+                intf_id = 40000 + int(m.group(1))
+            else:
+                print(f"Cannot get INTF ID from {gregory_aland}")
+                return
+
+    return intf_id
+
+
 def contains_arabic(text):
     return bool(ARABIC_RE.search(text))
 
@@ -91,6 +121,15 @@ def display_siglum(manuscript_id, metadata):
     )
 
 
+def sidebar_sort_key(item):
+    gregory_aland = item.get("gregoryaland")
+    if gregory_aland:
+        intf_id = gregory_aland_to_intf_id(gregory_aland)
+        if intf_id is not None:
+            return (0, intf_id, item["siglum"])
+    return (1, item["siglum"])
+
+
 def build_sidebar_sections(data_dir=DATA_DIR):
     metadata_path = data_dir / "bilingual-mss.yaml"
     if not metadata_path.exists():
@@ -110,12 +149,13 @@ def build_sidebar_sections(data_dir=DATA_DIR):
         sections.setdefault(category, []).append(
             {
                 "siglum": display_siglum(manuscript_id, metadata),
+                "gregoryaland": metadata.get("gregoryaland"),
                 "href": f"../../../mss/{manuscript_id}/",
             }
         )
 
     return [
-        {"title": title, "manuscripts": sorted(items, key=lambda item: item["siglum"])}
+        {"title": title, "manuscripts": sorted(items, key=sidebar_sort_key)}
         for title, items in sorted(sections.items())
     ]
 
