@@ -44,30 +44,16 @@
             </center>
         </div>
         <div id="mss">
-          <div id="greek-latin" class="category">
-            <h2>Greek-Latin</h2>
-            <ul>
-                <li><a href="./mss/05">05</a></li>
-                <li><a href="./mss/06">06</a></li>
-                <li><a href="./mss/010">010</a></li>
-                <li><a href="./mss/012">012</a></li>
-                <li><a href="./mss/037">037</a></li>
-                <li><a href="./mss/0319">0319</a></li>
-                <li><a href="./mss/0320">0320</a></li>
-            </ul></h2>
-          </div>
-          <div id="greek-coptic" class="category">
-            <h2>Greek-Coptic</h2>
-            <ul>
-                <li><a href="./mss/029">029</a></li>
-            </ul>
-          </div>
-          <div id="greek-arabic" class="category">
-            <h2>Greek-Arabic</h2>
-            <ul>
-                <li><a href="./mss/l2211">l2211</a></li>
-            </ul>
-          </div>
+            {% for section in sidebar_sections %}
+            <div class="category">
+                <h2>{{ section.title }}</h2>
+                <ul>
+                    {% for manuscript in section.manuscripts %}
+                    <li><a href="{{ manuscript.href }}">{{ manuscript.siglum }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
         </div>
     </body>
 </html>

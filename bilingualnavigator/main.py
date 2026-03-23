@@ -9,7 +9,7 @@ from rich.progress import Progress
 
 from .bible import read_verse_ref
 from .tei import read_tei, extract_text, find_elements
-from .build import build_from_yaml, build_sidebar_sections
+from .build import build_from_yaml, build_sidebar_sections, build_home_page
 
 DATA_DIR = Path("data")
 MANUSCRIPT_DATA_PATH = DATA_DIR / "bilingual-mss.yaml"
@@ -158,6 +158,7 @@ def extract(max_verses:int|None = None):
 def build():
     print("Building website...")
     sidebar_sections = build_sidebar_sections()
+    build_home_page(build_sidebar_sections(href_prefix="./mss"))
     for ms_directory in DATA_DIR.iterdir():
         if not ms_directory.is_dir():
             continue

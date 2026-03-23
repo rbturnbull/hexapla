@@ -20,6 +20,7 @@ env = Environment(
 ms_template = env.get_template("ms.html")
 verse_template = env.get_template("verse.html")
 verse_js_template = env.get_template("verse.js")
+home_template = env.get_template("home.html")
 
 ARABIC_RE = re.compile(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]")
 
@@ -130,7 +131,7 @@ def sidebar_sort_key(item):
     return (1, item["siglum"])
 
 
-def build_sidebar_sections(data_dir=DATA_DIR):
+def build_sidebar_sections(data_dir=DATA_DIR, href_prefix="../../../mss"):
     metadata_path = data_dir / "bilingual-mss.yaml"
     if not metadata_path.exists():
         return []
@@ -150,7 +151,7 @@ def build_sidebar_sections(data_dir=DATA_DIR):
             {
                 "siglum": display_siglum(manuscript_id, metadata),
                 "gregoryaland": metadata.get("gregoryaland"),
-                "href": f"../../../mss/{manuscript_id}/",
+                "href": f"{href_prefix}/{manuscript_id}/",
             }
         )
 
@@ -158,6 +159,15 @@ def build_sidebar_sections(data_dir=DATA_DIR):
         {"title": title, "manuscripts": sorted(items, key=sidebar_sort_key)}
         for title, items in sorted(sections.items())
     ]
+
+
+def build_home_page(sidebar_sections=None):
+    if sidebar_sections is None:
+        sidebar_sections = build_sidebar_sections(href_prefix="./mss")
+
+    WEBSITE_DIR.mkdir(parents=True, exist_ok=True)
+    home_html = home_template.render(sidebar_sections=sidebar_sections)
+    (WEBSITE_DIR / "index.html").write_text(home_html, encoding="utf-8")
 
 def render_highlighted_tokens(tokens, highlight_ids, no_space_after, highlight_class):
     highlight_set = set(highlight_ids or [])
