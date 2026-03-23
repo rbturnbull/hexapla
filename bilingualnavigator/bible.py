@@ -218,7 +218,7 @@ def get_book_id(name):
     return None
 
 def try_book_and_number(verse_ref):
-    matches = re.match("(\d*\s*[a-zA-Z]+)\s*(\d+)", verse_ref)
+    matches = re.match(r"(\d*\s*[a-zA-Z]+)[\s\.]*(\d+)$", verse_ref)
     if matches:
         book_name = matches.group(1)
         if len(book_name) == 0:
@@ -278,3 +278,12 @@ def components_from_verse_ref(verse_ref):
     raise Exception("Cannot interpret verse %s" % (verse_ref))
 
 
+def read_verse_ref(verse_ref) -> tuple[str, str]:
+    book_id, chapter, verse = components_from_verse_ref(verse_ref)
+    book_name = book_names[book_id] if book_id is not None else ""
+
+    book_id = book_id - 39 if book_id is not None else None  # Convert to 0-indexed
+    standard = f"B{book_id:02d}K{chapter:02d}V{verse:02d}"
+
+    explicit_name = f"{book_name} {chapter}:{verse}" if book_name else ""
+    return standard, explicit_name

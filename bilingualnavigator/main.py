@@ -7,7 +7,7 @@ import typer
 import yaml
 from rich.progress import Progress
 
-from .bible import components_from_verse_ref
+from .bible import read_verse_ref
 from .tei import read_tei, extract_text, find_elements
 
 DATA_DIR = Path("data")
@@ -101,12 +101,16 @@ def extract_verse(tei_path:Path) -> dict[str, dict[str, str | None]]:
         if not verse_id:
             continue
 
-        components = components_from_verse_ref(verse_id)
-        breakpoint()
+        try:
+            verse_id, verbose_verse_ref = read_verse_ref(verse_id)
+        except Exception as err:
+            print(f"Error interpreting verse reference {verse_id} in {tei_path}: {err}")
+            continue
         verse_text = extract_text(verse).replace("\n", " ").strip()
         verse_text = re.sub(r"\s+", " ", verse_text)
         verses[verse_id] = {
             "text": verse_text,
+            "verse": verbose_verse_ref,
         }
     return verses
 
