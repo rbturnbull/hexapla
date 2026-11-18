@@ -72,7 +72,7 @@
             <div class="verse-tei">
                 <div class="lang-chip">{{ side.language }}</div>
                 {% for n in side.notes %}
-                {% if n.folios %}<div>fol. {{ n.folios | join(", ") }}</div>{% endif %}
+                {% if n.folios %}<div>{{ ("p." if n.folios|length == 1 else "pp.") if n.unit == "page" else "fol." }} {{ n.folios | join(", ") }}</div>{% endif %}
                 {% set flags = [] %}
                 {% if n.corrections %}{% set _ = flags.append((n.corrections, "correction", "corrections", "fa-pen")) %}{% endif %}
                 {% if n.lacunae %}{% set _ = flags.append((n.lacunae, "lacuna", "lacunae", "fa-scissors")) %}{% endif %}

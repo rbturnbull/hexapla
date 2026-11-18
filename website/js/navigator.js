@@ -282,13 +282,28 @@ function renderInterlinear(sideIndex) {
 function renderMatrix() {
   const [A, B] = sentences;
   const ta = parseTokens(A.data), tb = parseTokens(B.data);
-  const cell = 24;
-  measureCtx.font = '15px "Gentium Plus"';
-  const left = Math.min(220, 16 + Math.max(...ta.map(t => measureCtx.measureText(t.form).width)));
-  const top = Math.min(220, 16 + Math.max(...tb.map(t => measureCtx.measureText(t.form).width)) * 0.75);
-  const width = left + tb.length * cell + 20;
-  const height = top + ta.length * cell + 20;
-  const svg = d3.select("#matrix").attr("width", width).attr("height", height);
+  // Columns always fill the panel width. Rows get their own height, which fits the grid into the window
+  // below where it starts (no scrolling): taller for short verses, flatter for long ones. Cells are not square.
+  const wrap = document.querySelector(".matrix-wrap");
+  const panel = wrap?.closest(".panel");
+  const panelInner = panel ? panel.clientWidth - parseFloat(getComputedStyle(panel).paddingLeft) - parseFloat(getComputedStyle(panel).paddingRight) : 900;
+  const availWidth = (wrap?.clientWidth || panelInner) - 4;  // the tab may still be hidden on first render
+  const anchor = wrap && wrap.offsetParent !== null ? wrap : document.querySelector("#tab-matrix")?.closest(".tab-content");
+  const startY = anchor ? anchor.getBoundingClientRect().top + window.scrollY + (anchor === wrap ? 0 : 50) : 400;
+  const availHeight = Math.max(240, window.innerHeight - startY - 24);
+  const MIN_CELL = 12, MAX_ROW = 64;
+  let cw = MIN_CELL, rh = MIN_CELL, fontSize = 15, left = 0, top = 0;
+  for (let pass = 0; pass < 2; pass++) {  // label size depends on cell size and the other way round
+    measureCtx.font = `${fontSize}px "Gentium Plus"`;
+    left = Math.min(260, 16 + Math.max(...ta.map(t => measureCtx.measureText(t.form).width)));
+    top = Math.min(260, 16 + Math.max(...tb.map(t => measureCtx.measureText(t.form).width)) * 0.75);
+    cw = Math.max(MIN_CELL, (availWidth - left - 20) / Math.max(1, tb.length));
+    rh = Math.max(MIN_CELL, Math.min(MAX_ROW, cw, Math.floor((availHeight - top - 20) / Math.max(1, ta.length))));
+    fontSize = Math.round(Math.max(11, Math.min(21, Math.min(cw, rh) * 0.62)));
+  }
+  const width = left + tb.length * cw + 20;
+  const height = top + ta.length * rh + 20;
+  const svg = d3.select("#matrix").attr("width", Math.floor(width)).attr("height", height).style("--matrix-font", `${fontSize}px`);
   svg.selectAll("*").remove();
   const ai = Object.fromEntries(ta.map((t, i) => [t.id, i]));
   const bi = Object.fromEntries(tb.map((t, i) => [t.id, i]));
@@ -296,23 +311,23 @@ function renderMatrix() {
   const grid = svg.append("g");
   ta.forEach((_, r) => tb.forEach((__, c) => {
     grid.append("rect").attr("class", "gridcell").attr("data-r", r).attr("data-c", c)
-      .attr("x", left + c * cell).attr("y", top + r * cell).attr("width", cell).attr("height", cell);
+      .attr("x", left + c * cw).attr("y", top + r * rh).attr("width", cw).attr("height", rh);
   }));
   svg.append("line").attr("class", "diag").attr("x1", left).attr("y1", top)
-    .attr("x2", left + tb.length * cell).attr("y2", top + ta.length * cell);
+    .attr("x2", left + tb.length * cw).attr("y2", top + ta.length * rh);
 
   svg.selectAll(".row-lbl").data(ta).enter().append("text").attr("class", "lbl row-lbl")
-    .attr("x", left - 8).attr("y", (d, i) => top + i * cell + cell / 2 + 5).attr("text-anchor", "end").text(d => d.form);
+    .attr("x", left - 8).attr("y", (d, i) => top + i * rh + rh / 2).attr("dominant-baseline", "middle").attr("text-anchor", "end").text(d => d.form);
   svg.selectAll(".col-lbl").data(tb).enter().append("text").attr("class", "lbl col-lbl")
-    .attr("transform", (d, i) => `translate(${left + i * cell + cell / 2 + 4},${top - 8}) rotate(-50)`).text(d => d.form);
+    .attr("transform", (d, i) => `translate(${left + i * cw + cw / 2 + fontSize * 0.25},${top - 8}) rotate(-50)`).text(d => d.form);
 
   const links = [];
   ta.forEach(t => (wordMap[`${A.svgId}-${t.id}`] || []).forEach(p => links.push({ a: t, b: tb[bi[p.id]], p })));
   svg.selectAll(".dot").data(links.filter(l => l.b)).enter().append("circle")
     .attr("class", l => `dot ${l.p.sure === false ? "probable" : "sure"}`)
-    .attr("cx", l => left + bi[l.b.id] * cell + cell / 2)
-    .attr("cy", l => top + ai[l.a.id] * cell + cell / 2)
-    .attr("r", 7)
+    .attr("cx", l => left + bi[l.b.id] * cw + cw / 2)
+    .attr("cy", l => top + ai[l.a.id] * rh + rh / 2)
+    .attr("r", Math.max(4, Math.min(18, Math.round(Math.min(cw, rh) * 0.3))))
     .on("mouseover", (event, l) => {
       const r = ai[l.a.id], c = bi[l.b.id];
       svg.selectAll(".gridcell").classed("hover", function () { return +this.dataset.r === r || +this.dataset.c === c; });
@@ -336,18 +351,63 @@ renderMatrix();
 let resizeTimer;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(renderTrees, 150);
+  resizeTimer = setTimeout(() => { renderTrees(); renderMatrix(); }, 150);
 });
 // Trees measure their width, so re-render when their tab is shown again.
 document.querySelector('[data-bs-target="#tab-trees"]')?.addEventListener("shown.bs.tab", renderTrees);
+// The matrix fits its cells to the panel width, which is only known once its tab is visible.
+document.querySelector('[data-bs-target="#tab-matrix"]')?.addEventListener("shown.bs.tab", renderMatrix);
 
+function setDirection(side) {
+  document.querySelectorAll("#il-direction button").forEach(b => b.classList.toggle("active", +b.dataset.side === side));
+  renderInterlinear(side);
+}
 document.querySelectorAll("#il-direction button").forEach(btn => btn.addEventListener("click", () => {
-  document.querySelectorAll("#il-direction button").forEach(b => b.classList.toggle("active", b === btn));
-  renderInterlinear(+btn.dataset.side);
+  setDirection(+btn.dataset.side);
+  rememberView();
 }));
 
+// ----- Stay on the same view when moving between verses -----
+// The open tab (and interlinear direction) is kept in the URL hash: #view=interlinear, #view=interlinear-2, #view=matrix.
+// (Not plain #matrix: the browser would scroll to the element with that id.)
+// The previous/next links and the verse selector pass it on to the next verse.
+const VIEW_TABS = { trees: "#tab-trees", interlinear: "#tab-interlinear", matrix: "#tab-matrix" };
+
+function currentViewHash() {
+  const active = document.querySelector('[data-bs-toggle="tab"].active')?.dataset.bsTarget;
+  const view = Object.keys(VIEW_TABS).find(key => VIEW_TABS[key] === active) || "trees";
+  if (view === "trees") return "";
+  const side = +(document.querySelector("#il-direction button.active")?.dataset.side || 0);
+  return view === "interlinear" && side === 1 ? "#view=interlinear-2" : `#view=${view}`;
+}
+
+function rememberView() {
+  const hash = currentViewHash();
+  history.replaceState(null, "", location.pathname + location.search + hash);
+  for (const id of ["prev-verse", "next-verse"]) {
+    const a = document.getElementById(id);
+    if (!a || a.classList.contains("disabled")) continue;
+    a.dataset.base = a.dataset.base || a.getAttribute("href");
+    a.setAttribute("href", a.dataset.base + hash);
+  }
+}
+
+(function restoreView() {
+  const match = location.hash.match(/^#view=(interlinear|matrix)(?:-(2))?$/);
+  if (match) {
+    if (match[2]) setDirection(1);
+    const btn = document.querySelector(`[data-bs-target="${VIEW_TABS[match[1]]}"]`);
+    if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
+  }
+  rememberView();
+})();
+document.querySelectorAll('[data-bs-toggle="tab"]').forEach(btn => btn.addEventListener("shown.bs.tab", rememberView));
+
+// Capture phase, so the arrow keys change verse even when a tab button has focus
+// (Bootstrap's tabs would otherwise take them to move between tabs; 1, 2, 3 do that here).
 document.addEventListener("keydown", e => {
   if (/input|textarea|select/i.test(document.activeElement.tagName) || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (["ArrowLeft", "ArrowRight"].includes(e.key)) e.stopPropagation();
   const go = id => { const a = document.getElementById(id); if (a && !a.classList.contains("disabled")) window.location.href = a.href; };
   if (e.key === "ArrowLeft") go("prev-verse");
   if (e.key === "ArrowRight") go("next-verse");
@@ -356,4 +416,4 @@ document.addEventListener("keydown", e => {
     const btn = document.querySelector(`[data-bs-target="${tabs[+e.key - 1]}"]`);
     if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
   }
-});
+}, true);

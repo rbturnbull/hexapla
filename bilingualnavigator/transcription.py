@@ -32,7 +32,7 @@ IDENTIFIER_LABELS = {
     "Liste": "Liste",
     "TM": "Trismegistos",
     "LDAB": "LDAB",
-    "smr": "Schmitz-Mink-Richter",
+    "smr": "Schmitz-Mink-Richter", "SMR": "Schmitz-Mink-Richter", "VetusLatina": "Vetus Latina",
     "NTVMR": "NTVMR",
     "partial": "Also",
     "VL": "Vetus Latina",
@@ -142,10 +142,19 @@ def _read_header(header) -> dict:
     availability = _find(publication, "availability")
     licence_text = _text(availability)
     licence_url = next(iter(_ptrs(availability)), None)
+    if "<" in licence_text:  # HTML in a CDATA section, as the NTVMR writes it
+        href = re.search(r'href="([^"]+)"', licence_text)
+        licence_url = licence_url or (href.group(1) if href else None)
+        licence_text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", licence_text)).strip()
     licence_name = None
     match = re.search(r"Creative Commons [A-Za-z\-]+(?: [A-Za-z\-]+)* [\d.]+(?: International)? License \(([^)]+)\)", licence_text)
+    cc_url = re.search(r"creativecommons\.org/licenses/([a-z\-]+)/([\d.]+)", licence_url or "")
     if match:
         licence_name = match.group(1)
+    elif cc_short := re.search(r"Creative Commons \(?(by(?:-n[cd])*(?:-sa)?)\b", licence_text, re.I):  # "(Creative Commons by-nc-sa)"
+        licence_name = f"CC {cc_short.group(1).upper()}"
+    elif cc_url:
+        licence_name = f"CC {cc_url.group(1).upper()} {cc_url.group(2)}"
     elif re.search(r"non-?commercial", licence_text, re.I):
         licence_name = "free for non-commercial use"
 
@@ -158,14 +167,16 @@ def _read_header(header) -> dict:
         if text:
             source.append(text)
 
-    ms_identifier = _find(file_desc, "sourceDesc/msDesc/msIdentifier")
-    shelfmark = {}
+    shelfmarks = []
     identifiers = []
-    if ms_identifier is not None:
+    for ms_identifier in _iter(file_desc, "msIdentifier"):
+        shelfmark = {}
         for key in ("country", "settlement", "repository", "idno", "msName"):
             element = _find(ms_identifier, key)
             if element is not None and _text(element):
                 shelfmark[key] = _text(element)
+        if shelfmark:
+            shelfmarks.append(shelfmark)
         for alt in _children(ms_identifier, "altIdentifier"):
             kind = alt.get("type") or ""
             value = _text(_find(alt, "idno"))
@@ -187,7 +198,7 @@ def _read_header(header) -> dict:
         revisions.append({"when": change.get("when"), "n": change.get("n"), "text": _text(change)})
 
     return {
-        "title": titles.get("main", ""),
+        "title": titles.get("main") or (f"GA {titles['document']}" if titles.get("document") else ""),
         "document": titles.get("document", ""),
         "document_key": document.get("key"),
         "work": titles.get("work", ""),
@@ -203,7 +214,8 @@ def _read_header(header) -> dict:
         "licence": licence_text,
         "licence_name": licence_name,
         "licence_url": licence_url,
-        "shelfmark": shelfmark,
+        "shelfmark": shelfmarks[0] if shelfmarks else {},
+        "shelfmarks": shelfmarks,
         "identifiers": identifiers,
         "project": project,
         "editorial": editorial,
@@ -211,26 +223,83 @@ def _read_header(header) -> dict:
     }
 
 
+FOLIO_NOTE = re.compile(r"\d+[rv]")
+
+
+def _find_restarts(text_element) -> set[int]:
+    """
+    Where verse numbers restart inside a chapter, as positions in the sequence of <ab n> elements.
+    A drop in verse number starts a run (up to the next drop or chapter). The run is a restart when it repeats a
+    verse already seen in the chapter: sa117 labels John 6:21-58 as John.4.21-58 after John.4.45-52. A run of new
+    numbers is just fragments out of order (ac1: John.13.13 before 13.10-12) and keeps its labels.
+    """
+    if text_element is None:
+        return set()
+    chapters: list[list[tuple[int, str, int]]] = [[]]
+    index = -1
+    for element in text_element.iter():
+        if not isinstance(element.tag, str):
+            continue
+        name = _local(element.tag)
+        if name == "div" and element.get("type") == "chapter":
+            chapters.append([])
+        elif name == "ab" and element.get("n"):
+            index += 1
+            match = re.fullmatch(r"(.*)\.(\d+)", element.get("n"))
+            if match:
+                chapters[-1].append((index, element.get("n"), int(match.group(2))))
+    starts = set()
+    for abs_ in chapters:
+        runs: list[list[tuple[int, str, int]]] = []
+        for item in abs_:
+            if not runs or item[2] < runs[-1][-1][2]:
+                runs.append([])
+            runs[-1].append(item)
+        seen = set()
+        for k, run in enumerate(runs):
+            refs = {ref for _, ref, _ in run}
+            if k > 0 and refs & seen:
+                starts.add(run[0][0])
+            seen |= refs
+    return starts
+
+
 def _read_body(text_element, renumber_restarts: list[str]) -> tuple[dict, dict[str, VerseNotes], list[str]]:
     verses: dict[str, VerseNotes] = {}
     problems: list[str] = []
     restarts = 0  # how many times verse numbers have dropped back inside a chapter, across the file
-    chapter = {"prev": 0, "restart": None}
+    chapter = {"restart": None}
+    restart_starts = _find_restarts(text_element)  # positions (in <ab n> order) where a restart begins
+    ab_index = -1
     folios: list[dict] = []
     totals = Counter()
     gaps = Counter()
     current_folio: str | None = None
+    # Files without <w> (D-Codex): words are counted from the text, and a verse is on the folios its text is on.
+    has_words = text_element is not None and any(_local(el.tag) == "w" for el in text_element.iter() if isinstance(el.tag, str))
+
+    def on_text(text: str | None, verse: VerseNotes | None):
+        if has_words or verse is None or not text:
+            return
+        words = [token for token in text.split() if token.strip("_-/.·:")]
+        totals["words"] += len(words)
+        if words and current_folio and current_folio not in verse.folios:
+            verse.folios.append(current_folio)
 
     def walk(element, verse: VerseNotes | None):
         nonlocal current_folio
+        if not isinstance(element.tag, str):  # comments, processing instructions
+            return
         name = _local(element.tag)
         if name == "pb":
             current_folio = element.get("n") or element.get(XML_ID)
             folios.append({"n": current_folio, "type": element.get("type")})
         elif name == "div" and element.get("type") == "chapter":
-            chapter.update(prev=0, restart=None)
+            chapter.update(restart=None)
         elif name == "ab" and element.get("n"):
-            verse = verses.setdefault(_renumber(element.get("n")), VerseNotes())
+            nonlocal ab_index
+            ab_index += 1
+            verse = verses.setdefault(_renumber(element.get("n"), ab_index), VerseNotes())
         elif name == "app":
             totals["corrections"] += 1
             if verse is not None:
@@ -238,7 +307,7 @@ def _read_body(text_element, renumber_restarts: list[str]) -> tuple[dict, dict[s
         elif name == "gap":
             reason = element.get("reason") or "gap"
             gaps[reason] += 1
-            if reason == "lacuna":
+            if reason == "lacuna" or (reason == "gap" and not has_words):  # a bare <gap/> in D-Codex is lost text
                 totals["lacunae"] += 1
                 if verse is not None:
                     verse.lacunae += 1
@@ -254,17 +323,23 @@ def _read_body(text_element, renumber_restarts: list[str]) -> tuple[dict, dict[s
             totals["nomina_sacra"] += 1
         elif name == "note":
             note = _text(element)
-            if verse is not None and note:
+            if not has_words and FOLIO_NOTE.fullmatch(note):  # D-Codex marks folios with <note>1r</note>
+                current_folio = note
+                folios.append({"n": note, "type": "folio"})
+            elif verse is not None and note:
                 verse.notes.append(note)
         elif name == "w":
             totals["words"] += 1
             # A verse is on the folios its words are on (an <ab> can run on past page breaks after its last word).
             if verse is not None and current_folio and current_folio not in verse.folios:
                 verse.folios.append(current_folio)
+        if name not in ("note", "teiHeader"):
+            on_text(element.text, verse)
         for child in element:
             walk(child, verse)
+            on_text(child.tail, verse)
 
-    def _renumber(ref: str) -> str:
+    def _renumber(ref: str, index: int) -> str:
         """ Some files restart the verse numbers inside a chapter (a run of chapter 6 labelled John.4.21...).
         Each restart is relabelled with the next chapter in ``renumber_restarts``, or left out if none is given. """
         nonlocal restarts
@@ -272,14 +347,13 @@ def _read_body(text_element, renumber_restarts: list[str]) -> tuple[dict, dict[s
         if not match:
             return ref
         number = int(match.group(2))
-        if number < chapter["prev"]:
+        if index in restart_starts:
             restarts += 1
             chapter["restart"] = restarts
             if restarts <= len(renumber_restarts):
                 problems.append(f"verse numbers restart at {ref}; relabelled as {renumber_restarts[restarts - 1]}.{number} onwards")
             else:
                 problems.append(f"verse numbers restart at {ref}; these verses are left out (set renumber_restarts to relabel them)")
-        chapter["prev"] = number
         if chapter["restart"] is None:
             return ref
         if chapter["restart"] <= len(renumber_restarts):
@@ -294,6 +368,8 @@ def _read_body(text_element, renumber_restarts: list[str]) -> tuple[dict, dict[s
     refs = list(verses)
     summary = {
         "folios": [folio["n"] for folio in folios if folio["n"]],
+        # "page" when every break is a numbered page (<pb type="page">), else "folio"
+        "unit": "page" if folios and all(folio["type"] == "page" for folio in folios) else "folio",
         "verses": len(refs),
         "first": refs[0] if refs else None,
         "last": refs[-1] if refs else None,

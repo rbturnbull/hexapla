@@ -83,11 +83,12 @@
                     <a class="btn btn-sm btn-outline-secondary" href="tei/{{ t.file }}" download title="Download the TEI XML"><i class="fa-solid fa-download"></i> TEI</a>
                 </div>
                 <h3>{{ h.title or t.file }}</h3>
-                {% if h.document or h.work %}<div class="muted">{{ h.document }}{% if h.document and h.work %} · {% endif %}{{ h.work }}</div>{% endif %}
+                {% set doc = h.document if h.document and h.document not in (h.title or "") else "" %}
+                {% if doc or h.work %}<div class="muted">{{ doc }}{% if doc and h.work %} · {% endif %}{{ h.work }}</div>{% endif %}
 
                 <div class="tei-stats">
                     <div><b>{{ "{:,}".format(s.verses) }}</b><span>verses{% if t.range %}<br>{{ t.range }}{% endif %}</span></div>
-                    {% if s.folios %}<div title="{{ s.folios | join(', ') }}"><b>{{ s.folios | length }}</b><span>folios{% if s.folios %}<br>{{ s.folios[0] }}{% if s.folios|length > 1 %} … {{ s.folios[-1] }}{% endif %}{% endif %}</span></div>{% endif %}
+                    {% if s.folios %}<div title="{{ s.folios | join(', ') }}"><b>{{ s.folios | length }}</b><span>{{ s.unit or "folio" }}s{% if s.folios %}<br>{{ s.folios[0] }}{% if s.folios|length > 1 %} … {{ s.folios[-1] }}{% endif %}{% endif %}</span></div>{% endif %}
                     <div><b>{{ "{:,}".format(s.words) }}</b><span>words</span></div>
                     <div><b>{{ s.corrections }}</b><span>corrections</span></div>
                     <div><b>{{ s.lacunae }}</b><span>lacunae</span></div>
@@ -97,9 +98,10 @@
                 </div>
 
                 <dl class="tei-dl">
-                    {% if h.shelfmark %}
-                    <dt>Shelfmark</dt>
-                    <dd>{{ [h.shelfmark.settlement, h.shelfmark.repository, h.shelfmark.idno] | select | join(", ") }}</dd>
+                    {% set shelfmarks = h.shelfmarks or ([h.shelfmark] if h.shelfmark else []) %}
+                    {% if shelfmarks %}
+                    <dt>Shelfmark{{ "s" if shelfmarks|length > 1 }}</dt>
+                    <dd>{% for m in shelfmarks %}{{ [m.settlement, m.repository, m.idno] | select | join(", ") }}{% if not loop.last %}<br>{% endif %}{% endfor %}</dd>
                     {% endif %}
                     {% if h.identifiers %}
                     <dt>Identifiers</dt>

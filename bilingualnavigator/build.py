@@ -263,11 +263,13 @@ def attribution(transcriptions: list[dict]) -> list[str]:
     lines = []
     for item in transcriptions:
         header = item["header"]
-        names = list(dict.fromkeys(name for resp in header.get("responsibility", []) for name in resp["names"]))
+        # Skip machine credits such as the NTVMR's "edition metadata assembled by VMRCRE".
+        names = list(dict.fromkeys(name for resp in header.get("responsibility", []) for name in resp["names"]
+                                   if "metadata" not in resp["resp"].lower()))
         credit = ", ".join(names) or ", ".join(header.get("publishers", []))
         if header.get("authority"):  # e.g. Project Wulfila, whose licence asks for the project to be named
             credit = f"{credit}, {header['authority']}" if credit else header["authority"]
-        lines.append({"language": item["language"], "credit": credit, "licence": header.get("licence_name"),
+        lines.append({"language": item["language"], "credit": credit or "transcriber not named in the file", "licence": header.get("licence_name"),
                       "licence_url": header.get("licence_url")})
     return lines
 

@@ -60,7 +60,7 @@ class Language:
         for transcription in self.transcriptions:
             notes = transcription.verses.get(verse_id)
             if notes is not None:
-                found.append(notes.to_dict())
+                found.append({**notes.to_dict(), "unit": transcription.summary.get("unit", "folio")})
         return found
 
 

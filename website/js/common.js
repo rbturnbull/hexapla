@@ -111,7 +111,8 @@
     const fragment = document.createDocumentFragment();
     for (const [id, label] of window.SELECT_ITEMS || []) fragment.appendChild(new Option(label, id, false, id === current));
     select.appendChild(fragment);
-    select.addEventListener("change", () => { window.location.href = `../${select.value}/`; });
+    // Keep the hash so the verse page stays on the same view (#view=matrix...).
+    select.addEventListener("change", () => { window.location.href = `../${select.value}/${window.location.hash}`; });
   };
 
   window.NAV = NAV;

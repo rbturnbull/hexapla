@@ -184,7 +184,7 @@ a { color: var(--brand); }
 /* ---------- Verse page ---------- */
 .verse-head { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
 .verse-head h2 { font-family: var(--serif); font-size: 2rem; margin: 0; }
-.verse-texts { font-family: var(--serif); font-size: 1.15rem; line-height: 1.55; }
+.verse-texts { font-family: var(--serif); font-size: 1.15rem; line-height: 1.55; text-align: center; }
 .verse-texts .lang { font-family: var(--sans); font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; display: block; }
 .verse-layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 1.25rem; }
 @media (max-width: 1200px) { .verse-layout { grid-template-columns: 1fr; } }
@@ -228,8 +228,9 @@ svg.tree { display: block; width: 100%; margin-bottom: 1.5rem; }
 .il-word .partners .probable { color: var(--link-probable-edge); border-bottom: 1px dashed var(--link-probable-edge); }
 .il-word .partners .none { color: #c5c7d0; }
 
-.matrix-wrap { overflow: auto; max-height: 75vh; }
-.matrix .lbl { font-family: var(--serif); font-size: 15px; fill: var(--text-primary); }
+.matrix-wrap { overflow: auto; }
+.verse-layout > * { min-width: 0; }  /* a wide matrix or tree scrolls inside its panel instead of widening the page */
+.matrix .lbl { font-family: var(--serif); font-size: var(--matrix-font, 15px); fill: var(--text-primary); }
 .matrix .lbl.active { font-weight: 700; fill: #1c3fae; }
 .matrix .gridcell { fill: transparent; stroke: #eef0f4; }
 .matrix .gridcell.hover { fill: #f1f5fd; }
