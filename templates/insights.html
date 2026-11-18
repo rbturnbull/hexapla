@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Translation insights · {{ title }}{% endblock %}
+{% block topbar %}<h1>Translation insights</h1><span class="crumb">{{ title }}</span>{% endblock %}
+
+{% block content %}
+<p class="text-secondary" style="max-width:900px">
+    How grammar and vocabulary carry over between the {{ langs.a.label }} and the {{ langs.b.label }}, measured over every
+    alignment link (punctuation left out). Rows are {{ langs.a.label }} values and columns are {{ langs.b.label }} values. Shading shows
+    the share of the row, so each {{ langs.a.label }} value reads as "how is this rendered?". Click a cell to see the verses.
+    "—" means the word has no value for the feature (e.g. a {{ langs.a.label }} participle rendered by a {{ langs.b.label }} noun).
+</p>
+
+<div class="row g-3">
+    <div class="col-xl-7">
+        <div class="panel">
+            <div class="toolbar">
+                <div class="seg" id="matrix-tabs"></div>
+                <span class="spacer" style="flex:1"></span>
+                <div class="seg" id="matrix-norm">
+                    <button data-norm="row" class="active">Share of {{ langs.a.label }}</button>
+                    <button data-norm="col">Share of {{ langs.b.label }}</button>
+                </div>
+            </div>
+            <h2 id="matrix-title"></h2>
+            <div class="sub" id="matrix-desc"></div>
+            <div style="overflow-x:auto"><table class="heatmap" id="heatmap"></table></div>
+            <div class="mt-2 legend-ramp"><span>0%</span><span class="bar"></span><span>100% of row</span></div>
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="panel" style="position:sticky; top:80px">
+            <h2 id="examples-title">Examples</h2>
+            <div class="sub" id="examples-sub">Click a cell or bar to see examples.</div>
+            <div id="examples" style="max-height:65vh; overflow:auto"></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="panel">
+            <h2>What the {{ langs.b.label }} leaves out</h2>
+            <div class="sub">Share of {{ langs.a.label }} words with no {{ langs.b.label }} counterpart, by part of speech (aligned verses only)</div>
+            <div id="unaligned-a"></div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="panel">
+            <h2>What the {{ langs.b.label }} adds</h2>
+            <div class="sub">Share of {{ langs.b.label }} words with no {{ langs.a.label }} counterpart, by part of speech (aligned verses only)</div>
+            <div id="unaligned-b"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>const INSIGHTS = {{ insights | tojson }};</script>
+<script src="../corpus.js"></script>
+<script src="{{ root }}js/pages.js"></script>
+{% endblock %}

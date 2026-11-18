@@ -1,173 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<!-- derived from:
-    https://startbootstrap.com/theme/sb-admin-2
-    https://github.com/startbootstrap/startbootstrap-sb-admin-2 
--->
-<head>
+{% extends "base.html" %}
+{% block title %}{{ lemma }} · {{ language }} · {{ title }}{% endblock %}
+{% block topbar %}
+<h1 class="lemma" {% if rtl %}dir="rtl"{% endif %}>{{ lemma }}</h1>
+<span class="crumb">{{ language }} lemma · <a href="../../lexicon/">Lexicon</a></span>
+<span class="spacer"></span>
+<select id="lemmaSelector" class="form-select form-select-sm" style="width: 220px" aria-label="Go to lemma" data-current="{{ lemma_id }}"></select>
+{% endblock %}
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+{% block content %}
+<div class="tiles">
+    <div class="tile"><div class="label">Occurrences</div><div class="value">{{ occurrences }}</div><div class="detail">{{ verse_count }} verse{{ "s" if verse_count != 1 }}</div></div>
+    <div class="tile"><div class="label">Aligned</div><div class="value">{{ parallels }}</div><div class="detail">{{ "%.0f"|format(100 * parallels / occurrences) if occurrences else 0 }}% of occurrences</div></div>
+    <div class="tile"><div class="label">Equivalents</div><div class="value">{{ aligned_items|length }}</div><div class="detail">distinct {{ other_language }} lemmas</div></div>
+    <div class="tile"><div class="label">Forms</div><div class="value">{{ forms|length }}</div><div class="detail text-serif" style="font-size:.95rem">{% for form, n in forms[:6] %}{{ form }}{{ "," if not loop.last }} {% endfor %}{% if forms|length > 6 %}…{% endif %}</div></div>
+</div>
 
-    <title>{{ siglum }} - {{ language }} - {{ lemma }}</title>
-    <link rel="shortcut icon" type="image/png" href="">
-    <!-- Custom fonts for this template-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
-
-    <link rel="stylesheet" 
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
-      crossorigin="anonymous" 
-      referrerpolicy="no-referrer" /> 
-
-    <!-- Custom styles for this template-->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link rel="stylesheet" href="../../../../css/sb-admin-2.min.css">    
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus&display=swap" rel="stylesheet">
-      
-    <style>
-        body {
-          font-family: "Gentium Plus", serif;
-        }
-        .sidebar-brand-icon {
-            width: 100%;
-        }
-        #sidebar-ss a {
-            color: white;
-        }
-        #sidebar-ss h3 {
-            color: white;
-            padding-top: 15px;
-            padding-left: 20px;
-            font-size: 1.2rem;
-        }
-        .lemma-display {
-            font-size: 48px;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-        .highlight-main {
-            background: var(--highlight-color);
-            padding: 0 2px;
-            border-radius: 3px;
-        }
-        .highlight-other {
-            background: var(--highlight-color);
-            padding: 0 2px;
-            border-radius: 3px;
-        }
-        :root {
-            --highlight-color: #ffeb3b;
-        }
-      </style>
-    
-</head>
-
-<body id="page-top">
-
-    <!-- Page Wrapper -->
-    <div id="wrapper">
-
-        <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="sidebar-ss">
-            <a href="../../../../"><img src="../../../../img/Logo-Arcs.jpg" alt="Polyglottarium Logo" class="sidebar-brand-icon"></a>
-            <p></p>
-            <h3>{{ siglum }}</h3>
-            <ul>
-                <li><a class="nav-item" href="../../../../mss/{{ siglum }}/"><span>Verses</span></a></li>
-            </ul>
-        </ul>
-        <!-- End of Sidebar -->
-
-        <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
-            <!-- Topbar -->
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                <h1>{{ siglum }} - {{ language }}</h1>
-                <select id="lemmaSelector" class="form-select" style="width: 240px; margin-left: auto;">
-                    {% for item in lemma_items %}
-                    <option value="{{ item.id }}" {% if item.label == lemma %}selected{% endif %}>{{ item.label }}</option>
-                    {% endfor %}
-                </select>
-                <ul class="navbar-nav ml-auto">
-                </ul>
-            </nav>
-            <!-- End of Topbar -->
-            <!-- Main Content -->
-            <div id="content" class="container-fluid">
-                <div class="lemma-display text-center" {% if rtl %}dir="rtl"{% endif %}>{{ lemma }}</div>
-                <div class="text-center">
-                    <div>Occurrences: {{ occurrences }}</div>
-                    <div>Parallels: {{ parallels }}</div>
-                </div>
-                {% if aligned_items %}
-                <div class="mt-5">
-                    <h3 class="text-center">Aligned Lemmas</h3>
-                    {% for item in aligned_items %}
-                    <div class="card my-3">
-                        <div class="card-body">
-                            <h4 class="card-title">{{ item.lemma }} ({{ item.count }})</h4>
-                            {% if item.examples %}
-                            <ul class="list-group list-group-flush">
-                                {% for ex in item.examples %}
-                                <li class="list-group-item">
-                                    <div><strong><a href="../../{{ ex.verse_id }}">{{ ex.label }}</a></strong></div>
-                                    {% if ex.text_this_html %}
-                                    <div {% if ex.rtl_this %}dir="rtl"{% endif %}>{{ ex.text_this_html | safe }}</div>
-                                    {% endif %}
-                                    {% if ex.text_other_html %}
-                                    <div {% if ex.rtl_other %}dir="rtl"{% endif %}>{{ ex.other_language }}: {{ ex.text_other_html | safe }}</div>
-                                    {% endif %}
-                                </li>
-                                {% endfor %}
-                            </ul>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                {% if unaligned_examples %}
-                <div class="mt-5">
-                    <h3 class="text-center">Unaligned Occurrences ({{ unaligned_examples | length }})</h3>
-                    <ul class="list-group">
-                        {% for ex in unaligned_examples %}
-                        <li class="list-group-item">
-                            <div><strong><a href="../../../mss/{{ siglum }}/{{ ex.verse_id }}">{{ ex.label }}</a></strong></div>
-                            <div {% if ex.rtl_this %}dir="rtl"{% endif %}>{{ ex.text_this_html | safe }}</div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                {% endif %}
-            </div>
-            <!-- End of Main Content -->
+<div class="row g-3">
+    {% if aligned_items %}
+    <div class="col-lg-4">
+        <div class="panel">
+            <h2>Rendered in {{ other_language }} as</h2>
+            <div class="sub">Occurrences per equivalent. A word linked to several words counts once, with those words together; "…" marks words that are not next to each other. Click one to jump to its examples.</div>
+            {% set top = aligned_items[0].count %}
+            {% for item in aligned_items %}
+            <a class="hbar-row text-decoration-none text-reset" href="#eq-{{ loop.index }}" style="grid-template-columns: minmax(80px, 140px) 1fr 40px">
+                <span class="text-serif" style="font-size:1.05rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap" title="{{ item.lemma }}">{{ item.lemma }}</span>
+                <span class="hbar-track"><span class="hbar-fill" style="width: {{ (100 * item.count / top)|round(1) }}%; display:block"></span></span>
+                <span class="val">{{ item.count }}</span>
+            </a>
+            {% endfor %}
         </div>
-        <!-- End of Content Wrapper -->
     </div>
-    <!-- End of Page Wrapper -->
+    {% endif %}
+    <div class="{{ 'col-lg-8' if aligned_items else 'col-12' }}">
+        {% for item in aligned_items %}
+        <div class="panel" id="eq-{{ loop.index }}">
+            <h2><span class="text-serif" style="font-size:1.3rem">{{ lemma }} → {% for part in item.parts %}{% if part.lemma == "…" %}<span class="muted">…</span>{% elif part.linkable %}<a href="../../{{ other_slug }}/{{ part.lemma }}/">{{ part.lemma }}</a>{% else %}{{ part.lemma }}{% endif %}{{ " " if not loop.last }}{% endfor %}</span> <span class="muted">({{ item.count }})</span></h2>
+            {% for ex in item.examples %}
+            <div class="example">
+                <div class="ref"><a href="../../{{ ex.verse_id }}/">{{ ex.label }}</a></div>
+                <div class="txt" {% if ex.rtl_this %}dir="rtl"{% endif %}><span class="lang">{{ language }}</span>{{ ex.text_this_html | safe }}</div>
+                <div class="txt" {% if ex.rtl_other %}dir="rtl"{% endif %}><span class="lang">{{ ex.other_language }}</span>{{ ex.text_other_html | safe }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        {% if unaligned_examples %}
+        <div class="panel">
+            <h2>Not aligned <span class="muted">({{ unaligned_examples | length }} verse{{ "s" if unaligned_examples|length != 1 }})</span></h2>
+            <div class="sub">Occurrences with no {{ other_language }} counterpart</div>
+            {% for ex in unaligned_examples %}
+            <div class="example">
+                <div class="ref"><a href="../../{{ ex.verse_id }}/">{{ ex.label }}</a></div>
+                <div class="txt" {% if ex.rtl_this %}dir="rtl"{% endif %}>{{ ex.text_this_html | safe }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
 
-    <!-- Bootstrap core JavaScript-->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-    <!-- Core plugin JavaScript-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js" integrity="sha512-0QbL0ph8Tc8g5bLhfVzSqxe9GERORsKhIn1IrpxDAgUsbBGz/V7iSav2zzW325XGd1OMLdL4UiqRJj702IeqnQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-    <!-- Custom scripts for all pages-->
-    <script src="../../../js/sb-admin-2.min.js"></script>
-    
-    <script>
-        document.getElementById('lemmaSelector').addEventListener('change', function() {
-            const selectedLemma = this.value;
-            window.location.href = `../${selectedLemma}`;
-        });
-    </script>
-</body>
-
-</html>
+{% block scripts %}
+<script src="../lemmas.js"></script>
+<script>NAV.fillSelector(document.getElementById('lemmaSelector'));</script>
+{% endblock %}

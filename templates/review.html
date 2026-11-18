@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Review queue · {{ title }}{% endblock %}
+{% block topbar %}<h1>Review queue</h1><span class="crumb">{{ title }}</span>{% endblock %}
+
+{% block content %}
+<p class="text-secondary" style="max-width:900px">
+    The places where the models were least sure, to check first. Link confidences come from mcaligner
+    and word confidences from mcparser (the lowest of the lemma, part of speech, features, head and relation scores).
+</p>
+<div class="row g-3">
+    <div class="col-12">
+        <div class="panel">
+            <h2>Alignment links</h2>
+            <div class="sub" id="review-links-sub"></div>
+            <div class="toolbar">
+                <div class="seg" id="review-link-filter">
+                    <button data-filter="all" class="active">All</button>
+                    <button data-filter="probable">Probable only</button>
+                </div>
+            </div>
+            <div class="table-scroll">
+                <table class="data-table" id="review-links">
+                    <thead><tr>
+                        <th data-sort="label" data-type="text">Verse</th>
+                        <th data-sort="a_form" data-type="text">{{ langs.a.label }}</th>
+                        <th data-sort="b_form" data-type="text">{{ langs.b.label }}</th>
+                        <th data-sort="sure" data-type="num">Type</th>
+                        <th class="num" data-sort="confidence">Confidence</th>
+                        <th data-sort="agent" data-type="text">Set by</th>
+                    </tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="panel">
+            <h2>Uncertain parses</h2>
+            <div class="sub" id="review-words-sub"></div>
+            <div class="toolbar">
+                <div class="seg" id="review-word-side">
+                    <button data-side="" class="active">Both</button>
+                    <button data-side="a">{{ langs.a.label }}</button>
+                    <button data-side="b">{{ langs.b.label }}</button>
+                </div>
+            </div>
+            <div class="table-scroll">
+                <table class="data-table" id="review-words">
+                    <thead><tr>
+                        <th data-sort="label" data-type="text">Verse</th>
+                        <th data-sort="form" data-type="text">Word</th>
+                        <th data-sort="lemma" data-type="text">Lemma</th>
+                        <th data-sort="upos" data-type="text">POS</th>
+                        <th data-sort="deprel" data-type="text">Relation</th>
+                        <th class="num" data-sort="confidence">Confidence</th>
+                    </tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>const REVIEW = {{ review | tojson }};</script>
+<script src="../corpus.js"></script>
+<script src="{{ root }}js/pages.js"></script>
+{% endblock %}

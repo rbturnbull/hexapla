@@ -1,4 +1,5 @@
 website/mss
 data-old
 verbal-aspect.py
-data
+/data
+datasets/

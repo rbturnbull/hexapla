@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Lexicon · {{ title }}{% endblock %}
+{% block topbar %}<h1>Lexicon</h1><span class="crumb">{{ title }}</span>{% endblock %}
+
+{% block content %}
+<div class="panel">
+    <div class="toolbar">
+        <div class="seg" id="lex-side">
+            <button data-side="a" class="active">{{ langs.a.label }} → {{ langs.b.label }}</button>
+            <button data-side="b">{{ langs.b.label }} → {{ langs.a.label }}</button>
+        </div>
+        <input class="form-control form-control-sm" placeholder="Search lemma or equivalent…  ( / )" data-search id="lex-search" autocomplete="off">
+        <select class="form-select form-select-sm" id="lex-upos" style="max-width:170px"><option value="">All parts of speech</option></select>
+        <span class="muted small" id="lex-count"></span>
+    </div>
+    <div class="sub">Equivalents are the lemmas that a lemma's words are linked to, most frequent first. A word linked to several words counts once, with those words together ("in Christus"); "…" marks words that are not next to each other. "Aligned" counts only verses that have been aligned. Click a lemma for its examples.</div>
+    <div class="table-scroll">
+        <table class="data-table" id="lex-table">
+            <thead><tr>
+                <th data-sort="lemma" data-type="text">Lemma</th>
+                <th data-sort="upos" data-type="text">POS</th>
+                <th class="num" data-sort="count">Occurrences</th>
+                <th class="num" data-sort="verses">Verses</th>
+                <th data-sort="share">Aligned</th>
+                <th class="num" data-sort="eq_total">Equivalents</th>
+                <th>Most frequent equivalents</th>
+            </tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <div class="muted small mt-2" id="lex-more"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>const LEXICON = {{ lexicon | tojson }};</script>
+<script src="{{ root }}js/pages.js"></script>
+{% endblock %}

@@ -1,59 +1,29 @@
-<html>
-    <head>
-        <title>Polyglottarium</title>
-        <style type="text/css">
-            body {
-                font-family: Arial, sans-serif;
-                text-align: center;
-                margin-top: 50px;
-            }
-            #logo img {
-                width: 500px;
-                margin: 0 auto;
-                display: block; /* Added for better centering */
-            }
-            h2 {
-                font-family: "Gentium Plus", serif;
-                font-size: 24px;
-                color: #113F64;
-                text-align: left;;
-            }
-            li {
-                font-family: "Gentium Plus", serif;
-                font-size: 20px;
-                color: #113F64;
-            }
-            .category {
-                margin-top: 20px;
-                text-align: left; /* Align the list to the left */
-                padding-left: 10px; /* Add some padding for better readability */
-                width: 300px; /* Set a fixed width for the list */
-            }
-            #mss {
-                display: flex;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-        </style>
-        <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus&display=swap" rel="stylesheet">
-    </head>
-    <body>
-        <div id="logo">
-            <center>
-                <img src="./img/Logo-Arcs.jpg" alt="Polyglottarium Logo" \>
-            </center>
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block topbar %}<h1>Bilingual Navigator</h1><span class="crumb">Multilingual New Testament manuscripts, parsed and word-aligned</span>{% endblock %}
+{% block content %}
+<div class="home-hero">
+    <img src="{{ root }}img/Logo-Arcs.svg" alt="Bilingual Navigator">
+    <p>Read each bilingual manuscript verse by verse, with both languages parsed and every word linked to its counterpart.
+        Explore how the translator rendered grammar and vocabulary.</p>
+</div>
+{% for section in cards %}
+<h2 class="text-center text-serif mt-4" style="font-size:1.4rem">{{ section.title }}</h2>
+<div class="ms-cards">
+    {% for card in section.manuscripts %}
+    <a class="ms-card" href="{{ root }}mss/{{ card.id }}/">
+        <div class="siglum">{% if card.gregoryaland %}GA {{ card.gregoryaland }}{% endif %}{% if card.vl %} · VL {{ card.vl }}{% endif %}{% if card.date %} · {{ card.date }}{% endif %}</div>
+        <h3>{{ card.title }}</h3>
+        <div class="langs">{{ card.description or section.title }}</div>
+        <div class="nums">
+            <div><b>{{ "{:,}".format(card.verses) }}</b>verses</div>
+            <div><b>{{ "{:,}".format(card.links) }}</b>links</div>
+            <div><b>{{ "%.0f"|format(card.coverage * 100) }}%</b>words aligned</div>
         </div>
-        <div id="mss">
-            {% for section in sidebar_sections %}
-            <div class="category">
-                <h2>{{ section.title }}</h2>
-                <ul>
-                    {% for manuscript in section.manuscripts %}
-                    <li><a href="{{ manuscript.href }}">{{ manuscript.siglum }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endfor %}
-        </div>
-    </body>
-</html>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-center muted">No datasets yet. Add one under <code>datasets/</code> (see datasets/README.md).</p>
+{% endfor %}
+{% endblock %}

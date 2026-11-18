@@ -1,474 +1,359 @@
-// import { datasets } from './data.js';
+// Bilingual Navigator: verse page (dependency trees, interlinear view, alignment matrix).
+// Expects the globals defined by <dataset>-<verse>.js: wordMap, siglum, sentences.
 
-// const selectedDataset = datasets.matt2_2a;
-// const { sentences, wordMap } = selectedDataset;
+const TOKEN_FONT = '24px "Gentium Plus"';
+const TOP = 130;           // baseline of the first row (room for arcs above it)
+const ROW_GAP = 175;       // distance between row baselines
+const SPACING = 22;        // horizontal gap between words
+const MARGIN = 30;
 
-const tokenY = 120;
-const spacing = 20;
-const rowGap = 100;
-const defaultMaxWordsPerRow = 12;
+const measureCtx = document.createElement("canvas").getContext("2d");
+function textWidth(text) {
+  measureCtx.font = TOKEN_FONT;
+  return measureCtx.measureText(text).width;
+}
 
-function arcHeightForDistance(distance, minHeight = 30, maxHeight = 80) {
-  const raw = maxHeight - (maxHeight - minHeight) * Math.exp(-(distance - 1)/5);
+// Words in CoNLL-U order; head is null when the parser left it as "_".
+function parseTokens(data) {
+  return data.split("\n").filter(line => line.trim()).map(line => {
+    const [id, form, lemma, upos, , feats, head, deprel] = line.split("\t");
+    const headNum = Number.parseInt(head, 10);
+    return { id: +id, form, lemma, upos, feats, head: Number.isFinite(headNum) ? headNum : null, deprel };
+  });
+}
+
+function arcHeightForDistance(distance, minHeight = 30, maxHeight = 85) {
+  const raw = maxHeight - (maxHeight - minHeight) * Math.exp(-(distance - 1) / 5);
   return Math.max(minHeight, Math.min(maxHeight, raw));
 }
 
-function arcPath(x1, x2, height, y, flip = false) {
+function arcPath(x1, x2, height, y) {
   const radius = Math.abs(x2 - x1) / 2;
-  const sweep = flip ? (x1 < x2 ? 0 : 1) : (x1 < x2 ? 1 : 0);
+  const sweep = x1 < x2 ? 1 : 0;
   return `M${x1},${y} A${radius},${height} 0 0,${sweep} ${x2},${y}`;
 }
 
-function connectorY(rowYs, rowIndex, edge) {
-  const rowY = rowYs[rowIndex];
-  if (edge === "top") {
-    return rowY - 18;
-  }
-  return rowY + 6;
-}
-
 function adjustArabicTaMarbuta(str) {
-  if (str.length > 1 && str.endsWith("ة")) {
-    return str.slice(0, -1) + "ت";
-  }
-  return str;
+  return str.length > 1 && str.endsWith("ة") ? str.slice(0, -1) + "ت" : str;
 }
 
-function buildGroups(tokens, rows, noSpaceAfter, rtl) {
-  const noSpaceAfterSet = new Set(noSpaceAfter || []);
+// ---------------------------------------------------------------- layout
+// Words joined without a space (multiword tokens) form one group; groups wrap onto as many rows as needed.
+function computeLayout(sentence, svgWidth) {
+  const tokens = parseTokens(sentence.data);
+  const noSpace = new Set(sentence.noSpaceAfter || []);
   const groups = [];
-  const tokenToGroup = new Array(tokens.length).fill(-1);
-  let i = 0;
-  while (i < tokens.length) {
-    const rowIndex = rows[i];
+  for (let i = 0; i < tokens.length;) {
     let end = i;
     let text = tokens[i].form;
-    while (
-      end < tokens.length - 1 &&
-      noSpaceAfterSet.has(tokens[end].id) &&
-      rows[end + 1] === rowIndex
-    ) {
+    while (end < tokens.length - 1 && noSpace.has(tokens[end].id)) {
       end += 1;
       text = adjustArabicTaMarbuta(text) + tokens[end].form;
     }
-    const tokenIndexes = [];
-    for (let j = i; j <= end; j += 1) {
-      tokenToGroup[j] = groups.length;
-      tokenIndexes.push(j);
-    }
-    groups.push({ rowIndex, tokenIndexes, text, rtl });
+    groups.push({ start: i, end, text, width: textWidth(text) });
     i = end + 1;
   }
-  return { groups, tokenToGroup };
-}
 
-function computeGroupPositions(groups, svgWidth) {
-  const ctx = document.createElement("canvas").getContext("2d");
-  ctx.font = "24px Gentium Plus";
-  const positionsByGroup = new Array(groups.length).fill(null);
-
-  const rows = {};
-  groups.forEach((g, idx) => {
-    const width = ctx.measureText(g.text).width;
-    if (!rows[g.rowIndex]) {
-      rows[g.rowIndex] = [];
-    }
-    rows[g.rowIndex].push({ idx, width, rtl: g.rtl });
-  });
-
-  Object.values(rows).forEach((rowGroups) => {
-    const totalWidth = rowGroups.reduce((sum, g, i) => {
-      const gap = i < rowGroups.length - 1 ? spacing : 0;
-      return sum + g.width + gap;
-    }, 0);
-    const rtl = rowGroups[0]?.rtl;
-    const startX = Math.max(50, (svgWidth - totalWidth) / 2);
-    if (rtl) {
-      let rightEdge = startX + totalWidth;
-      rowGroups.forEach((g, i) => {
-        const center = rightEdge - g.width / 2;
-        positionsByGroup[g.idx] = { center, width: g.width, left: rightEdge - g.width, right: rightEdge };
-        const gap = i < rowGroups.length - 1 ? spacing : 0;
-        rightEdge -= g.width + gap;
-      });
+  const available = Math.max(300, svgWidth - 2 * MARGIN);
+  const rowsOfGroups = [[]];
+  let used = 0;
+  groups.forEach(g => {
+    const row = rowsOfGroups[rowsOfGroups.length - 1];
+    const needed = (row.length ? SPACING : 0) + g.width;
+    if (row.length && used + needed > available) {
+      rowsOfGroups.push([g]);
+      used = g.width;
     } else {
-      let currentX = startX;
-      rowGroups.forEach((g, i) => {
-        const center = currentX + g.width / 2;
-        positionsByGroup[g.idx] = { center, width: g.width, left: currentX, right: currentX + g.width };
-        const gap = i < rowGroups.length - 1 ? spacing : 0;
-        currentX += g.width + gap;
+      row.push(g);
+      used += needed;
+    }
+  });
+
+  const n = tokens.length;
+  const rows = new Array(n).fill(0);
+  const positions = new Array(n).fill(0);
+  const bounds = new Array(n).fill(null);
+  const display = new Array(n).fill(null);
+  const rowYs = rowsOfGroups.map((_, r) => TOP + r * ROW_GAP);
+
+  rowsOfGroups.forEach((rowGroups, r) => {
+    const total = rowGroups.reduce((sum, g, i) => sum + g.width + (i ? SPACING : 0), 0);
+    const start = Math.max(MARGIN, (svgWidth - total) / 2);
+    let cursor = sentence.rtl ? start + total : start;
+    rowGroups.forEach(g => {
+      const left = sentence.rtl ? cursor - g.width : cursor;
+      const right = left + g.width;
+      cursor = sentence.rtl ? left - SPACING : right + SPACING;
+      // Split the group's width between its words in proportion to their own widths.
+      const idx = [];
+      for (let k = g.start; k <= g.end; k += 1) idx.push(k);
+      const weights = idx.map(k => textWidth(tokens[k].form) || 1);
+      const sum = weights.reduce((a, b) => a + b, 0);
+      let segCursor = sentence.rtl ? right : left;
+      idx.forEach((k, j) => {
+        const w = g.width * (weights[j] / sum);
+        const segLeft = sentence.rtl ? segCursor - w : segCursor;
+        const segRight = segLeft + w;
+        segCursor = sentence.rtl ? segLeft : segRight;
+        rows[k] = r;
+        positions[k] = (segLeft + segRight) / 2;
+        bounds[k] = { left: segLeft, right: segRight };
+        display[k] = { x: (left + right) / 2, text: j === 0 ? g.text : "", visible: j === 0 };
       });
-    }
-  });
-
-  return positionsByGroup;
-}
-
-function computeLayout(tokens, rtl, noSpaceAfter, svgWidth, maxWordsPerRow = defaultMaxWordsPerRow) {
-  const rows = new Array(tokens.length).fill(0);
-  const rowYs = [tokenY];
-  let split = tokens.length;
-  const noSpaceAfterSet = new Set(noSpaceAfter || []);
-  if (tokens.length > maxWordsPerRow) {
-    split = Math.ceil(tokens.length / 2);
-    while (split < tokens.length && noSpaceAfterSet.has(tokens[split - 1]?.id)) {
-      split += 1;
-    }
-    rowYs.push(tokenY + rowGap);
-    for (let i = split; i < tokens.length; i += 1) {
-      rows[i] = 1;
-    }
-  }
-
-  const { groups } = buildGroups(tokens, rows, noSpaceAfter, rtl);
-  const groupPositions = computeGroupPositions(groups, svgWidth);
-  const ctx = document.createElement("canvas").getContext("2d");
-  ctx.font = "24px Gentium Plus";
-
-  const positions = new Array(tokens.length).fill(0);
-  const segmentBounds = new Array(tokens.length).fill(null);
-  const displayPositions = new Array(tokens.length).fill(0);
-  const displayText = tokens.map(t => t.form);
-  const displayOpacity = new Array(tokens.length).fill(1);
-  const displayAnchors = new Array(tokens.length).fill(rtl ? "end" : "middle");
-  const displayDx = new Array(tokens.length).fill(0);
-
-  groups.forEach((group, groupIndex) => {
-    const groupPos = groupPositions[groupIndex];
-    const tokenIndexes = group.tokenIndexes;
-    if (!groupPos) {
-      return;
-    }
-    const totalWeight = tokenIndexes.reduce((sum, idx) => {
-      const width = ctx.measureText(tokens[idx].form).width;
-      return sum + (width || 1);
-    }, 0) || 1;
-    let cursor = group.rtl ? groupPos.right : groupPos.left;
-    tokenIndexes.forEach((idx, segIndex) => {
-      const segWeight = ctx.measureText(tokens[idx].form).width || 1;
-      const segWidth = groupPos.width * (segWeight / totalWeight);
-      let segLeft;
-      let segRight;
-      if (group.rtl) {
-        segRight = cursor;
-        segLeft = cursor - segWidth;
-        cursor = segLeft;
-      } else {
-        segLeft = cursor;
-        segRight = cursor + segWidth;
-        cursor = segRight;
-      }
-      positions[idx] = (segLeft + segRight) / 2;
-      segmentBounds[idx] = { left: segLeft, right: segRight };
-      if (segIndex === 0) {
-        displayPositions[idx] = groupPos.center;
-        displayText[idx] = group.text;
-        displayOpacity[idx] = 1;
-        displayAnchors[idx] = "middle";
-        displayDx[idx] = 0;
-      } else {
-        displayPositions[idx] = groupPos.center;
-        displayOpacity[idx] = 0;
-      }
     });
-  });
-
-  return {
-    positions,
-    segmentBounds,
-    rows,
-    rowYs,
-    split,
-    displayPositions,
-    displayText,
-    displayOpacity,
-    displayAnchors,
-    displayDx
-  };
-}
-
-function renderSentence(sentence) {
-  const svg = d3.select(`#${sentence.svgId}`);
-  if (sentence.rtl) {
-    svg.attr("direction", "rtl")
-      .attr("style", "direction: rtl; unicode-bidi: bidi-override;");
-  }
-  const tokens = sentence.data.split("\n").map(line => {
-    const [id, form, , upos, , feats, head, deprel] = line.split("\t");
-    return { id: +id, form, upos, feats, head: +head, deprel };
   });
 
   const idToIndex = Object.fromEntries(tokens.map((t, i) => [t.id, i]));
-  const svgWidth = svg.node()?.getBoundingClientRect().width || 1800;
-  const {
-    positions,
-    segmentBounds,
-    rows,
-    rowYs,
-    displayPositions,
-    displayText,
-    displayOpacity,
-    displayAnchors,
-    displayDx
-  } = computeLayout(
-    tokens,
-    sentence.rtl,
-    sentence.noSpaceAfter,
-    svgWidth
-  );
+  const height = rowYs[rowYs.length - 1] + 150;
+  return { tokens, idToIndex, rows, rowYs, positions, bounds, display, height };
+}
+
+// A dependency edge from token index i to its head index h.
+function edgePath(L, i, h) {
+  const ri = L.rows[i], rh = L.rows[h];
+  if (ri === rh) {
+    const height = arcHeightForDistance(Math.abs(i - h));
+    return { d: arcPath(L.positions[i], L.positions[h], height, L.rowYs[ri] - 30), height, sameRow: true };
+  }
+  // Across rows: a straight line from the lower word's top to the upper word's bottom.
+  const yi = ri > rh ? L.rowYs[ri] - 24 : L.rowYs[ri] + 8;
+  const yh = rh > ri ? L.rowYs[rh] - 24 : L.rowYs[rh] + 8;
+  return { d: `M${L.positions[i]},${yi} L${L.positions[h]},${yh}`, sameRow: false };
+}
+
+const layouts = {};
+
+// ---------------------------------------------------------------- trees
+function renderSentence(sentence) {
+  const svg = d3.select(`#${sentence.svgId}`);
+  svg.selectAll("*").remove();
+  const svgWidth = svg.node()?.getBoundingClientRect().width || 1200;
+  const L = computeLayout(sentence, svgWidth);
+  layouts[sentence.svgId] = L;
+  svg.attr("height", L.height);
+  if (sentence.rtl) svg.attr("direction", "rtl");
 
   const defs = svg.append("defs");
-  defs.selectAll("marker")
-    .data([
-      { id: "arrowhead", color: "#ddd" },
-      { id: "arrowhead-red", color: "red" },
-      { id: "arrowhead-blue", color: "blue" }
-    ])
-    .enter().append("marker")
-      .attr("id", d => d.id)
-      .attr("viewBox", "0 -5 10 10")
-      .attr("refX", 8)
-      .attr("refY", 0)
-      .attr("markerWidth", 6)
-      .attr("markerHeight", 6)
-      .attr("orient", "auto")
-    .append("path")
-      .attr("d", "M0,-5L10,0L0,5")
-      .attr("fill", d => d.color);
+  [["arrowhead", "#d8dbe3"], ["arrowhead-red", "#d03b3b"], ["arrowhead-blue", "#1c3fae"]].forEach(([id, color]) => {
+    defs.append("marker").attr("id", `${sentence.svgId}-${id}`).attr("viewBox", "0 -5 10 10")
+      .attr("refX", 8).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
+      .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", color);
+  });
 
-  svg.selectAll(".arc")
-    .data(tokens.filter(t => t.head !== 0))
-    .enter().append("path")
-      .attr("class", "arc")
-      .attr("marker-end", "url(#arrowhead)")
-      .attr("d", d => {
-        const fromIndex = idToIndex[d.id];
-        const toIndex = idToIndex[d.head];
-        const fromRow = rows[fromIndex];
-        const toRow = rows[toIndex];
-        const x1 = positions[fromIndex];
-        const x2 = positions[toIndex];
-        if (fromRow !== toRow) {
-          const y1 = fromRow === 0 ? connectorY(rowYs, fromRow, "bottom") : connectorY(rowYs, fromRow, "top");
-          const y2 = toRow === 0 ? connectorY(rowYs, toRow, "bottom") : connectorY(rowYs, toRow, "top");
-          return `M${x1},${y1} L${x2},${y2}`;
-        }
-        const distance = Math.abs(fromIndex - toIndex);
-        const height = arcHeightForDistance(distance);
-        const y = fromRow === 0 ? rowYs[0] - 30 : rowYs[1] + 30;
-        return arcPath(x1, x2, height, y, fromRow === 1);
-      });
+  L.tokens.forEach((t, i) => {
+    if (!t.head || L.idToIndex[t.head] === undefined) return;
+    const e = edgePath(L, i, L.idToIndex[t.head]);
+    svg.append("path").attr("class", e.sameRow ? "arc" : "arc cross").attr("d", e.d)
+      .attr("marker-end", e.sameRow ? `url(#${sentence.svgId}-arrowhead)` : null);
+  });
 
-  const groups = svg.selectAll(".token")
-    .data(tokens).enter()
-    .append("g")
-      .attr("transform", (d, i) => `translate(${displayPositions[i]},${rowYs[rows[i]]})`)
-      .attr("data-id", d => `${sentence.svgId}-${d.id}`);
-
+  const lowConf = new Set(sentence.lowConf || []);
+  const groups = svg.selectAll(".token-g").data(L.tokens).enter().append("g")
+    .attr("class", "token-g")
+    .attr("transform", (d, i) => `translate(${L.display[i].x},${L.rowYs[L.rows[i]]})`)
+    .attr("data-id", d => `${sentence.svgId}-${d.id}`);
   groups.append("text")
-    .attr("text-anchor", (d, i) => displayAnchors[i])
+    .attr("text-anchor", "middle")
+    .attr("class", d => `token${d.head === 0 ? " root" : ""}${lowConf.has(d.id) ? " low-conf" : ""}`)
     .attr("direction", sentence.rtl ? "rtl" : "ltr")
-    .attr("unicode-bidi", sentence.rtl ? "bidi-override" : null)
-    .attr("class", d => `token${d.head === 0 ? " root" : ""}`)
-    .style("opacity", (d, i) => displayOpacity[i])
+    .style("opacity", (d, i) => (L.display[i].visible ? 1 : 0))
     .style("pointer-events", "none")
-    .attr("dx", (d, i) => displayDx[i])
-    .text((d, i) => displayText[i]);
+    .text((d, i) => L.display[i].text);
 
-  const hitHeight = 24;
-  svg.selectAll(".token-hit")
-    .data(tokens)
-    .enter()
-    .append("rect")
-      .attr("class", "token-hit")
-      .attr("x", (d, i) => {
-        const bounds = segmentBounds[i];
-        return bounds ? (bounds.left - 2) : (positions[i] - 10);
-      })
-      .attr("y", (d, i) => rowYs[rows[i]] - hitHeight + 4)
-      .attr("width", (d, i) => {
-        const bounds = segmentBounds[i];
-        return bounds ? (bounds.right - bounds.left + 4) : 20;
-      })
-      .attr("height", hitHeight)
-      .attr("fill", "transparent")
-      .style("cursor", "pointer")
-      .on("mouseover", (event, d) => highlight(event, d, sentence, positions, displayPositions, idToIndex, segmentBounds))
-      .on("mouseout", clearHighlight)
-      .on("click", (event, d) => navigateToLemma(sentence, d));
+  svg.selectAll(".token-hit").data(L.tokens).enter().append("rect")
+    .attr("class", "token-hit")
+    .attr("x", (d, i) => L.bounds[i].left - 2)
+    .attr("y", (d, i) => L.rowYs[L.rows[i]] - 22)
+    .attr("width", (d, i) => L.bounds[i].right - L.bounds[i].left + 4)
+    .attr("height", 28)
+    .attr("fill", "transparent")
+    .style("cursor", "pointer")
+    .on("mouseover", (event, d) => highlight(sentence, d))
+    .on("mouseout", clearHighlight)
+    .on("click", (event, d) => navigateToLemma(sentence, d));
 }
 
-function highlight(event, d, sentence, positions, displayPositions, idToIndex, segmentBounds) {
+function highlight(sentence, d) {
   clearHighlight();
-  const svg = d3.select(`#${sentence.svgId}`);
-  highlightWord(svg, sentence, d, positions, displayPositions, idToIndex, sentence.svgId, null, null, segmentBounds);
-
-  const pairId = wordMap[`${sentence.svgId}-${d.id}`];
-  if (pairId) {
-    const [pairSvgId, pairTokenId] = pairId.split("-");
-    const pairSentence = sentences.find(s => s.svgId === pairSvgId);
-    const pairTokens = pairSentence.data.split("\n").map(line => {
-      const [id, form, , upos, , feats, head, deprel] = line.split("\t");
-      return { id: +id, form, upos, feats, head: +head, deprel };
-    });
-    const pairIdToIndex = Object.fromEntries(pairTokens.map((t, i) => [t.id, i]));
-    const pairSvg = d3.select(`#${pairSvgId}`);
-    const pairSvgWidth = pairSvg.node()?.getBoundingClientRect().width || 1800;
-    const {
-      positions: pairPositions,
-      rows: pairRows,
-      rowYs: pairRowYs,
-      segmentBounds: pairSegmentBounds,
-      displayPositions: pairDisplayPositions
-    } = computeLayout(
-      pairTokens,
-      pairSentence.rtl,
-      pairSentence.noSpaceAfter,
-      pairSvgWidth
-    );
-    const pairD = pairTokens.find(t => t.id === +pairTokenId);
-    highlightWord(
-      pairSvg,
-      pairSentence,
-      pairD,
-      pairPositions,
-      pairDisplayPositions,
-      pairIdToIndex,
-      pairSvgId,
-      pairRows,
-      pairRowYs,
-      pairSegmentBounds
-    );
-  }
+  highlightWord(sentence, d, "token-bg", null, true);
+  (wordMap[`${sentence.svgId}-${d.id}`] || []).forEach(partner => {
+    const other = sentences.find(s => s.svgId === partner.svgId);
+    const L = layouts[partner.svgId];
+    if (!other || !L) return;
+    const pd = L.tokens.find(t => t.id === +partner.id);
+    if (pd) highlightWord(other, pd, partner.sure === false ? "token-bg-probable" : "token-bg", partner.confidence, true);
+  });
 }
 
-function highlightWord(svg, sentence, d, positions, displayPositions, idToIndex, svgId, rows, rowYs, segmentBounds) {
-  const tokens = sentence.data.split("\n").map(line => {
-    const [id, form, , upos, , feats, head, deprel] = line.split("\t");
-    return { id: +id, form, upos, feats, head: +head, deprel };
-  });
-  const svgWidth = svg.node()?.getBoundingClientRect().width || 1800;
-  if (!rows || !rowYs || !segmentBounds || !displayPositions) {
-    ({ rows, rowYs, segmentBounds, displayPositions } = computeLayout(
-      tokens,
-      sentence.rtl,
-      sentence.noSpaceAfter,
-      svgWidth
-    ));
+function highlightWord(sentence, d, bgClass, confidence, details) {
+  const L = layouts[sentence.svgId];
+  const svg = d3.select(`#${sentence.svgId}`);
+  const idx = L.idToIndex[d.id];
+  const row = L.rows[idx];
+  const rowY = L.rowYs[row];
+  const b = L.bounds[idx];
+  const group = svg.select(`[data-id="${sentence.svgId}-${d.id}"]`);
+  const bg = group.insert("rect", "text").attr("class", bgClass)
+    .attr("x", b.left - L.display[idx].x - 4).attr("y", -22)
+    .attr("width", b.right - b.left + 8).attr("height", 28).attr("rx", 4);
+  if (confidence !== null && confidence !== undefined) {
+    bg.append("title").text(`alignment confidence ${Number(confidence).toFixed(2)}`);
   }
-  const idx = idToIndex[d.id];
-  const x = positions[idx];
-  const displayX = displayPositions ? displayPositions[idx] : positions[idx];
-  const rowIndex = rows[idx];
-  const rowY = rowYs[rowIndex];
-  const y = rowIndex === 0 ? rowY - 18 : rowY + 18;
-  const group = d3.select(`[data-id="${svgId}-${d.id}"]`);
-  const bounds = segmentBounds[idx];
-  const rectWidth = bounds ? (bounds.right - bounds.left) : 0;
-  const rectHeight = 24;
-  group.insert("rect", "text")
-    .attr("class", "token-bg")
-    .attr("x", bounds ? (bounds.left - displayX - 4) : -10)
-    .attr("y", -rectHeight + 4)
-    .attr("width", bounds ? (rectWidth + 8) : 20)
-    .attr("height", rectHeight);
+  if (!details) return;
 
-  if (d.head !== 0) {
-    const headIdx = idToIndex[d.head];
-    const headRow = rows[headIdx];
-    if (headRow !== rowIndex) {
-      const y1 = rowIndex === 0 ? connectorY(rowYs, rowIndex, "bottom") : connectorY(rowYs, rowIndex, "top");
-      const y2 = headRow === 0 ? connectorY(rowYs, headRow, "bottom") : connectorY(rowYs, headRow, "top");
-      svg.append("path")
-        .attr("class", "arc arc-highlight-out")
-        .attr("marker-end", "url(#arrowhead-blue)")
-        .attr("d", `M${positions[idx]},${y1} L${positions[headIdx]},${y2}`);
-    } else {
-      const distance = Math.abs(idToIndex[d.id] - idToIndex[d.head]);
-      const height = arcHeightForDistance(distance);
-      const arcY = rowIndex === 0 ? rowY - 30 : rowY + 30;
-      svg.append("path")
-        .attr("class", "arc arc-highlight-out")
-        .attr("marker-end", "url(#arrowhead-blue)")
-        .attr("d", arcPath(positions[idx], positions[headIdx], height, arcY, rowIndex === 1));
-      svg.append("text")
-        .attr("class", "arc-label")
-        .attr("x", (positions[idx] + positions[headIdx]) / 2)
-        .attr("y", rowIndex === 0 ? arcY - height - 20 : arcY + height + 20)
-        .text(d.deprel);
-    }
+  const sid = sentence.svgId;
+  if (d.head && L.idToIndex[d.head] !== undefined) {
+    const h = L.idToIndex[d.head];
+    const e = edgePath(L, idx, h);
+    svg.append("path").attr("class", "arc arc-highlight-out").attr("d", e.d).attr("marker-end", `url(#${sid}-arrowhead-blue)`);
+    const labelY = e.sameRow ? rowY - 30 - e.height - 8 : (rowY + L.rowYs[L.rows[h]]) / 2;
+    svg.append("text").attr("class", "arc-label").attr("x", (L.positions[idx] + L.positions[h]) / 2).attr("y", labelY).text(d.deprel);
   }
-
-  tokens.forEach((t, i) => {
+  L.tokens.forEach((t, i) => {
     if (t.head === d.id) {
-      const childRow = rows[i];
-      if (childRow !== rowIndex) {
-        const y1 = rowIndex === 0 ? connectorY(rowYs, rowIndex, "bottom") : connectorY(rowYs, rowIndex, "top");
-        const y2 = childRow === 0 ? connectorY(rowYs, childRow, "bottom") : connectorY(rowYs, childRow, "top");
-        svg.append("path")
-          .attr("class", "arc arc-highlight-in")
-          .attr("marker-end", "url(#arrowhead-red)")
-          .attr("d", `M${positions[i]},${y2} L${positions[idx]},${y1}`);
-      } else {
-        const distance = Math.abs(i - idx);
-        const height = arcHeightForDistance(distance);
-        const arcY = rowIndex === 0 ? rowY - 30 : rowY + 30;
-        svg.append("path")
-          .attr("class", "arc arc-highlight-in")
-          .attr("marker-end", "url(#arrowhead-red)")
-          .attr("d", arcPath(positions[i], positions[idx], height, arcY, rowIndex === 1));
-      }
+      svg.append("path").attr("class", "arc arc-highlight-in").attr("d", edgePath(L, i, idx).d)
+        .attr("marker-end", `url(#${sid}-arrowhead-red)`);
     }
   });
 
-  const featLines = (d.feats && d.feats !== "_") ? d.feats.split("|") : [];
-  const lines = [d.upos, ...featLines];
-  lines.forEach((line, i) => {
-    svg.append("text")
-      .attr("class", "features")
-      .attr("x", x)
-      .attr("y", rowIndex === 0 ? (rowY + 20 + i * 14) : (rowY - 20 - i * 14))
-      .text(line);
+  const featLines = d.feats && d.feats !== "_" ? d.feats.split("|") : [];
+  const lines = [[d.lemma && d.lemma !== "_" ? d.lemma : null, "lemma-line"], [d.upos, ""], ...featLines.map(f => [f, ""])]
+    .filter(([text]) => text);
+  lines.forEach(([text, cls], i) => {
+    svg.append("text").attr("class", `features ${cls}`).attr("x", L.positions[idx]).attr("y", rowY + 22 + i * 14).text(text);
   });
 }
 
 function clearHighlight() {
-  d3.selectAll(".token-bg").remove();
-  d3.selectAll(".arc-highlight-in").remove();
-  d3.selectAll(".arc-highlight-out").remove();
-  d3.selectAll(".arc-label").remove();
-  d3.selectAll(".features").remove();
+  d3.selectAll(".token-bg, .token-bg-probable, .arc-highlight-in, .arc-highlight-out, .arc-label, .features").remove();
+}
+
+function lemmaUrl(languageSlug, lemma) {
+  return `../${languageSlug}/${encodeURIComponent(lemma)}/`;
 }
 
 function navigateToLemma(sentence, d) {
-  if (!sentence.lemmaMap || !sentence.languageSlug) {
-    return;
-  }
-  const lemma = sentence.lemmaMap[d.id];
-  if (!lemma || lemma === "_") {
-    return;
-  }
-  const encodedLemma = encodeURIComponent(lemma);
-  window.location.href = `../../${siglum}/${sentence.languageSlug}/${encodedLemma}/`;
+  const lemma = sentence.lemmaMap && sentence.lemmaMap[d.id];
+  if (lemma) window.location.href = lemmaUrl(sentence.languageSlug, lemma);
 }
 
-sentences.forEach(renderSentence);
-
-function clearSVGs() {
-  d3.selectAll("svg").selectAll("*").remove();
+function renderTrees() {
+  sentences.forEach(renderSentence);
 }
 
-// function loadDataset(name) {
-//   const { sentences, wordMap } = datasets[name];
-//   window.currentWordMap = wordMap;
-//   clearSVGs();
-//   sentences.forEach(renderSentence);
-// }
+// ---------------------------------------------------------------- interlinear
+function renderInterlinear(sideIndex) {
+  const main = sentences[sideIndex];
+  const other = sentences[1 - sideIndex];
+  const otherTokens = Object.fromEntries(parseTokens(other.data).map(t => [t.id, t]));
+  const container = document.getElementById("interlinear");
+  container.setAttribute("dir", main.rtl ? "rtl" : "ltr");
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const linkedOther = new Set();
+  container.innerHTML = parseTokens(main.data).map(t => {
+    const partners = (wordMap[`${main.svgId}-${t.id}`] || []).slice().sort((a, b) => a.id - b.id);
+    partners.forEach(p => linkedOther.add(p.id));
+    const partnerHtml = partners.length
+      ? partners.map(p => {
+          const pt = otherTokens[p.id];
+          const conf = p.confidence !== null && p.confidence !== undefined ? ` · confidence ${Number(p.confidence).toFixed(2)}` : "";
+          return `<span class="${p.sure === false ? "probable" : ""}" title="${esc(pt?.lemma)} (${esc(pt?.upos)})${p.sure === false ? " · probable" : ""}${conf}">${esc(pt?.form)}</span>`;
+        }).join(" ")
+      : '<span class="none">—</span>';
+    const lemma = main.lemmaMap[t.id];
+    return `<div class="il-word${partners.length ? "" : " unaligned"}" data-lemma="${esc(lemma || "")}" title="${esc(t.feats !== "_" ? t.feats : "")}">
+      <div class="form">${esc(t.form)}</div>
+      <div class="lemma">${esc(t.lemma !== "_" ? t.lemma : "")}</div>
+      <div class="upos">${esc(t.upos)}</div>
+      <div class="partners" ${other.rtl ? 'dir="rtl"' : ""}>${partnerHtml}</div>
+    </div>`;
+  }).join("");
+  container.querySelectorAll(".il-word").forEach(el => el.addEventListener("click", () => {
+    if (el.dataset.lemma) window.location.href = lemmaUrl(main.languageSlug, el.dataset.lemma);
+  }));
 
-// document.getElementById("datasetSelector").addEventListener("change", (e) => {
-//   loadDataset(e.target.value);
-// });
+  const leftover = Object.values(otherTokens).filter(t => !linkedOther.has(t.id) && t.upos !== "PUNCT");
+  document.getElementById("interlinear-extra").innerHTML = leftover.length
+    ? `Not aligned to any word above: <span class="text-serif" style="font-size:1.05rem">${leftover.map(t => esc(t.form)).join(" · ")}</span>`
+    : "";
+}
 
-// // Load default
-// loadDataset("matt2_2a");
+// ---------------------------------------------------------------- matrix
+function renderMatrix() {
+  const [A, B] = sentences;
+  const ta = parseTokens(A.data), tb = parseTokens(B.data);
+  const cell = 24;
+  measureCtx.font = '15px "Gentium Plus"';
+  const left = Math.min(220, 16 + Math.max(...ta.map(t => measureCtx.measureText(t.form).width)));
+  const top = Math.min(220, 16 + Math.max(...tb.map(t => measureCtx.measureText(t.form).width)) * 0.75);
+  const width = left + tb.length * cell + 20;
+  const height = top + ta.length * cell + 20;
+  const svg = d3.select("#matrix").attr("width", width).attr("height", height);
+  svg.selectAll("*").remove();
+  const ai = Object.fromEntries(ta.map((t, i) => [t.id, i]));
+  const bi = Object.fromEntries(tb.map((t, i) => [t.id, i]));
+
+  const grid = svg.append("g");
+  ta.forEach((_, r) => tb.forEach((__, c) => {
+    grid.append("rect").attr("class", "gridcell").attr("data-r", r).attr("data-c", c)
+      .attr("x", left + c * cell).attr("y", top + r * cell).attr("width", cell).attr("height", cell);
+  }));
+  svg.append("line").attr("class", "diag").attr("x1", left).attr("y1", top)
+    .attr("x2", left + tb.length * cell).attr("y2", top + ta.length * cell);
+
+  svg.selectAll(".row-lbl").data(ta).enter().append("text").attr("class", "lbl row-lbl")
+    .attr("x", left - 8).attr("y", (d, i) => top + i * cell + cell / 2 + 5).attr("text-anchor", "end").text(d => d.form);
+  svg.selectAll(".col-lbl").data(tb).enter().append("text").attr("class", "lbl col-lbl")
+    .attr("transform", (d, i) => `translate(${left + i * cell + cell / 2 + 4},${top - 8}) rotate(-50)`).text(d => d.form);
+
+  const links = [];
+  ta.forEach(t => (wordMap[`${A.svgId}-${t.id}`] || []).forEach(p => links.push({ a: t, b: tb[bi[p.id]], p })));
+  svg.selectAll(".dot").data(links.filter(l => l.b)).enter().append("circle")
+    .attr("class", l => `dot ${l.p.sure === false ? "probable" : "sure"}`)
+    .attr("cx", l => left + bi[l.b.id] * cell + cell / 2)
+    .attr("cy", l => top + ai[l.a.id] * cell + cell / 2)
+    .attr("r", 7)
+    .on("mouseover", (event, l) => {
+      const r = ai[l.a.id], c = bi[l.b.id];
+      svg.selectAll(".gridcell").classed("hover", function () { return +this.dataset.r === r || +this.dataset.c === c; });
+      svg.selectAll(".row-lbl").classed("active", (d, i) => i === r);
+      svg.selectAll(".col-lbl").classed("active", (d, i) => i === c);
+      const conf = l.p.confidence !== null && l.p.confidence !== undefined ? `<br>confidence ${Number(l.p.confidence).toFixed(2)}` : "";
+      NAV.showTip(event, `<b>${NAV.esc(l.a.form)}</b> → <b>${NAV.esc(l.b.form)}</b><br>${NAV.esc(l.a.lemma)} → ${NAV.esc(l.b.lemma)}<br>${l.p.sure === false ? "probable" : "sure"}${conf}`);
+    })
+    .on("mouseout", () => {
+      svg.selectAll(".gridcell").classed("hover", false);
+      svg.selectAll(".lbl").classed("active", false);
+      NAV.hideTip();
+    });
+}
+
+// ---------------------------------------------------------------- wiring
+renderTrees();
+renderInterlinear(0);
+renderMatrix();
+
+let resizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderTrees, 150);
+});
+// Trees measure their width, so re-render when their tab is shown again.
+document.querySelector('[data-bs-target="#tab-trees"]')?.addEventListener("shown.bs.tab", renderTrees);
+
+document.querySelectorAll("#il-direction button").forEach(btn => btn.addEventListener("click", () => {
+  document.querySelectorAll("#il-direction button").forEach(b => b.classList.toggle("active", b === btn));
+  renderInterlinear(+btn.dataset.side);
+}));
+
+document.addEventListener("keydown", e => {
+  if (/input|textarea|select/i.test(document.activeElement.tagName) || e.metaKey || e.ctrlKey || e.altKey) return;
+  const go = id => { const a = document.getElementById(id); if (a && !a.classList.contains("disabled")) window.location.href = a.href; };
+  if (e.key === "ArrowLeft") go("prev-verse");
+  if (e.key === "ArrowRight") go("next-verse");
+  const tabs = ["#tab-trees", "#tab-interlinear", "#tab-matrix"];
+  if (["1", "2", "3"].includes(e.key)) {
+    const btn = document.querySelector(`[data-bs-target="${tabs[+e.key - 1]}"]`);
+    if (btn) bootstrap.Tab.getOrCreateInstance(btn).show();
+  }
+});

@@ -1,107 +1,146 @@
-<html>
-    <head>
-        <title>Polyglottarium</title>
-        <style type="text/css">
-            body {
-                font-family: Arial, sans-serif;
-                text-align: center;
-                margin-top: 50px;
-            }
-            #logo img {
-                width: 500px;
-                margin: 0 auto;
-                display: block; /* Added for better centering */
-            }
-            h2 {
-                font-family: "Gentium Plus", serif;
-                font-size: 24px;
-                color: #113F64;
-                text-align: left;;
-            }
-            li {
-                font-family: "Gentium Plus", serif;
-                font-size: 20px;
-                color: #113F64;
-            }
-            .category {
-                margin-top: 20px;
-                text-align: left; /* Align the list to the left */
-                padding-left: 10px; /* Add some padding for better readability */
-                width: 300px; /* Set a fixed width for the list */
-            }
-            #mss {
-                display: flex;
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-        </style>
-        <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus&display=swap" rel="stylesheet">
-    </head>
-    <body>
-        <div id="logo">
-            <center>
-                <img src="./img/Logo-Arcs.jpg" alt="Polyglottarium Logo" \>
-            </center>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home · Bilingual Navigator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 24 A8 10 0 0 1 20 24 M12 24 A8 10 0 0 1 28 24' fill='none' stroke='%23224abe' stroke-width='3'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="./css/navigator.css">
+    
+</head>
+<body data-page="home">
+<div class="app">
+    <aside class="sidebar" id="sidebar">
+        <a class="logo" href="./"><img src="./img/Logo-Arcs.jpg" alt="Bilingual Navigator"></a>
+        
+        
+        <h6>Gothic-Latin</h6>
+        <nav class="ms-list">
+            
+            <a href="./mss/carolinus/" class="" title="Codex Carolinus">Car <span class="muted" style="color:rgba(255,255,255,.6)">· Codex Carolinus</span></a>
+            
+        </nav>
+        
+        <h6>Greek-Arabic</h6>
+        <nav class="ms-list">
+            
+            <a href="./mss/0278/" class="" title="GA 0278">0278 <span class="muted" style="color:rgba(255,255,255,.6)">· GA 0278</span></a>
+            
+        </nav>
+        
+        <h6>Greek-Coptic</h6>
+        <nav class="ms-list">
+            
+            <a href="./mss/borgianus/" class="" title="Codex Borgianus">029 <span class="muted" style="color:rgba(255,255,255,.6)">· Codex Borgianus</span></a>
+            
+        </nav>
+        
+        <h6>Greek-Latin</h6>
+        <nav class="ms-list">
+            
+            <a href="./mss/claromontanus/" class="" title="Codex Claromontanus">06 <span class="muted" style="color:rgba(255,255,255,.6)">· Codex Claromontanus</span></a>
+            
+        </nav>
+        
+    </aside>
+    <div class="main">
+        <header class="topbar">
+            <button class="btn btn-sm btn-outline-secondary sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+            <h1>Bilingual Navigator</h1><span class="crumb">Multilingual New Testament manuscripts, parsed and word-aligned</span>
+        </header>
+        <main class="content">
+            
+<div class="home-hero">
+    <img src="./img/Logo-Arcs.svg" alt="Bilingual Navigator">
+    <p>Read each bilingual manuscript verse by verse, with both languages parsed and every word linked to its counterpart.
+        Explore how the translator rendered grammar and vocabulary.</p>
+</div>
+
+<h2 class="text-center text-serif mt-4" style="font-size:1.4rem">Gothic-Latin</h2>
+<div class="ms-cards">
+    
+    <a class="ms-card" href="./mss/carolinus/">
+        <div class="siglum"> · VL 79 · 6 cent.</div>
+        <h3>Codex Carolinus</h3>
+        <div class="langs">Gothic-Latin bilingual palimpsest fragments of Romans.</div>
+        <div class="nums">
+            <div><b>42</b>verses</div>
+            <div><b>599</b>links</div>
+            <div><b>98%</b>words aligned</div>
         </div>
-        <div id="mss">
-            
-            <div class="category">
-                <h2>Greek-Arabic</h2>
-                <ul>
-                    
-                    <li><a href="./mss/Harris9/">0136</a></li>
-                    
-                    <li><a href="./mss/GA211/">211</a></li>
-                    
-                    <li><a href="./mss/S116/">L2211</a></li>
-                    
-                </ul>
-            </div>
-            
-            <div class="category">
-                <h2>Greek-Coptic</h2>
-                <ul>
-                    
-                    <li><a href="./mss/GA086/">086</a></li>
-                    
-                    <li><a href="./mss/GA0238/">0238</a></li>
-                    
-                    <li><a href="./mss/GA0260/">0260</a></li>
-                    
-                </ul>
-            </div>
-            
-            <div class="category">
-                <h2>Greek-Latin</h2>
-                <ul>
-                    
-                    <li><a href="./mss/bezae/">05</a></li>
-                    
-                    <li><a href="./mss/claromontanus/">06</a></li>
-                    
-                    <li><a href="./mss/laudianus/">08</a></li>
-                    
-                    <li><a href="./mss/augiensis/">010</a></li>
-                    
-                    <li><a href="./mss/boernerianus/">012</a></li>
-                    
-                    <li><a href="./mss/sangallensis48/">037</a></li>
-                    
-                    <li><a href="./mss/sangermanensis/">0319</a></li>
-                    
-                    <li><a href="./mss/GA79/">79</a></li>
-                    
-                    <li><a href="./mss/GA457/">457</a></li>
-                    
-                    <li><a href="./mss/GA620/">620</a></li>
-                    
-                    <li><a href="./mss/GA628/">628</a></li>
-                    
-                    <li><a href="./mss/GA629/">629</a></li>
-                    
-                </ul>
-            </div>
-            
+    </a>
+    
+</div>
+
+<h2 class="text-center text-serif mt-4" style="font-size:1.4rem">Greek-Arabic</h2>
+<div class="ms-cards">
+    
+    <a class="ms-card" href="./mss/0278/">
+        <div class="siglum">GA 0278 · 9 cent.</div>
+        <h3>GA 0278</h3>
+        <div class="langs">Greek-Arabic bilingual of the Pauline epistles. Ephesians so far.</div>
+        <div class="nums">
+            <div><b>111</b>verses</div>
+            <div><b>1,590</b>links</div>
+            <div><b>82%</b>words aligned</div>
         </div>
-    </body>
+    </a>
+    
+</div>
+
+<h2 class="text-center text-serif mt-4" style="font-size:1.4rem">Greek-Coptic</h2>
+<div class="ms-cards">
+    
+    <a class="ms-card" href="./mss/borgianus/">
+        <div class="siglum">GA 029 · 5 cent.</div>
+        <h3>Codex Borgianus</h3>
+        <div class="langs">Greek-Sahidic Coptic bilingual of the Gospels. John so far.</div>
+        <div class="nums">
+            <div><b>91</b>verses</div>
+            <div><b>1,644</b>links</div>
+            <div><b>75%</b>words aligned</div>
+        </div>
+    </a>
+    
+</div>
+
+<h2 class="text-center text-serif mt-4" style="font-size:1.4rem">Greek-Latin</h2>
+<div class="ms-cards">
+    
+    <a class="ms-card" href="./mss/claromontanus/">
+        <div class="siglum">GA 06 · VL 75 · 5 cent.</div>
+        <h3>Codex Claromontanus</h3>
+        <div class="langs">Greek-Latin bilingual of the Pauline epistles. Galatians so far.</div>
+        <div class="nums">
+            <div><b>149</b>verses</div>
+            <div><b>2,330</b>links</div>
+            <div><b>99%</b>words aligned</div>
+        </div>
+    </a>
+    
+</div>
+
+
+        </main>
+        
+    </div>
+</div>
+<div class="chart-tooltip" id="tooltip" role="tooltip"></div>
+<script>
+    window.NAV = {
+        root: "./",
+        siglum: null,
+        msUrl: null,
+        langs: null
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+<script src="./js/d3.v7.min.js"></script>
+<script src="./js/common.js"></script>
+
+</body>
 </html>

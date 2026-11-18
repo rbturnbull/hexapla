@@ -9,7 +9,8 @@ from rich.progress import Progress
 
 from .bible import read_verse_ref
 from .tei import read_tei, extract_text, find_elements
-from .build import build_from_yaml, build_sidebar_sections, build_home_page
+from .build import build_website, WEBSITE_DIR
+from .dataset import DATASETS_DIR, DatasetError, find_manifests, load_dataset, load_datasets
 
 DATA_DIR = Path("data")
 MANUSCRIPT_DATA_PATH = DATA_DIR / "bilingual-mss.yaml"
@@ -155,17 +156,56 @@ def extract(max_verses:int|None = None):
 
 
 @app.command()
-def build():
-    print("Building website...")
-    sidebar_sections = build_sidebar_sections()
-    build_home_page(build_sidebar_sections(href_prefix="./mss"))
-    for ms_directory in DATA_DIR.iterdir():
-        if not ms_directory.is_dir():
-            continue
+def build(
+    datasets_dir: Path = typer.Option(DATASETS_DIR, help="Folder with one sub-folder (and dataset.yaml) per dataset."),
+    website_dir: Path = typer.Option(WEBSITE_DIR, help="Where to write the website."),
+    only: list[str] = typer.Option(None, "--only", help="Build only these datasets (folder names). Repeatable."),
+):
+    """
+    Build the website from every dataset in DATASETS_DIR (see datasets/README.md).
+    """
+    datasets = load_datasets(datasets_dir)
+    selected = [dataset for dataset in datasets if not only or dataset.path.parent.name in only]
+    if not selected:
+        print(f"No datasets to build in {datasets_dir}")
+        raise typer.Exit(1)
+    for dataset in selected:
+        print(f"Building {dataset.id}: {dataset.title} ({len(dataset.verses)} verses)")
+        for problem in dataset.problems:
+            print(f"    ! {problem}")
+    # The sidebar and home page always list every dataset, even when only some are rebuilt.
+    # Only remove stale pages when every manifest loaded, so a broken dataset keeps its last good build.
+    clean = not only and len(datasets) == len(find_manifests(datasets_dir))
+    build_website(datasets, website_dir, build_ids={dataset.id for dataset in selected}, clean=clean)
+    print(f"Website written to {website_dir}")
 
-        yaml_path = ms_directory / f"{ms_directory.stem}.yaml"
-        if yaml_path.exists():
-            build_from_yaml(yaml_path, sidebar_sections=sidebar_sections)
+
+@app.command()
+def validate(
+    datasets_dir: Path = typer.Option(DATASETS_DIR, help="Folder with one sub-folder (and dataset.yaml) per dataset."),
+    only: list[str] = typer.Option(None, "--only", help="Check only these datasets (folder names). Repeatable."),
+):
+    """
+    Check that each dataset's manifest, CoNLL-U and alignment files load, and report what would be built.
+    """
+    manifests = [m for m in find_manifests(datasets_dir) if not only or m.parent.name in only]
+    if not manifests:
+        print(f"No datasets found in {datasets_dir}")
+        raise typer.Exit(1)
+    failed = False
+    for manifest in manifests:
+        try:
+            dataset = load_dataset(manifest)
+        except (DatasetError, ValueError, OSError) as err:
+            failed = True
+            print(f"✗ {manifest.parent.name}: {err}")
+            continue
+        stats = ", ".join(f"{key}={value}" for key, value in dataset.stats().items())
+        print(f"✓ {dataset.id}: {dataset.title} [{dataset.category}] {stats}")
+        for problem in dataset.problems:
+            print(f"    ! {problem}")
+    if failed:
+        raise typer.Exit(1)
 
 
 if __name__ == "__main__":

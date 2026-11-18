@@ -1,0 +1,73 @@
+# sent_id = B06K01V07
+# text = προς ρωμαιους κλητοις αγιοις χαρις υμειν και ειρηνη απο θυ πατρος ημων και κυ ιυ χυ
+# verse = Romans 1:7
+1	προς	πρός	ADP	R-	_	2	case	_	Conf=form:0.9,lemma:0.9,upos:0.85,xpos:0.9,feats:0.97,head:0.9,deprel:0.9
+2	ρωμαιους	Ῥωμαῖος	PROPN	Ne	Case=Acc|Gender=Masc|Number=Plur	5	orphan	_	Conf=form:0.9,lemma:0.9,upos:0.9,xpos:0.97,feats:0.85,head:0.97,deprel:0.85
+3	κλητοις	κλητός	ADJ	A-	Case=Dat|Gender=Masc|Number=Plur	2	amod	_	Conf=form:0.9,lemma:0.85,upos:0.85,xpos:0.97,feats:0.9,head:0.97,deprel:0.97
+4	αγιοις	ἅγιος	ADJ	A-	Case=Dat|Gender=Masc|Number=Plur	3	conj	_	Conf=form:0.97,lemma:0.85,upos:0.9,xpos:0.85,feats:0.97,head:0.85,deprel:0.97
+5	χαρις	χάρις	NOUN	Nb	Case=Nom|Gender=Fem|Number=Sing	0	root	_	Conf=form:0.9,lemma:0.9,upos:0.97,xpos:0.85,feats:0.9,head:0.9,deprel:0.9
+6	υμειν	ὑμεῖς	PRON	Pp	Case=Dat|Gender=Masc|Number=Plur|Person=2|PronType=Prs	5	orphan	_	Conf=form:0.97,lemma:0.97,upos:0.85,xpos:0.97,feats:0.9,head:0.9,deprel:0.97
+7	και	καί	CCONJ	C-	_	8	cc	_	Conf=form:0.9,lemma:0.85,upos:0.97,xpos:0.85,feats:0.85,head:0.97,deprel:0.9
+8	ειρηνη	εἰρήνη	NOUN	Nb	Case=Nom|Gender=Fem|Number=Sing	5	conj	_	Conf=form:0.97,lemma:0.97,upos:0.97,xpos:0.85,feats:0.97,head:0.9,deprel:0.9
+9	απο	ἀπό	ADP	R-	_	10	case	_	Conf=form:0.85,lemma:0.97,upos:0.9,xpos:0.97,feats:0.85,head:0.85,deprel:0.97
+10	θυ	θεός	NOUN	Nb	Case=Gen|Gender=Masc|Number=Sing	5	orphan	_	Conf=form:0.85,lemma:0.85,upos:0.85,xpos:0.97,feats:0.9,head:0.85,deprel:0.85
+11	πατρος	πατήρ	NOUN	Nb	Case=Gen|Gender=Masc|Number=Sing	10	appos	_	Conf=form:0.9,lemma:0.97,upos:0.9,xpos:0.85,feats:0.9,head:0.97,deprel:0.9
+12	ημων	ἡμεῖς	PRON	Pp	Case=Gen|Gender=Masc|Number=Plur|Person=1|PronType=Prs	11	det	_	Conf=form:0.97,lemma:0.85,upos:0.97,xpos:0.9,feats:0.97,head:0.85,deprel:0.97
+13	και	καί	CCONJ	C-	_	14	cc	_	Conf=form:0.97,lemma:0.97,upos:0.9,xpos:0.9,feats:0.85,head:0.97,deprel:0.9
+14	κυ	κύριος	NOUN	Nb	Case=Gen|Gender=Masc|Number=Sing	10	conj	_	Conf=form:0.9,lemma:0.97,upos:0.85,xpos:0.9,feats:0.85,head:0.85,deprel:0.85
+15	ιυ	Ἰησοῦς	PROPN	Ne	Case=Gen|Gender=Masc|Number=Sing	14	appos	_	Conf=form:0.85,lemma:0.97,upos:0.97,xpos:0.9,feats:0.9,head:0.85,deprel:0.85
+16	χυ	Χριστός	PROPN	Ne	Case=Gen|Gender=Masc|Number=Sing	15	flat:name	_	Conf=form:0.97,lemma:0.85,upos:0.85,xpos:0.85,feats:0.85,head:0.97,deprel:0.97
+
+# sent_id = B06K01V08
+# text = π ρωτον μεν ευχαριστω τω θω μου δια ιυ χυ περι παντων υμων οτι η πιστις υμων καταγγελλετε εν ολω τω κοσμω
+# verse = Romans 1:8
+1	π ρωτον	πρῶτον	ADV	Df	_	4	advmod	_	Conf=form:0.85,lemma:0.9,upos:0.97,xpos:0.9,feats:0.97,head:0.97,deprel:0.85
+2	μεν	μέν	ADV	Df	_	4	discourse	_	Conf=form:0.85,lemma:0.9,upos:0.9,xpos:0.9,feats:0.9,head:0.85,deprel:0.9
+3	ευχαριστω	εὐχαριστέω	VERB	V-	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin|Voice=Act	0	root	_	Conf=form:0.85,lemma:0.97,upos:0.97,xpos:0.85,feats:0.97,head:0.85,deprel:0.85
+4	τω	ὁ	DET	S-	Case=Dat|Definite=Def|Gender=Masc,Neut|Number=Sing|PronType=Dem	5	det	_	Conf=form:0.9,lemma:0.97,upos:0.9,xpos:0.9,feats:0.85,head:0.85,deprel:0.85
+5	θω	θεός	NOUN	Nb	Case=Dat|Gender=Masc|Number=Sing	3	obl:arg	_	Conf=form:0.97,lemma:0.85,upos:0.97,xpos:0.97,feats:0.97,head:0.85,deprel:0.85
+6	μου	ἐγώ	PRON	Pp	Case=Gen|Gender=Masc|Number=Sing|Person=1|PronType=Prs	5	det	_	Conf=form:0.85,lemma:0.97,upos:0.97,xpos:0.85,feats:0.9,head:0.9,deprel:0.97
+7	δια	διά	ADP	R-	_	9	case	_	Conf=form:0.85,lemma:0.85,upos:0.9,xpos:0.9,feats:0.97,head:0.85,deprel:0.85
+8	ιυ	Ἰησοῦς	PROPN	Ne	Case=Gen|Gender=Masc|Number=Sing	3	obl	_	Conf=form:0.9,lemma:0.9,upos:0.85,xpos:0.9,feats:0.85,head:0.97,deprel:0.97
+9	χυ	Χριστός	PROPN	Ne	Case=Gen|Gender=Masc|Number=Sing	8	flat:name	_	Conf=form:0.97,lemma:0.97,upos:0.9,xpos:0.85,feats:0.85,head:0.9,deprel:0.85
+10	περι	περί	ADP	R-	_	11	case	_	Conf=form:0.85,lemma:0.85,upos:0.85,xpos:0.97,feats:0.9,head:0.97,deprel:0.9
+11	παντων	πᾶς	DET	Px	Case=Gen|Gender=Masc,Neut|Number=Plur	3	obl	_	Conf=form:0.9,lemma:0.97,upos:0.85,xpos:0.97,feats:0.97,head:0.97,deprel:0.97
+12	υμων	ὑμεῖς	PRON	Pp	Case=Gen|Gender=Masc|Number=Plur|Person=2|PronType=Prs	11	det	_	Conf=form:0.9,lemma:0.97,upos:0.97,xpos:0.9,feats:0.97,head:0.9,deprel:0.9
+13	οτι	ὅτι	SCONJ	G-	_	18	mark	_	Conf=form:0.97,lemma:0.85,upos:0.85,xpos:0.9,feats:0.97,head:0.9,deprel:0.85
+14	η	ὁ	DET	S-	Case=Nom|Definite=Def|Gender=Fem|Number=Sing|PronType=Dem	15	det	_	Conf=form:0.85,lemma:0.85,upos:0.9,xpos:0.9,feats:0.9,head:0.9,deprel:0.97
+15	πιστις	πίστις	NOUN	Nb	Case=Nom|Gender=Fem|Number=Sing	18	nsubj	_	Conf=form:0.85,lemma:0.9,upos:0.97,xpos:0.85,feats:0.85,head:0.9,deprel:0.85
+16	υμων	ὑμεῖς	PRON	Pp	Case=Gen|Gender=Masc|Number=Plur|Person=2|PronType=Prs	15	det	_	Conf=form:0.85,lemma:0.97,upos:0.9,xpos:0.9,feats:0.9,head:0.97,deprel:0.85
+17	καταγγελλετε	καταγγέλλω	VERB	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Pass	3	advcl	_	Conf=form:0.9,lemma:0.85,upos:0.9,xpos:0.97,feats:0.85,head:0.85,deprel:0.9
+18	εν	ἐν	ADP	R-	_	20	case	_	Conf=form:0.85,lemma:0.97,upos:0.97,xpos:0.85,feats:0.9,head:0.9,deprel:0.9
+19	ολω	ὅλος	ADJ	A-	Case=Dat|Degree=Pos|Gender=Masc|Number=Sing	20	det	_	Conf=form:0.9,lemma:0.9,upos:0.85,xpos:0.85,feats:0.97,head:0.9,deprel:0.9
+20	τω	ὁ	DET	S-	Case=Dat|Definite=Def|Gender=Masc,Neut|Number=Sing|PronType=Dem	21	det	_	Conf=form:0.9,lemma:0.9,upos:0.85,xpos:0.9,feats:0.85,head:0.97,deprel:0.9
+21	κοσμω	κόσμος	NOUN	Nb	Case=Dat|Gender=Masc|Number=Sing	17	obl	_	Conf=form:0.9,lemma:0.85,upos:0.9,xpos:0.9,feats:0.97,head:0.97,deprel:0.85
+
+# sent_id = B06K01V09
+# text = μαρτυ ρ γαρ μοι εστιν ο θς ω λατρευω εν τω πνι μου εν τω ευαγγελιω του υιου αυτου ως αδιαλιπτως μνιαν υμων ποιουμαι
+# verse = Romans 1:9
+1	μαρτυ	μάρτυς	NOUN	Nb	Case=Nom|Gender=Masc|Number=Sing	7	nsubj	_	Conf=form:0.9,lemma:0.85,upos:0.97,xpos:0.9,feats:0.9,head:0.9,deprel:0.85
+2	ρ	ρ	X	X	_	1	dep	_	Conf=form:0.85,lemma:0.9,upos:0.85,xpos:0.85,feats:0.85,head:0.97,deprel:0.97
+3	γαρ	γάρ	ADV	Df	_	7	discourse	_	Conf=form:0.85,lemma:0.97,upos:0.9,xpos:0.85,feats:0.97,head:0.97,deprel:0.97
+4	μοι	ἐγώ	PRON	Pp	Case=Dat|Gender=Masc|Number=Sing|Person=1|PronType=Prs	1	det	_	Conf=form:0.9,lemma:0.85,upos:0.9,xpos:0.9,feats:0.85,head:0.85,deprel:0.97
+5	εστιν	εἰμί	AUX	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act	7	cop	_	Conf=form:0.97,lemma:0.9,upos:0.97,xpos:0.97,feats:0.9,head:0.97,deprel:0.85
+6	ο	ὁ	DET	S-	Case=Nom|Definite=Def|Gender=Masc|Number=Sing|PronType=Dem	7	det	_	Conf=form:0.97,lemma:0.97,upos:0.97,xpos:0.9,feats:0.85,head:0.9,deprel:0.9
+7	θς	θεός	NOUN	Nb	Case=Nom|Gender=Masc|Number=Sing	0	root	_	Conf=form:0.97,lemma:0.97,upos:0.85,xpos:0.97,feats:0.85,head:0.85,deprel:0.9
+8	ω	ὅς	PRON	Pr	Case=Dat|Gender=Masc|Number=Sing|PronType=Rel	9	obl:arg	_	Conf=form:0.9,lemma:0.9,upos:0.85,xpos:0.9,feats:0.9,head:0.97,deprel:0.85
+9	λατρευω	λατρεύω	VERB	V-	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin|Voice=Act	7	acl	_	Conf=form:0.85,lemma:0.85,upos:0.9,xpos:0.9,feats:0.85,head:0.97,deprel:0.97
+10	εν	ἐν	ADP	R-	_	12	case	_	Conf=form:0.97,lemma:0.97,upos:0.85,xpos:0.85,feats:0.85,head:0.97,deprel:0.97
+11	τω	ὁ	DET	S-	Case=Dat|Definite=Def|Gender=Neut|Number=Sing|PronType=Dem	12	det	_	Conf=form:0.97,lemma:0.97,upos:0.9,xpos:0.97,feats:0.9,head:0.85,deprel:0.85
+12	πνι	πνεῦμα	NOUN	Nb	Case=Dat|Gender=Neut|Number=Sing	9	obl	_	Conf=form:0.9,lemma:0.97,upos:0.9,xpos:0.85,feats:0.85,head:0.9,deprel:0.85
+13	μου	ἐγώ	PRON	Pp	Case=Gen|Gender=Masc|Number=Sing|Person=1|PronType=Prs	12	det	_	Conf=form:0.85,lemma:0.9,upos:0.85,xpos:0.97,feats:0.85,head:0.9,deprel:0.9
+14	εν	ἐν	ADP	R-	_	16	case	_	Conf=form:0.97,lemma:0.9,upos:0.85,xpos:0.9,feats:0.9,head:0.97,deprel:0.9
+15	τω	ὁ	DET	S-	Case=Dat|Definite=Def|Gender=Neut|Number=Sing|PronType=Dem	16	det	_	Conf=form:0.85,lemma:0.9,upos:0.85,xpos:0.85,feats:0.9,head:0.97,deprel:0.85
+16	ευαγγελιω	εὐαγγέλιον	NOUN	Nb	Case=Dat|Gender=Neut|Number=Sing	9	obl	_	Conf=form:0.9,lemma:0.9,upos:0.85,xpos:0.85,feats:0.85,head:0.9,deprel:0.85
+17	του	ὁ	DET	S-	Case=Gen|Definite=Def|Gender=Masc,Neut|Number=Sing|PronType=Dem	18	det	_	Conf=form:0.97,lemma:0.85,upos:0.85,xpos:0.85,feats:0.85,head:0.97,deprel:0.97
+18	υιου	υἱός	NOUN	Nb	Case=Gen|Gender=Masc|Number=Sing	16	nmod	_	Conf=form:0.97,lemma:0.85,upos:0.97,xpos:0.85,feats:0.9,head:0.9,deprel:0.97
+19	αυτου	αὐτός	PRON	Pp	Case=Gen|Gender=Masc|Number=Sing|Person=3|PronType=Prs	18	det	_	Conf=form:0.85,lemma:0.97,upos:0.85,xpos:0.85,feats:0.85,head:0.9,deprel:0.85
+20	ως	ὡς	ADV	Df	_	22	mark	_	Conf=form:0.9,lemma:0.9,upos:0.97,xpos:0.9,feats:0.85,head:0.85,deprel:0.85
+21	αδιαλιπτως	ἀδιαλείπτως	ADV	Df	_	22	advmod	_	Conf=form:0.9,lemma:0.9,upos:0.9,xpos:0.9,feats:0.9,head:0.97,deprel:0.97
+22	μνιαν	μνεία	NOUN	Nb	Case=Acc|Gender=Fem|Number=Sing	24	obj	_	Conf=form:0.9,lemma:0.85,upos:0.97,xpos:0.85,feats:0.85,head:0.97,deprel:0.97
+23	υμων	ὑμεῖς	PRON	Pp	Case=Gen|Gender=Masc|Number=Plur|Person=2|PronType=Prs	22	nmod	_	Conf=form:0.9,lemma:0.85,upos:0.9,xpos:0.85,feats:0.85,head:0.85,deprel:0.9
+24	ποιουμαι	ποιέω	VERB	V-	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin|Voice=Mid	7	ccomp	_	Conf=form:0.97,lemma:0.85,upos:0.85,xpos:0.85,feats:0.9,head:0.9,deprel:0.9
+

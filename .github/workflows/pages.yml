@@ -45,9 +45,9 @@ jobs:
         poetry env use "${{ matrix.python-version }}"
         poetry install --no-interaction --no-root
 
-    - name: Docs
+    - name: Build website
       run: |
-        poetry run python build.py
+        poetry run python -m bilingualnavigator.main build
   
     - name: Setup Pages
       uses: actions/configure-pages@v3

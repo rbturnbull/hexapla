@@ -1,0 +1,73 @@
+# sent_id = B06K01V07
+# text = omnibus qui sunt romae in caritate dei Uocatis sanctiS gratia uobis et pax a deo patre n ostro et dmo ihu xpO
+# verse = Romans 1:7
+1	omnibus	omnis	DET	Px	Case=Dat|Gender=Masc|Number=Plur	8	obl:arg	_	Conf=form:0.97,lemma:0.9,upos:0.97,xpos:0.97,feats:0.9,head:0.97,deprel:0.85
+2	qui	qui	PRON	Pr	Case=Nom|Gender=Masc|Number=Plur|PronType=Rel	4	nsubj:pass	_	Conf=form:0.85,lemma:0.97,upos:0.97,xpos:0.9,feats:0.97,head:0.9,deprel:0.9
+3	sunt	sum	AUX	V-	Mood=Ind|Number=Plur|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act	4	aux:pass	_	Conf=form:0.9,lemma:0.97,upos:0.97,xpos:0.97,feats:0.9,head:0.85,deprel:0.9
+4	romae	Roma	PROPN	Ne	Case=Loc|Gender=Fem|Number=Sing	1	acl	_	Conf=form:0.97,lemma:0.85,upos:0.9,xpos:0.97,feats:0.97,head:0.9,deprel:0.85
+5	in	in	ADP	R-	_	6	case	_	Conf=form:0.85,lemma:0.85,upos:0.97,xpos:0.9,feats:0.85,head:0.97,deprel:0.85
+6	caritate	caritas	NOUN	Nb	Case=Abl|Gender=Fem|Number=Sing	4	obl	_	Conf=form:0.9,lemma:0.85,upos:0.9,xpos:0.9,feats:0.85,head:0.85,deprel:0.85
+7	dei	deus	NOUN	Nb	Case=Gen|Gender=Masc|Number=Sing	6	nmod	_	Conf=form:0.97,lemma:0.85,upos:0.85,xpos:0.97,feats:0.97,head:0.97,deprel:0.97
+8	Uocatis	uoco	VERB	V-	Aspect=Perf|Case=Dat|Gender=Masc|Number=Plur|Tense=Past|VerbForm=Part|Voice=Pass	0	root	_	Conf=form:0.97,lemma:0.85,upos:0.85,xpos:0.85,feats:0.97,head:0.85,deprel:0.97
+9	sanctiS	sanctus	ADJ	A-	Case=Dat|Degree=Pos|Gender=Masc|Number=Plur	8	amod	_	Conf=form:0.97,lemma:0.85,upos:0.9,xpos:0.85,feats:0.9,head:0.85,deprel:0.85
+10	gratia	gratia	NOUN	Nb	Case=Nom|Gender=Fem|Number=Sing	8	nsubj	_	Conf=form:0.97,lemma:0.85,upos:0.85,xpos:0.85,feats:0.97,head:0.85,deprel:0.9
+11	uobis	uos	PRON	Pp	Case=Dat|Gender=Masc|Number=Plur|Person=2|PronType=Prs	10	obl:arg	_	Conf=form:0.85,lemma:0.97,upos:0.85,xpos:0.97,feats:0.85,head:0.97,deprel:0.9
+12	et	et	CCONJ	C-	_	13	cc	_	Conf=form:0.97,lemma:0.85,upos:0.9,xpos:0.85,feats:0.85,head:0.85,deprel:0.97
+13	pax	pax	NOUN	Nb	Case=Nom|Gender=Fem|Number=Sing	10	conj	_	Conf=form:0.9,lemma:0.9,upos:0.9,xpos:0.85,feats:0.85,head:0.97,deprel:0.9
+14	a	ab	ADP	R-	_	15	case	_	Conf=form:0.85,lemma:0.97,upos:0.85,xpos:0.97,feats:0.9,head:0.85,deprel:0.9
+15	deo	deus	NOUN	Nb	Case=Abl|Gender=Masc|Number=Sing	10	obl	_	Conf=form:0.9,lemma:0.97,upos:0.9,xpos:0.97,feats:0.85,head:0.97,deprel:0.97
+16	patre	pater	NOUN	Nb	Case=Abl|Gender=Masc|Number=Sing	15	appos	_	Conf=form:0.85,lemma:0.85,upos:0.97,xpos:0.85,feats:0.85,head:0.9,deprel:0.97
+17	n	noster	DET	Pt	Case=Abl|Gender=Masc|Number=Sing|Person=1|Poss=Yes	18	det	_	Conf=form:0.9,lemma:0.85,upos:0.97,xpos:0.9,feats:0.97,head:0.85,deprel:0.85
+18	ostro	noster	DET	Pt	Case=Abl|Gender=Masc|Number=Sing|Person=1|Poss=Yes	16	det	_	Conf=form:0.9,lemma:0.97,upos:0.9,xpos:0.97,feats:0.97,head:0.9,deprel:0.97
+19	et	et	CCONJ	C-	_	20	cc	_	Conf=form:0.9,lemma:0.9,upos:0.97,xpos:0.9,feats:0.85,head:0.97,deprel:0.97
+20	dmo	dominus	NOUN	Nb	Case=Abl|Gender=Masc|Number=Sing	15	conj	_	Conf=form:0.85,lemma:0.9,upos:0.97,xpos:0.85,feats:0.9,head:0.97,deprel:0.85
+21	ihu	Iesus	PROPN	Ne	Case=Abl|Gender=Masc|Number=Sing	20	appos	_	Conf=form:0.97,lemma:0.9,upos:0.85,xpos:0.85,feats:0.9,head:0.9,deprel:0.97
+22	xpO	Christus	PROPN	Ne	Case=Abl|Gender=Masc|Number=Sing	21	flat:name	_	Conf=form:0.9,lemma:0.97,upos:0.9,xpos:0.97,feats:0.97,head:0.97,deprel:0.85
+
+# sent_id = B06K01V08
+# text = Primum quidem gratias agO deo meo per ihm xpm pro omnibus uobiS quia fides uestra adnuntiatur in uniuerso mundo
+# verse = Romans 1:8
+1	Primum	primum	ADV	Df	_	4	advmod	_	Conf=form:0.85,lemma:0.97,upos:0.97,xpos:0.9,feats:0.97,head:0.85,deprel:0.85
+2	quidem	quidem	ADV	Df	_	4	discourse	_	Conf=form:0.85,lemma:0.85,upos:0.97,xpos:0.85,feats:0.85,head:0.9,deprel:0.85
+3	gratias	gratia	NOUN	Nb	Case=Acc|Gender=Fem|Number=Plur	4	obj	_	Conf=form:0.85,lemma:0.9,upos:0.97,xpos:0.97,feats:0.9,head:0.9,deprel:0.9
+4	agO	ago	VERB	V-	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin|Voice=Act	0	root	_	Conf=form:0.97,lemma:0.97,upos:0.97,xpos:0.85,feats:0.9,head:0.85,deprel:0.9
+5	deo	deus	NOUN	Nb	Case=Dat|Gender=Masc|Number=Sing	4	obl:arg	_	Conf=form:0.85,lemma:0.9,upos:0.97,xpos:0.85,feats:0.9,head:0.85,deprel:0.9
+6	meo	meus	DET	Pp	Case=Dat|Gender=Masc|Number=Sing	5	det	_	Conf=form:0.85,lemma:0.85,upos:0.97,xpos:0.85,feats:0.97,head:0.9,deprel:0.97
+7	per	per	ADP	R-	_	9	case	_	Conf=form:0.85,lemma:0.85,upos:0.9,xpos:0.9,feats:0.9,head:0.85,deprel:0.97
+8	ihm	Iesus	PROPN	Ne	Case=Acc|Gender=Masc|Number=Sing	9	flat	_	Conf=form:0.85,lemma:0.85,upos:0.97,xpos:0.85,feats:0.85,head:0.85,deprel:0.9
+9	xpm	Christus	PROPN	Ne	Case=Acc|Gender=Masc|Number=Sing	4	obl	_	Conf=form:0.9,lemma:0.9,upos:0.97,xpos:0.85,feats:0.85,head:0.97,deprel:0.9
+10	pro	pro	ADP	R-	_	11	case	_	Conf=form:0.85,lemma:0.97,upos:0.9,xpos:0.97,feats:0.97,head:0.9,deprel:0.97
+11	omnibus	omnis	PRON	Px	Case=Abl|Number=Plur	4	obl	_	Conf=form:0.9,lemma:0.97,upos:0.9,xpos:0.9,feats:0.9,head:0.97,deprel:0.97
+12	uobiS	uos	PRON	Pp	Case=Abl|Gender=Masc|Number=Plur|Person=2|PronType=Prs	11	nmod	_	Conf=form:0.85,lemma:0.97,upos:0.97,xpos:0.85,feats:0.85,head:0.9,deprel:0.97
+13	quia	quia	SCONJ	G-	_	16	mark	_	Conf=form:0.97,lemma:0.9,upos:0.9,xpos:0.85,feats:0.97,head:0.85,deprel:0.9
+14	fides	fides	NOUN	Nb	Case=Nom|Gender=Fem|Number=Sing	16	nsubj:pass	_	Conf=form:0.97,lemma:0.85,upos:0.9,xpos:0.97,feats:0.9,head:0.97,deprel:0.97
+15	uestra	uester	DET	Pp	Case=Nom|Gender=Fem|Number=Sing	14	det	_	Conf=form:0.9,lemma:0.85,upos:0.85,xpos:0.97,feats:0.85,head:0.85,deprel:0.85
+16	adnuntiatur	adnuntio	VERB	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Pass	4	advcl	_	Conf=form:0.85,lemma:0.85,upos:0.9,xpos:0.85,feats:0.9,head:0.9,deprel:0.85
+17	in	in	ADP	R-	_	19	case	_	Conf=form:0.85,lemma:0.97,upos:0.9,xpos:0.9,feats:0.97,head:0.9,deprel:0.97
+18	uniuerso	uniuersus	ADJ	A-	Case=Abl|Degree=Pos|Gender=Masc|Number=Sing	19	amod	_	Conf=form:0.97,lemma:0.85,upos:0.97,xpos:0.85,feats:0.97,head:0.97,deprel:0.97
+19	mundo	mundus	NOUN	Nb	Case=Abl|Gender=Masc|Number=Sing	16	obl	_	Conf=form:0.85,lemma:0.97,upos:0.9,xpos:0.85,feats:0.9,head:0.97,deprel:0.97
+
+# sent_id = B06K01V09
+# text = testis enim mihi est deuS cui seruio in spu meo in euangelio filii eius quod sine intermissionE memoriam uestri facio
+# verse = Romans 1:9
+1	testis	testis	NOUN	Nb	Case=Nom|Gender=Masc|Number=Sing	4	nsubj	_	Conf=form:0.97,lemma:0.85,upos:0.85,xpos:0.97,feats:0.85,head:0.9,deprel:0.85
+2	enim	enim	ADV	Df	_	4	discourse	_	Conf=form:0.97,lemma:0.85,upos:0.85,xpos:0.9,feats:0.9,head:0.97,deprel:0.9
+3	mihi	ego	PRON	Pp	Case=Dat|Gender=Masc|Number=Sing|Person=1|PronType=Prs	4	obl:arg	_	Conf=form:0.97,lemma:0.85,upos:0.97,xpos:0.9,feats:0.9,head:0.97,deprel:0.9
+4	est	sum	AUX	V-	Mood=Ind|Number=Sing|Person=3|Tense=Pres|VerbForm=Fin|Voice=Act	0	root	_	Conf=form:0.85,lemma:0.85,upos:0.9,xpos:0.97,feats:0.9,head:0.97,deprel:0.97
+5	deuS	deus	NOUN	Nb	Case=Nom|Gender=Masc|Number=Sing	4	nsubj	_	Conf=form:0.85,lemma:0.9,upos:0.9,xpos:0.85,feats:0.9,head:0.97,deprel:0.9
+6	cui	qui	PRON	Pr	Case=Dat|Gender=Masc|Number=Sing|PronType=Rel	7	obl:arg	_	Conf=form:0.9,lemma:0.85,upos:0.9,xpos:0.9,feats:0.9,head:0.85,deprel:0.85
+7	seruio	seruio	VERB	V-	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin|Voice=Act	5	acl	_	Conf=form:0.85,lemma:0.9,upos:0.85,xpos:0.97,feats:0.97,head:0.97,deprel:0.85
+8	in	in	ADP	R-	_	9	case	_	Conf=form:0.97,lemma:0.9,upos:0.9,xpos:0.85,feats:0.9,head:0.9,deprel:0.85
+9	spu	spiritus	NOUN	Nb	Case=Abl|Gender=Masc|Number=Sing	7	obl	_	Conf=form:0.85,lemma:0.9,upos:0.9,xpos:0.97,feats:0.85,head:0.9,deprel:0.9
+10	meo	meus	DET	Pt	Case=Abl|Gender=Masc|Number=Sing|Person=1|Poss=Yes	9	det	_	Conf=form:0.97,lemma:0.97,upos:0.85,xpos:0.9,feats:0.85,head:0.9,deprel:0.85
+11	in	in	ADP	R-	_	12	case	_	Conf=form:0.97,lemma:0.9,upos:0.97,xpos:0.9,feats:0.85,head:0.85,deprel:0.9
+12	euangelio	euangelium	NOUN	Nb	Case=Abl|Gender=Neut|Number=Sing	7	obl	_	Conf=form:0.85,lemma:0.97,upos:0.9,xpos:0.97,feats:0.97,head:0.85,deprel:0.9
+13	filii	filius	NOUN	Nb	Case=Gen|Gender=Masc|Number=Sing	12	nmod	_	Conf=form:0.97,lemma:0.9,upos:0.85,xpos:0.97,feats:0.9,head:0.85,deprel:0.97
+14	eius	is	PRON	Pp	Case=Gen|Gender=Masc|Number=Sing|Person=3|PronType=Prs	13	det	_	Conf=form:0.9,lemma:0.9,upos:0.97,xpos:0.85,feats:0.85,head:0.9,deprel:0.97
+15	quod	quod	SCONJ	G-	_	20	mark	_	Conf=form:0.85,lemma:0.85,upos:0.9,xpos:0.9,feats:0.97,head:0.97,deprel:0.97
+16	sine	sine	ADP	R-	_	17	case	_	Conf=form:0.9,lemma:0.9,upos:0.85,xpos:0.97,feats:0.9,head:0.9,deprel:0.9
+17	intermissionE	intermissio	NOUN	Nb	Case=Abl|Gender=Fem|Number=Sing	20	obl	_	Conf=form:0.97,lemma:0.85,upos:0.97,xpos:0.85,feats:0.85,head:0.85,deprel:0.9
+18	memoriam	memoria	NOUN	Nb	Case=Acc|Gender=Fem|Number=Sing	20	obj	_	Conf=form:0.9,lemma:0.97,upos:0.9,xpos:0.85,feats:0.97,head:0.85,deprel:0.85
+19	uestri	uos	PRON	Pp	Case=Gen|Gender=Masc|Number=Plur|Person=2|PronType=Prs	18	nmod	_	Conf=form:0.85,lemma:0.9,upos:0.9,xpos:0.9,feats:0.97,head:0.85,deprel:0.97
+20	facio	facio	VERB	V-	Mood=Ind|Number=Sing|Person=1|Tense=Pres|VerbForm=Fin|Voice=Act	7	advcl	_	Conf=form:0.97,lemma:0.97,upos:0.85,xpos:0.97,feats:0.85,head:0.9,deprel:0.97
+

@@ -1,204 +1,106 @@
-<!DOCTYPE html>
-<html lang="en">
-<!-- derived from:
-    https://startbootstrap.com/theme/sb-admin-2
-    https://github.com/startbootstrap/startbootstrap-sb-admin-2 
--->
-<head>
+{% extends "base.html" %}
+{% block title %}{{ verse_label }} · {{ title }}{% endblock %}
+{% block topbar %}
+<h1>{{ verse_label }}</h1>
+<span class="crumb">{{ title }}</span>
+<span class="spacer"></span>
+<a class="btn btn-sm btn-outline-secondary {{ 'disabled' if not prev_verse }}" id="prev-verse" href="{{ '../' ~ prev_verse ~ '/' if prev_verse else '#' }}" title="Previous verse (←)"><i class="fa-solid fa-arrow-left"></i></a>
+<select id="verseSelector" class="form-select form-select-sm" style="width: 190px" aria-label="Go to verse" data-current="{{ verse }}"></select>
+<a class="btn btn-sm btn-outline-secondary {{ 'disabled' if not next_verse }}" id="next-verse" href="{{ '../' ~ next_verse ~ '/' if next_verse else '#' }}" title="Next verse (→)"><i class="fa-solid fa-arrow-right"></i></a>
+{% endblock %}
 
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+{% block content %}
+<div class="verse-layout">
+    <div>
+        <div class="panel verse-texts">
+            <div {% if lang_a_rtl %}dir="rtl"{% endif %}><span class="lang">{{ lang_a_label }}</span>{{ lang_a_text }}</div>
+            <div class="mt-2" {% if lang_b_rtl %}dir="rtl"{% endif %}><span class="lang">{{ lang_b_label }}</span>{{ lang_b_text }}</div>
+        </div>
 
-    <title>{{ siglum }} - {{ verse }}</title>
-    <link rel="shortcut icon" type="image/png" href="">
-    <!-- Custom fonts for this template-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
+        <div class="panel">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-trees" type="button" role="tab">Trees &amp; alignment</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-interlinear" type="button" role="tab">Interlinear</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-matrix" type="button" role="tab">Alignment matrix</button></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-trees" role="tabpanel">
+                    <p class="muted small mb-2">Hover over a word to see its dependency relations, morphology and aligned words in the other language. Click it to open its lemma. <span class="legend-key sure"></span>sure link <span class="legend-key probable ms-2"></span>probable link{% if has_confidence %} · <span style="text-decoration: underline wavy #e07a1f">wavy</span> = parse confidence below 0.8{% endif %}</p>
+                    <h3 class="tree-title">{{ lang_a_label }}</h3>
+                    <svg id="{{ lang_a_id }}" class="tree" height="200"></svg>
+                    <h3 class="tree-title">{{ lang_b_label }}</h3>
+                    <svg id="{{ lang_b_id }}" class="tree" height="200"></svg>
+                </div>
+                <div class="tab-pane fade" id="tab-interlinear" role="tabpanel">
+                    <div class="toolbar">
+                        <div class="seg" id="il-direction">
+                            <button data-side="0" class="active">{{ lang_a_label }} with {{ lang_b_label }}</button>
+                            <button data-side="1">{{ lang_b_label }} with {{ lang_a_label }}</button>
+                        </div>
+                        <span class="muted small">Each word shows its lemma and, below the line, the words it is aligned to.</span>
+                    </div>
+                    <div id="interlinear" class="interlinear"></div>
+                    <div id="interlinear-extra" class="mt-3 small muted"></div>
+                </div>
+                <div class="tab-pane fade" id="tab-matrix" role="tabpanel">
+                    <p class="muted small mb-2">Rows are {{ lang_a_label }} words and columns {{ lang_b_label }} words. With the same word order, the links run down the dashed diagonal. Links off the diagonal show reordering. Filled dot = sure, ring = probable.</p>
+                    <div class="matrix-wrap"><svg id="matrix" class="matrix"></svg></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <link rel="stylesheet" 
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
-      crossorigin="anonymous" 
-      referrerpolicy="no-referrer" /> 
-
-    <!-- Custom styles for this template-->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link rel="stylesheet" href="../../../css/sb-admin-2.min.css">    
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus&display=swap" rel="stylesheet">
-      
-    <style>
-        body {
-          font-family: "Gentium Plus", serif;
-        }
-        .token {
-          font-size: 24px;
-          cursor: pointer;
-        }
-        .root {
-          fill: blue;
-          font-weight: bold;
-        }
-        .arc {
-          fill: none;
-          stroke: #ddd;
-          stroke-width: 1.5px;
-          marker-end: url(#arrowhead);
-        }
-        .arc-highlight-in {
-          stroke: red;
-          stroke-width: 2.5px;
-          marker-end: url(#arrowhead-red);
-        }
-        .arc-highlight-out {
-          stroke: blue;
-          stroke-width: 2.5px;
-          marker-end: url(#arrowhead-blue);
-        }
-        .arc-label {
-          font-size: 14px;
-          text-anchor: middle;
-          fill: blue;
-          font-style: italic;
-        }
-        .features {
-          font-size: 12px;
-          fill: green;
-          text-anchor: middle;
-        }
-        .token-bg {
-          fill: yellow;
-          opacity: 0.5;
-        }
-        svg {
-          display: block;
-          margin-bottom: 60px;
-        }
-        .sidebar-brand-icon {
-            width: 100%;
-        }
-        #sidebar-ss a {
-            color: white;
-        }
-        #sidebar-ss h3 {
-            color: white;
-            padding-top: 15px;
-            padding-left: 20px;
-            font-size: 1.2rem;
-        }
-      </style>
-    
-</head>
-
-<body id="page-top">
-
-    <!-- Page Wrapper -->
-    <div id="wrapper">
-
-        <!-- Sidebar -->
-        <!-- <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar"> -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="sidebar-ss">
-            <a href="../../../"><img src="../../../img/Logo-Arcs.jpg" alt="Polyglottarium Logo" class="sidebar-brand-icon"></a>
-            <p></p>
-            {% for section in sidebar_sections %}
-            <div class="category">
-                <h3>{{ section.title }}</h3>
-                <ul>
-                    {% for manuscript in section.manuscripts %}
-                    <li><a class="nav-item" href="{{ manuscript.href }}"><span>{{ manuscript.siglum }}</span></a></li>
-                    {% endfor %}
-                </ul>
+    <aside>
+        <div class="panel">
+            <h2>This verse</h2>
+            <ul class="stat-list mt-2">
+                <li><span>{{ lang_a_label }} words</span><span>{{ stats.words_a }}</span></li>
+                <li><span>{{ lang_b_label }} words</span><span>{{ stats.words_b }}</span></li>
+                <li><span>Links</span><span>{{ stats.links }}{% if stats.probable %} <span class="muted fw-normal">({{ stats.probable }} probable)</span>{% endif %}</span></li>
+                <li><span>{{ lang_a_label }} aligned</span><span>{{ "%.0f"|format(stats.coverage_a * 100) }}%</span></li>
+                <li><span>{{ lang_b_label }} aligned</span><span>{{ "%.0f"|format(stats.coverage_b * 100) }}%</span></li>
+                {% if stats.reordering is not none %}<li><span>Word-order change</span><span>{{ "%.0f"|format(stats.reordering * 100) }}%</span></li>{% endif %}
+                {% if stats.link_confidence is not none %}<li><span>Link confidence</span><span>{{ "%.2f"|format(stats.link_confidence) }}</span></li>{% endif %}
+                {% if stats.parse_confidence is not none %}<li><span>Parse confidence</span><span>{{ "%.2f"|format(stats.parse_confidence) }}</span></li>{% endif %}
+            </ul>
+            <div class="muted small mt-3">sent_id <code>{{ sent_id }}</code></div>
+        </div>
+        {% if verse_notes %}
+        <div class="panel">
+            <h2>In the manuscript</h2>
+            {% for side in verse_notes %}
+            <div class="verse-tei">
+                <div class="lang-chip">{{ side.language }}</div>
+                {% for n in side.notes %}
+                {% if n.folios %}<div>fol. {{ n.folios | join(", ") }}</div>{% endif %}
+                {% set flags = [] %}
+                {% if n.corrections %}{% set _ = flags.append((n.corrections, "correction", "corrections", "fa-pen")) %}{% endif %}
+                {% if n.lacunae %}{% set _ = flags.append((n.lacunae, "lacuna", "lacunae", "fa-scissors")) %}{% endif %}
+                {% if n.unclear %}{% set _ = flags.append((n.unclear, "unclear reading", "unclear readings", "fa-eye-low-vision")) %}{% endif %}
+                {% if n.supplied %}{% set _ = flags.append((n.supplied, "supplied passage", "supplied passages", "fa-square-plus")) %}{% endif %}
+                {% if flags %}
+                <ul class="tei-flags">{% for count, one, many, icon in flags %}<li><i class="fa-solid {{ icon }}"></i>{{ count }} {{ one if count == 1 else many }}</li>{% endfor %}</ul>
+                {% else %}<div class="muted small">No corrections, lacunae or uncertain text.</div>{% endif %}
+                {% if n.notes %}<div class="muted small mt-1">Editor’s note{{ "s" if n.notes|length > 1 }}: {{ n.notes | join("; ") }}</div>{% endif %}
+                {% else %}
+                <div class="muted small">Not in the transcription.</div>
+                {% endfor %}
             </div>
             {% endfor %}
-        </ul>
-        <!-- End of Sidebar -->
-
-        <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
-            <!-- Topbar -->
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                {% set verse_index = verse_list.index(verse) %}
-                {% set prev_verse = verse_list[verse_index - 1] if verse_index > 0 else None %}
-                {% set next_verse = verse_list[verse_index + 1] if verse_index + 1 < verse_list|length else None %}
-                <h1>{{ siglum }}</h1>
-                <div class="d-flex align-items-center ms-3">
-                    {% if prev_verse %}
-                    <a class="btn btn-outline-secondary me-2" href="../{{ prev_verse }}" title="Previous verse">
-                        <i class="fa-solid fa-arrow-left"></i>
-                    </a>
-                    {% endif %}
-                    {% if next_verse %}
-                    <a class="btn btn-outline-secondary me-2" href="../{{ next_verse }}" title="Next verse">
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </a>
-                    {% endif %}
-                </div>
-                <select id="verseSelector" class="form-select" style="width: 200px; margin-left: auto;">
-                    {% for item in verse_items %}
-                    <option value="{{ item.id }}" {% if item.id == verse %}selected{% endif %}>{{ item.label }}</option>
-                    {% endfor %}
-                </select>
-                <ul class="navbar-nav ml-auto">
-                </ul>
-            </nav>
-            <!-- End of Topbar -->
-            <!-- Main Content -->
-            <div id="content">
-                <h3 class="text-center">{{ lang_a_label }}</h3>
-                <svg id="{{ lang_a_id }}" width="100%" height="340" preserveAspectRatio="xMinYMin meet"></svg>
-                <h3 class="text-center">{{ lang_b_label }}</h3>
-                <svg id="{{ lang_b_id }}" width="100%" height="340" preserveAspectRatio="xMinYMin meet"></svg>
-                <script src="./{{ siglum }}-{{ verse }}.js"></script>
-                <script type="module" src="../../../js/navigator.js"></script>
-                            </div>
-            <!-- End of Main Content -->
+            <a class="small" href="../#transcriptions">About the transcriptions</a>
         </div>
-        <!-- End of Content Wrapper -->
-    </div>
-    <!-- End of Page Wrapper -->
-    <!-- Scroll to Top Button-->
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
-                </div>
-            </div>
+        {% endif %}
+        <div class="panel small muted">
+            <span class="kbd">←</span> <span class="kbd">→</span> previous / next verse<br>
+            <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> switch view
         </div>
-    </div>
+    </aside>
+</div>
+{% endblock %}
 
-    <!-- Bootstrap core JavaScript-->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
-    <!-- Core plugin JavaScript-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js" integrity="sha512-0QbL0ph8Tc8g5bLhfVzSqxe9GERORsKhIn1IrpxDAgUsbBGz/V7iSav2zzW325XGd1OMLdL4UiqRJj702IeqnQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-    <!-- <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script> -->
-    <!-- Custom scripts for all pages-->
-    <script src="../../../js/sb-admin-2.min.js"></script>
-    
-    <script>
-        // Redirect to the first verse in the list
-        document.getElementById('verseSelector').addEventListener('change', function() {
-            const selectedVerse = this.value;
-            window.location.href = `../${selectedVerse}`;
-        });
-    </script>
-</body>
-
-</html>
+{% block scripts %}
+<script src="./{{ siglum }}-{{ verse }}.js"></script>
+<script src="{{ root }}js/navigator.js"></script>
+<script src="../verses.js"></script>
+<script>NAV.fillSelector(document.getElementById('verseSelector'));</script>
+{% endblock %}
