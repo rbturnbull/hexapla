@@ -177,4 +177,4 @@ Executive Agency (EACEA). Neither the European Union nor EACEA can be held respo
 Author
 ======
 
-Robert Turnbull (Melbourne Data Analytics Platform, University of Melbourne)
+`Robert Turnbull <https://robturnbull.com>`_ (Melbourne Data Analytics Platform, University of Melbourne)

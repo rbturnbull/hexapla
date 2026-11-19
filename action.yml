@@ -22,7 +22,7 @@ inputs:
 outputs:
   page_url:
     description: The URL of the deployed site.
-    value: ${{ steps.deployment.outputs.page_url }}
+    value: ${{ steps.first.outputs.page_url || steps.second.outputs.page_url }}
 
 runs:
   using: composite
@@ -48,6 +48,17 @@ runs:
       with:
         path: ${{ inputs.output }}
 
+    # GitHub can take a moment to list an artifact just uploaded in the same job, so a deployment that finds no
+    # artifact is tried once more after a pause.
     - if: inputs.deploy == 'true'
-      id: deployment
+      id: first
+      continue-on-error: true
+      uses: actions/deploy-pages@v4
+
+    - if: inputs.deploy == 'true' && steps.first.outcome == 'failure'
+      shell: bash
+      run: sleep 20
+
+    - if: inputs.deploy == 'true' && steps.first.outcome == 'failure'
+      id: second
       uses: actions/deploy-pages@v4
