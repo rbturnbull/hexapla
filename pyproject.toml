@@ -1,9 +1,9 @@
 [project]
-name = "bilingualnavigator"
+name = "hexapla"
 version = "0.1.0"
-description = "Analysis of Multi-Lingual New Testament Documents"
+description = "Static websites for reading and exploring word-aligned manuscript texts"
 authors = [
-    {name = "Robert Turnbull",email = "robert.turnbull@unimelb.edu.au"}
+    {name = "Robert Turnbull", email = "robert.turnbull@unimelb.edu.au"}
 ]
 license = {text = "Apache-2.0"}
 readme = "README.rst"
@@ -12,19 +12,29 @@ dependencies = [
     "pyyaml (>=6.0.2,<7.0.0)",
     "jinja2 (>=3.1.6,<4.0.0)",
     "typer (>=0.21.1,<0.22.0)",
-    "certifi (>=2026.2.25,<2027.0.0)",
-    "lxml (>=6.0.2,<7.0.0)"
+    "pydantic (>=2.7,<3.0.0)",
+    "libsass (>=0.23.0)",
+    "markdown-it-py (>=3.0.0)",
+    "rich (>=13.0.0)",
 ]
-package-mode = false
 
+[project.scripts]
+hexapla = "hexapla.main:app"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry.scripts]
-bilingualnavigator = "bilingualnavigator.main:app"
+[tool.poetry]
+packages = [{include = "hexapla"}]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.2"
+pytest-cov = "^7.0.0"
 
+[tool.pytest.ini_options]
+addopts = "--cov=hexapla --cov-report=term-missing"
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+<teiHeader>
+<fileDesc>
+<titleStmt>
+<title>A transcription of Romans in Codex Claromontanus (Greek)</title>
+<respStmt><resp>Transcribed by</resp><name>A. Scribe</name></respStmt>
+</titleStmt>
+<publicationStmt><publisher><name>Test Project</name></publisher>
+<availability><licence target="https://creativecommons.org/licenses/by/4.0/">Licensed under a Creative Commons Attribution 4.0 International License (CC BY 4.0).</licence></availability>
+</publicationStmt>
+<sourceDesc><msDesc>
+<msIdentifier>
+<settlement>Paris</settlement><repository>Bibliothèque nationale de France</repository><idno>Grec 107</idno>
+<msName>Codex Claromontanus</msName>
+<altIdentifier type="GA"><idno>06</idno></altIdentifier>
+<altIdentifier type="VL"><idno>75</idno></altIdentifier>
+<altIdentifier type="TM"><idno>65887</idno></altIdentifier>
+</msIdentifier>
+<msContents><summary>Greek-Latin bilingual of the Pauline epistles.</summary><textLang mainLang="grc">Greek</textLang></msContents>
+<history><origin><origDate notBefore="0500" notAfter="0599">6th century</origDate></origin></history>
+</msDesc></sourceDesc>
+</fileDesc>
+</teiHeader>
+<text xml:lang="grc"><body><div type="book" n="Rom"><div type="chapter" n="Rom.1">
+<pb n="1r" type="folio"/>
+<ab n="Rom.1.7"><w>προς</w><w>ρωμαιους</w><app><rdg type="orig"><w>κλητοις</w></rdg><rdg type="corr"><w>κλητοι</w></rdg></app></ab>
+<ab n="Rom.1.8"><w>πρωτον</w><pb n="1v" type="folio"/><w>μεν</w><gap reason="lacuna" unit="line"/></ab>
+<ab n="Rom.1.9"><w>μαρτυς</w><unclear>γαρ</unclear><note>Written above the line.</note></ab>
+</div></div></body></text>
+</TEI>

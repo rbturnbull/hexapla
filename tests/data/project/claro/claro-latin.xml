@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+<teiHeader>
+<fileDesc>
+<titleStmt>
+<title>A transcription of Romans in Codex Claromontanus (Latin)</title>
+<respStmt><resp>Transcribed by</resp><name>B. Scribe</name></respStmt>
+</titleStmt>
+<publicationStmt><publisher><name>Test Project</name></publisher></publicationStmt>
+<sourceDesc><msDesc>
+<msIdentifier>
+<settlement>Paris</settlement><repository>Bibliothèque nationale de France</repository><idno>Grec 107</idno>
+<msName>Codex Claromontanus</msName>
+<altIdentifier type="GA"><idno>06</idno></altIdentifier>
+<altIdentifier type="TM"><idno>65887</idno></altIdentifier>
+</msIdentifier>
+<history><origin><origDate>6th century</origDate></origin></history>
+</msDesc></sourceDesc>
+</fileDesc>
+</teiHeader>
+<text xml:lang="lat"><body><div type="book" n="Rom"><div type="chapter" n="Rom.1">
+<pb n="1r" type="folio"/>
+<ab n="Rom.1.7"><w>omnibus</w><supplied>qui</supplied></ab>
+<ab n="Rom.1.8"><w>primum</w></ab>
+<ab n="Rom.1.9"><w>testis</w></ab>
+</div></div></body></text>
+</TEI>

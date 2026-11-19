@@ -1,5 +1,12 @@
-website/mss
+# Old build output and data from before Hexapla (the data now lives in its project repositories)
 data-old
 verbal-aspect.py
 /data
 datasets/
+website/
+# Hexapla builds
+site/
+_site/
+.coverage
+*.egg-info/
+__pycache__/

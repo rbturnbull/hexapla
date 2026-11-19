@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block topbar %}<h1>{{ site.name }}</h1><span class="crumb">Manuscript texts, parsed and word-aligned</span>{% endblock %}
+{% block content %}
+<div class="home-hero">
+    <img src="{{ root }}img/{{ site.logo }}" alt="{{ site.name }}">
+    <p>Read each manuscript verse by verse, with both texts parsed and every word linked to its counterpart.
+        Explore how the translator rendered grammar and vocabulary.{% if site.about %} <a href="{{ root }}about/">About this site</a>.{% endif %}</p>
+</div>
+{% for section in cards %}
+<h2 class="text-center text-serif mt-4" style="font-size:1.4rem">{{ section.title }}</h2>
+<div class="ms-cards">
+    {% for card in section.manuscripts %}
+    <a class="ms-card" href="{{ root }}alignments/{{ card.id }}/">
+        <div class="siglum">{{ [("GA " ~ card.gregoryaland) if card.gregoryaland, ("VL " ~ card.vl) if card.vl, card.date] | select | join(" · ") }}</div>
+        <h3>{{ card.title }}</h3>
+        <div class="langs">{{ card.description or section.title }}</div>
+        <div class="nums">
+            <div><b>{{ "{:,}".format(card.verses) }}</b>verses</div>
+            <div><b>{{ "{:,}".format(card.links) }}</b>links</div>
+            <div><b>{{ "%.0f"|format(card.coverage * 100) }}%</b>words aligned</div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-center muted">No alignments yet. Add one to the project's config file.</p>
+{% endfor %}
+{% endblock %}

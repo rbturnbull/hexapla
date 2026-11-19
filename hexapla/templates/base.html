@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ title }}{% endblock %} · {{ site.name }}</title>
+    <link rel="stylesheet" href="{{ root }}css/hexapla.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 24 A8 10 0 0 1 20 24 M12 24 A8 10 0 0 1 28 24' fill='none' stroke='%23224abe' stroke-width='3'/%3E%3C/svg%3E">
+    {% block head %}{% endblock %}
+</head>
+<body data-page="{{ page }}">
+<div class="app">
+    <aside class="sidebar" id="sidebar">
+        <a class="logo" href="{{ root }}"><img src="{{ root }}img/{{ site.logo }}" alt="{{ site.name }}"></a>
+        <nav class="site-nav">
+            <a href="{{ root }}" class="{{ 'active' if page == 'home' }}"><i class="fa-solid fa-house"></i>Home</a>
+            {% if site.about %}<a href="{{ root }}about/" class="{{ 'active' if page == 'about' }}"><i class="fa-solid fa-circle-info"></i>About</a>{% endif %}
+        </nav>
+        {% if siglum %}
+        {% set ms = root ~ "alignments/" ~ siglum ~ "/" %}
+        <h6>Alignment</h6>
+        <div class="ds-title">{{ title }}</div>
+        <nav>
+            <a href="{{ ms }}" class="{{ 'active' if page == 'overview' }}"><i class="fa-solid fa-chart-simple"></i>Overview</a>
+            <a href="{{ ms }}{{ first_verse }}/" class="{{ 'active' if page == 'verse' }}"><i class="fa-solid fa-book-open"></i>Read</a>
+            <a href="{{ ms }}lexicon/" class="{{ 'active' if page in ('lexicon', 'lemma') }}"><i class="fa-solid fa-language"></i>Lexicon</a>
+            <a href="{{ ms }}insights/" class="{{ 'active' if page == 'insights' }}"><i class="fa-solid fa-table-cells"></i>Translation insights</a>
+            <a href="{{ ms }}review/" class="{{ 'active' if page == 'review' }}"><i class="fa-solid fa-magnifying-glass"></i>Review queue</a>
+            {% for t in transcriptions %}<a href="{{ root }}manuscripts/{{ t.id }}/"><i class="fa-solid fa-scroll"></i>{{ t.language }} manuscript</a>{% endfor %}
+        </nav>
+        {% endif %}
+        {% for section in sidebar_sections %}
+        <h6>{{ section.title }}</h6>
+        <nav class="ms-list">
+            {% for manuscript in section.manuscripts %}
+            <a href="{{ root }}alignments/{{ manuscript.id }}/" class="{{ 'active' if manuscript.id == siglum }}" title="{{ manuscript.title }}">{{ manuscript.siglum }}{% if manuscript.siglum != manuscript.title %} <span class="muted" style="color:rgba(255,255,255,.6)">· {{ manuscript.title }}</span>{% endif %}</a>
+            {% endfor %}
+        </nav>
+        {% endfor %}
+    </aside>
+    <div class="main">
+        <header class="topbar">
+            <button class="btn btn-sm btn-outline-secondary sidebar-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+            {% block topbar %}<h1>{{ title }}</h1>{% endblock %}
+        </header>
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+        {% if attribution %}
+        <footer class="site-footer">
+            Transcriptions:
+            {% for a in attribution %}<span>{{ a.language }}, {{ a.credit }} ({% if a.licence_url %}<a href="{{ a.licence_url }}" target="_blank" rel="noopener">{{ a.licence }}</a>{% else %}{{ a.licence }}{% endif %})</span>{{ "; " if not loop.last }}{% endfor %}.
+            {% for l in licences %}<span>{{ l.label }}: {% if l.url %}<a href="{{ l.url }}" target="_blank" rel="noopener">{{ l.name }}</a>{% else %}{{ l.name }}{% endif %}</span>{{ "; " if not loop.last else "." }} {% endfor %}
+            Parsed with mcparser and aligned with mcaligner. Built with Hexapla.
+        </footer>
+        {% elif site.licence %}
+        <footer class="site-footer">
+            {{ site.name }}: {% if site.licence.url %}<a href="{{ site.licence.url }}" target="_blank" rel="noopener">{{ site.licence.name }}</a>{% else %}{{ site.licence.name }}{% endif %}. Built with Hexapla.
+        </footer>
+        {% endif %}
+    </div>
+</div>
+<div class="chart-tooltip" id="tooltip" role="tooltip"></div>
+<script>
+    window.NAV = {
+        root: {{ root | tojson }},
+        siglum: {{ siglum | tojson }},
+        msUrl: {{ (root ~ "alignments/" ~ siglum ~ "/") | tojson if siglum else "null" }},
+        langs: {{ langs | tojson if langs else "null" }}
+    };
+</script>
+<script src="{{ root }}js/bootstrap.bundle.min.js"></script>
+<script src="{{ root }}js/d3.v7.min.js"></script>
+<script src="{{ root }}js/common.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

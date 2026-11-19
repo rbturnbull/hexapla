@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block topbar %}
+<h1>{{ t.name }}</h1>
+<span class="crumb">{{ t.language }}{% if t.header.date and t.header.date.text %} · {{ t.header.date.text }}{% endif %}</span>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <div class="col-xl-8">
+        {% set h = t.header %}
+        {% set s = t.summary %}
+    <article class="tei-card">
+        <div class="tei-head">
+            <span class="lang-chip">{{ t.language }}</span>
+            <a class="btn btn-sm btn-outline-secondary" href="{{ t.file }}" download title="Download the TEI XML"><i class="fa-solid fa-download"></i> TEI</a>
+        </div>
+        <h3>{{ h.title or t.file }}</h3>
+        {% if h.description %}<p class="text-serif mt-2" style="font-size:1.05rem">{{ h.description }}</p>{% endif %}
+        {% set doc = h.document if h.document and h.document not in (h.title or "") else "" %}
+        {% if doc or h.work %}<div class="muted">{{ doc }}{% if doc and h.work %} · {% endif %}{{ h.work }}</div>{% endif %}
+
+        <div class="tei-stats">
+            <div><b>{{ "{:,}".format(s.verses) }}</b><span>verses{% if t.range %}<br>{{ t.range }}{% endif %}</span></div>
+            {% if s.folios %}<div title="{{ s.folios | join(', ') }}"><b>{{ s.folios | length }}</b><span>{{ s.unit or "folio" }}s{% if s.folios %}<br>{{ s.folios[0] }}{% if s.folios|length > 1 %} … {{ s.folios[-1] }}{% endif %}{% endif %}</span></div>{% endif %}
+            <div><b>{{ "{:,}".format(s.words) }}</b><span>words</span></div>
+            <div><b>{{ s.corrections }}</b><span>corrections</span></div>
+            <div><b>{{ s.lacunae }}</b><span>lacunae</span></div>
+            <div><b>{{ "{:,}".format(s.unclear) }}</b><span>unclear</span></div>
+            <div><b>{{ "{:,}".format(s.supplied) }}</b><span>supplied</span></div>
+            {% if s.nomina_sacra %}<div><b>{{ s.nomina_sacra }}</b><span>nomina sacra</span></div>{% endif %}
+        </div>
+
+        <dl class="tei-dl">
+            {% set shelfmarks = h.shelfmarks or ([h.shelfmark] if h.shelfmark else []) %}
+            {% if shelfmarks %}
+            <dt>Shelfmark{{ "s" if shelfmarks|length > 1 }}</dt>
+            <dd>{% for m in shelfmarks %}{{ [m.settlement, m.repository, m.idno] | select | join(", ") }}{% if not loop.last %}<br>{% endif %}{% endfor %}</dd>
+            {% endif %}
+            {% if h.date %}<dt>Date</dt><dd>{{ h.date.text or h.date.when or [h.date.not_before, h.date.not_after] | select | join("–") }}</dd>{% endif %}
+            {% if h.identifiers %}
+            <dt>Identifiers</dt>
+            <dd>{% for i in h.identifiers %}<span class="tei-id">{{ i.label }} {% if i.url %}<a href="{{ i.url }}" target="_blank" rel="noopener">{{ i.value }}</a>{% else %}{{ i.value }}{% endif %}</span>{% endfor %}</dd>
+            {% endif %}
+            {% for r in h.responsibility %}
+            <dt>{{ r.resp }}</dt><dd>{{ r.names | join(", ") }}</dd>
+            {% endfor %}
+            {% if h.funders %}<dt>Funded by</dt><dd>{{ h.funders | join(", ") }}</dd>{% endif %}
+            {% if h.sponsors %}<dt>Sponsor</dt><dd>{{ h.sponsors | join(", ") }}</dd>{% endif %}
+            {% if h.edition %}<dt>Edition</dt><dd>{{ h.edition }}</dd>{% endif %}
+            {% if h.source %}<dt>Based on</dt><dd>{{ h.source | join("; ") }}</dd>{% endif %}
+            {% if h.authority %}<dt>Authority</dt><dd>{{ h.authority }}</dd>{% endif %}
+            {% if h.publishers %}<dt>Published by</dt><dd>{{ h.publishers | join(", ") }}{% if h.published %} · {{ h.published }}{% endif %}</dd>{% endif %}
+            <dt>Transcription licence</dt>
+            <dd>{% if t.licence_text %}{{ t.licence_text | urlize(target="_blank") }}{% elif t.licence %}{% if t.licence.url %}<a href="{{ t.licence.url }}" target="_blank" rel="noopener">{{ t.licence.name }}</a>{% else %}{{ t.licence.name }}{% endif %}{% else %}Not stated{% endif %}</dd>
+            {% if t.parsing_licence %}
+            <dt>Parsing licence</dt>
+            <dd>{% if t.parsing_licence.url %}<a href="{{ t.parsing_licence.url }}" target="_blank" rel="noopener">{{ t.parsing_licence.name }}</a>{% else %}{{ t.parsing_licence.name }}{% endif %}</dd>
+            {% endif %}
+        </dl>
+
+        {% if h.project or h.editorial %}
+        <details class="tei-more">
+            <summary>Project and editorial notes</summary>
+            {% for p in h.project + h.editorial %}<p>{{ p | urlize(target="_blank") }}</p>{% endfor %}
+        </details>
+        {% endif %}
+        {% if h.revisions %}
+        <details class="tei-more">
+            <summary>Revision history ({{ h.revisions | length }})</summary>
+            <ul>{% for r in h.revisions %}<li>{% if r.when %}<span class="muted">{{ r.when }}</span> {% endif %}{{ r.text }}</li>{% endfor %}</ul>
+        </details>
+        {% endif %}
+    </article>
+    </div>
+    <div class="col-xl-4">
+        <div class="panel">
+            <h2>Alignments</h2>
+            {% for a in alignments %}
+            <div class="example"><a href="{{ root }}alignments/{{ a.id }}/">{{ a.title }}</a> <span class="muted small">{{ a.category }}</span></div>
+            {% else %}
+            <div class="muted">Not in any alignment yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

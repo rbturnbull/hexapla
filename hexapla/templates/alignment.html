@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block topbar %}
+<h1>{{ title }}</h1>
+<span class="crumb">{{ langs.a.label }}–{{ langs.b.label }}{% if metadata.date %} · {{ metadata.date }}{% endif %}{% if metadata.gregoryaland %} · GA {{ metadata.gregoryaland }}{% endif %}{% if metadata.vl %} · VL {{ metadata.vl }}{% endif %}</span>
+<span class="spacer"></span>
+<a class="btn btn-primary btn-sm" href="{{ first_verse }}/"><i class="fa-solid fa-book-open"></i> Start reading</a>
+{% endblock %}
+
+{% block content %}
+{% if metadata.description %}<p class="text-serif" style="font-size:1.1rem">{{ metadata.description }}</p>{% endif %}
+
+<div class="tiles">
+    <div class="tile"><div class="label">Verses</div><div class="value">{{ "{:,}".format(summary.verses) }}</div>
+        <div class="detail">{{ "{:,}".format(summary.aligned_verses) }} aligned{% if summary.books|length > 1 %} · {{ summary.books|length }} books{% endif %}</div></div>
+    <div class="tile"><div class="label">{{ langs.a.label }} words aligned</div><div class="value">{{ "%.0f"|format(summary.coverage_a * 100) }}%</div>
+        <div class="detail">{{ "{:,}".format(summary.aligned_a) }} of {{ "{:,}".format(summary.words_a) }}</div></div>
+    <div class="tile"><div class="label">{{ langs.b.label }} words aligned</div><div class="value">{{ "%.0f"|format(summary.coverage_b * 100) }}%</div>
+        <div class="detail">{{ "{:,}".format(summary.aligned_b) }} of {{ "{:,}".format(summary.words_b) }}</div></div>
+    <div class="tile"><div class="label">Alignment links</div><div class="value">{{ "{:,}".format(summary.links) }}</div>
+        <div class="detail">{{ "{:,}".format(summary.sure) }} sure · {{ "{:,}".format(summary.probable) }} probable</div></div>
+    <div class="tile"><div class="label">Word-order change</div><div class="value">{{ "%.1f"|format((summary.reordering or 0) * 100) }}%</div>
+        <div class="detail">of link pairs cross</div></div>
+    {% if summary.link_confidence is not none %}
+    <div class="tile"><div class="label">Link confidence</div><div class="value">{{ "%.2f"|format(summary.link_confidence) }}</div>
+        <div class="detail">mean, from mcaligner</div></div>
+    {% endif %}
+    {% if summary.parse_confidence is not none %}
+    <div class="tile"><div class="label">Parse confidence</div><div class="value">{{ "%.2f"|format(summary.parse_confidence) }}</div>
+        <div class="detail"><a href="review/">{{ "{:,}".format(summary.low_confidence_words) }} words below 0.8</a></div></div>
+    {% endif %}
+</div>
+
+<div class="panel">
+    <div class="d-flex flex-wrap align-items-start gap-2">
+        <div>
+            <h2>Across the manuscript</h2>
+            <div class="sub" id="strip-sub">Each bar is a verse, in manuscript order. Click a bar to read the verse.</div>
+        </div>
+        <span class="spacer" style="flex:1"></span>
+        <div class="seg" id="strip-metric">
+            <button data-metric="coverage" class="active">Words aligned</button>
+            <button data-metric="reordering">Word-order change</button>
+            <button data-metric="link_confidence">Link confidence</button>
+            <button data-metric="parse_confidence">Parse confidence</button>
+        </div>
+    </div>
+    <div id="strip"></div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="panel h-100">
+            <h2>How words correspond</h2>
+            <div class="sub">Groups of linked words by shape: one {{ langs.a.label }} word to one {{ langs.b.label }} word (1:1), one to several (1:n), and so on.</div>
+            <div id="shapes"></div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="panel h-100">
+            <h2>Explore</h2>
+            <div class="sub">Where to go next</div>
+            <div class="row g-3">
+                <div class="col-md-4"><a class="ms-card" href="lexicon/"><h3><i class="fa-solid fa-language"></i> Lexicon</h3><div class="langs">Every lemma with its translation equivalents, searchable in both directions.</div></a></div>
+                <div class="col-md-4"><a class="ms-card" href="insights/"><h3><i class="fa-solid fa-table-cells"></i> Insights</h3><div class="langs">How the translator renders case, tense, voice and parts of speech, and what is left out.</div></a></div>
+                <div class="col-md-4"><a class="ms-card" href="review/"><h3><i class="fa-solid fa-magnifying-glass"></i> Review</h3><div class="langs">Least confident links and parses, to check first.</div></a></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="panel mt-3" id="transcriptions">
+    <h2>Manuscripts</h2>
+    <div class="sub">The TEI transcriptions the texts come from. Each manuscript page describes the transcription and its licences.</div>
+    <div class="row g-3 mt-1">
+        {% for t in transcriptions %}
+        <div class="col-md-6">
+            <a class="ms-card" href="{{ root }}manuscripts/{{ t.id }}/">
+                <div class="siglum"><span class="lang-chip">{{ t.language }}</span></div>
+                <h3>{{ t.name }}</h3>
+                <div class="langs">{{ t.header.title }}{% if t.range %} · {{ t.range }}{% endif %}</div>
+                <div class="nums">
+                    <div><b>{{ "{:,}".format(t.summary.verses) }}</b>verses</div>
+                    <div><b>{{ "{:,}".format(t.summary.words) }}</b>words</div>
+                    {% if t.summary.folios %}<div><b>{{ t.summary.folios | length }}</b>{{ t.summary.unit }}s</div>{% endif %}
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="panel mt-3">
+    <h2>Verses</h2>
+    <div class="toolbar mt-2">
+        <input class="form-control form-control-sm" placeholder="Filter by reference…  ( / )" data-search id="verse-filter">
+        <span class="muted small" id="verse-count"></span>
+    </div>
+    <div class="table-scroll">
+        <table class="data-table" id="verse-table">
+            <thead><tr>
+                <th data-sort="i">#</th>
+                <th data-sort="label" data-type="text">Verse</th>
+                <th class="num" data-sort="words_a">{{ langs.a.label }}</th>
+                <th class="num" data-sort="words_b">{{ langs.b.label }}</th>
+                <th class="num" data-sort="links">Links</th>
+                <th data-sort="coverage">Words aligned</th>
+                <th class="num" data-sort="reordering">Order change</th>
+                <th class="num" data-sort="link_confidence">Link conf.</th>
+                <th class="num" data-sort="parse_confidence">Parse conf.</th>
+                <th class="num" data-sort="low_confidence_words">Uncertain words</th>
+            </tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>const OVERVIEW = {{ overview | tojson }};</script>
+<script src="{{ root }}js/pages.js"></script>
+{% endblock %}

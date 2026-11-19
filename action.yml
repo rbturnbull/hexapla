@@ -1,0 +1,53 @@
+name: Hexapla
+description: Build a Hexapla website from a project config file and deploy it to GitHub Pages.
+author: Robert Turnbull
+branding:
+  icon: book-open
+  color: blue
+
+inputs:
+  config:
+    description: The project's config file, relative to the repository root.
+    required: true
+  output:
+    description: Where to write the website.
+    default: _site
+  deploy:
+    description: Deploy to GitHub Pages ("true"), or only build the site ("false", e.g. to check a pull request).
+    default: "true"
+  python-version:
+    description: The Python version to run Hexapla with.
+    default: "3.12"
+
+outputs:
+  page_url:
+    description: The URL of the deployed site.
+    value: ${{ steps.deployment.outputs.page_url }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    # Installs Hexapla from this action's own checkout, so @v1 runs the code tagged v1 (no PyPI release needed).
+    - name: Install Hexapla
+      shell: bash
+      run: python -m pip install --quiet "${{ github.action_path }}"
+
+    - name: Build the website
+      shell: bash
+      run: hexapla build "${{ inputs.config }}" --output "${{ inputs.output }}"
+
+    - if: inputs.deploy == 'true'
+      uses: actions/configure-pages@v5
+
+    - if: inputs.deploy == 'true'
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ${{ inputs.output }}
+
+    - if: inputs.deploy == 'true'
+      id: deployment
+      uses: actions/deploy-pages@v4

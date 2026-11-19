@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block topbar %}<h1>About</h1><span class="crumb">{{ site.name }}</span>{% endblock %}
+{% block content %}
+<div class="panel about">
+{{ about_html | safe }}
+</div>
+{% endblock %}

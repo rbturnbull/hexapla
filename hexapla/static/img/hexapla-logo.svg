@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 300" role="img" aria-label="Hexapla">
+  <title>Hexapla</title>
+  <!-- Six columns of text, as in Origen's Hexapla, under the asterisk he used to mark additions. -->
+  <g fill="#224abe">
+    <rect x="60" y="150" width="46" height="70" rx="5"/>
+    <rect x="122" y="150" width="46" height="70" rx="5" opacity=".85"/>
+    <rect x="184" y="150" width="46" height="70" rx="5" opacity=".7"/>
+    <rect x="250" y="150" width="46" height="70" rx="5" opacity=".7"/>
+    <rect x="312" y="150" width="46" height="70" rx="5" opacity=".85"/>
+    <rect x="374" y="150" width="46" height="70" rx="5"/>
+  </g>
+  <g stroke="#c08a3e" stroke-width="12" stroke-linecap="round" transform="translate(240 82)">
+    <line x1="0" y1="-48" x2="0" y2="48"/>
+    <line x1="-41.6" y1="-24" x2="41.6" y2="24"/>
+    <line x1="-41.6" y1="24" x2="41.6" y2="-24"/>
+  </g>
+  <text x="240" y="276" text-anchor="middle" font-family="Gentium Plus, Georgia, 'Times New Roman', serif" font-size="46" letter-spacing="10" fill="#1b2f6e">HEXAPLA</text>
+</svg>

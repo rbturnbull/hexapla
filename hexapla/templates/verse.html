@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ verse_label }} · {{ title }}{% endblock %}
+{% block topbar %}
+<h1>{{ verse_label }}</h1>
+<span class="crumb">{{ title }}</span>
+<span class="spacer"></span>
+<a class="btn btn-sm btn-outline-secondary {{ 'disabled' if not prev_verse }}" id="prev-verse" href="{{ '../' ~ prev_verse ~ '/' if prev_verse else '#' }}" title="Previous verse (←)"><i class="fa-solid fa-arrow-left"></i></a>
+<select id="verseSelector" class="form-select form-select-sm" style="width: 190px" aria-label="Go to verse" data-current="{{ verse }}"></select>
+<a class="btn btn-sm btn-outline-secondary {{ 'disabled' if not next_verse }}" id="next-verse" href="{{ '../' ~ next_verse ~ '/' if next_verse else '#' }}" title="Next verse (→)"><i class="fa-solid fa-arrow-right"></i></a>
+{% endblock %}
+
+{% block content %}
+<div class="verse-layout">
+    <div>
+        <div class="panel verse-texts">
+            <div {% if lang_a_rtl %}dir="rtl"{% endif %}><span class="lang">{{ lang_a_label }}</span>{{ lang_a_text }}</div>
+            <div class="mt-2" {% if lang_b_rtl %}dir="rtl"{% endif %}><span class="lang">{{ lang_b_label }}</span>{{ lang_b_text }}</div>
+        </div>
+
+        <div class="panel">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-trees" type="button" role="tab">Trees &amp; alignment</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-interlinear" type="button" role="tab">Interlinear</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-matrix" type="button" role="tab">Alignment matrix</button></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-trees" role="tabpanel">
+                    <p class="muted small mb-2">Hover over a word to see its dependency relations, morphology and aligned words in the other language. Click it to open its lemma. <span class="legend-key sure"></span>sure link <span class="legend-key probable ms-2"></span>probable link{% if has_confidence %} · <span style="text-decoration: underline wavy #e07a1f">wavy</span> = parse confidence below 0.8{% endif %}</p>
+                    <h3 class="tree-title">{{ lang_a_label }}</h3>
+                    <svg id="{{ lang_a_id }}" class="tree" height="200"></svg>
+                    <h3 class="tree-title">{{ lang_b_label }}</h3>
+                    <svg id="{{ lang_b_id }}" class="tree" height="200"></svg>
+                </div>
+                <div class="tab-pane fade" id="tab-interlinear" role="tabpanel">
+                    <div class="toolbar">
+                        <div class="seg" id="il-direction">
+                            <button data-side="0" class="active">{{ lang_a_label }} with {{ lang_b_label }}</button>
+                            <button data-side="1">{{ lang_b_label }} with {{ lang_a_label }}</button>
+                        </div>
+                        <span class="muted small">Each word shows its lemma and, below the line, the words it is aligned to.</span>
+                    </div>
+                    <div id="interlinear" class="interlinear"></div>
+                    <div id="interlinear-extra" class="mt-3 small muted"></div>
+                </div>
+                <div class="tab-pane fade" id="tab-matrix" role="tabpanel">
+                    <p class="muted small mb-2">Rows are {{ lang_a_label }} words and columns {{ lang_b_label }} words. With the same word order, the links run down the dashed diagonal. Links off the diagonal show reordering. Filled dot = sure, ring = probable.</p>
+                    <div class="matrix-wrap"><svg id="matrix" class="matrix"></svg></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <aside>
+        <div class="panel">
+            <h2>This verse</h2>
+            <ul class="stat-list mt-2">
+                <li><span>{{ lang_a_label }} words</span><span>{{ stats.words_a }}</span></li>
+                <li><span>{{ lang_b_label }} words</span><span>{{ stats.words_b }}</span></li>
+                <li><span>Links</span><span>{{ stats.links }}{% if stats.probable %} <span class="muted fw-normal">({{ stats.probable }} probable)</span>{% endif %}</span></li>
+                <li><span>{{ lang_a_label }} aligned</span><span>{{ "%.0f"|format(stats.coverage_a * 100) }}%</span></li>
+                <li><span>{{ lang_b_label }} aligned</span><span>{{ "%.0f"|format(stats.coverage_b * 100) }}%</span></li>
+                {% if stats.reordering is not none %}<li><span>Word-order change</span><span>{{ "%.0f"|format(stats.reordering * 100) }}%</span></li>{% endif %}
+                {% if stats.link_confidence is not none %}<li><span>Link confidence</span><span>{{ "%.2f"|format(stats.link_confidence) }}</span></li>{% endif %}
+                {% if stats.parse_confidence is not none %}<li><span>Parse confidence</span><span>{{ "%.2f"|format(stats.parse_confidence) }}</span></li>{% endif %}
+            </ul>
+            <div class="muted small mt-3">sent_id <code>{{ sent_id }}</code></div>
+        </div>
+        {% if verse_notes %}
+        <div class="panel">
+            <h2>In the manuscript</h2>
+            {% for side in verse_notes %}
+            <div class="verse-tei">
+                <a class="lang-chip text-decoration-none" href="{{ root }}manuscripts/{{ side.manuscript }}/" title="About this manuscript">{{ side.language }}</a>
+                {% for n in side.notes %}
+                {% if n.folios %}<div>{{ ("p." if n.folios|length == 1 else "pp.") if n.unit == "page" else "fol." }} {{ n.folios | join(", ") }}</div>{% endif %}
+                {% set flags = [] %}
+                {% if n.corrections %}{% set _ = flags.append((n.corrections, "correction", "corrections", "fa-pen")) %}{% endif %}
+                {% if n.lacunae %}{% set _ = flags.append((n.lacunae, "lacuna", "lacunae", "fa-scissors")) %}{% endif %}
+                {% if n.unclear %}{% set _ = flags.append((n.unclear, "unclear reading", "unclear readings", "fa-eye-low-vision")) %}{% endif %}
+                {% if n.supplied %}{% set _ = flags.append((n.supplied, "supplied passage", "supplied passages", "fa-square-plus")) %}{% endif %}
+                {% if flags %}
+                <ul class="tei-flags">{% for count, one, many, icon in flags %}<li><i class="fa-solid {{ icon }}"></i>{{ count }} {{ one if count == 1 else many }}</li>{% endfor %}</ul>
+                {% else %}<div class="muted small">No corrections, lacunae or uncertain text.</div>{% endif %}
+                {% if n.notes %}<div class="muted small mt-1">Editor’s note{{ "s" if n.notes|length > 1 }}: {{ n.notes | join("; ") }}</div>{% endif %}
+                {% else %}
+                <div class="muted small">Not in the transcription.</div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            
+        </div>
+        {% endif %}
+        <div class="panel small muted">
+            <span class="kbd">←</span> <span class="kbd">→</span> previous / next verse<br>
+            <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> switch view
+        </div>
+    </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="./{{ siglum }}-{{ verse }}.js"></script>
+<script src="{{ root }}js/navigator.js"></script>
+<script src="../verses.js"></script>
+<script>NAV.fillSelector(document.getElementById('verseSelector'));</script>
+{% endblock %}

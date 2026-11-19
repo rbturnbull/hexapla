@@ -1,0 +1,21 @@
+# A small complete Hexapla project, used by the end-to-end tests.
+theme:
+  name: Test Navigator
+  logo: theme/logo.svg
+  variables: theme/variables.scss
+  about: theme/about.md
+  licence: CC-BY-NC-SA-4.0
+
+manuscripts:
+  claro-greek:
+    tei: claro/claro-greek.xml
+    parsing: claro/claro-greek.conllu
+  claro-latin:
+    tei: claro/claro-latin.xml
+    parsing: claro/claro-latin.conllu
+    parsing_licence: CC-BY-4.0
+
+alignments:
+  claro:
+    manuscripts: [claro-greek, claro-latin]
+    links: claro/claro-links.jsonl
