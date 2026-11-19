@@ -33,6 +33,10 @@ hexapla validate path/to/project-config.yaml
   `transcription.py` (TEI), `conllu.py`, `links.py`, `corpus.py` (loads witnesses and aligned pairs),
   `analysis.py`, `theme.py` (SCSS compile), `build.py` (pages), `main.py` (CLI).
 - `hexapla/templates/`: Jinja2 templates. `hexapla/static/`: JS, images, SCSS (incl. vendored Bootstrap).
+- `docs/`: Sphinx docs (furo). They include sections of `README.rst` between `.. start-<name>` /
+  `.. end-<name>` markers, so edit shared text in the README. Build with `sphinx-build -W docs docs/_build/html`;
+  update the docs whenever behaviour or the config changes.
+- `docs/_static/`: the Hexapla banner and logo (the logo is also the sites' default, `hexapla/static/img/hexapla-logo.svg`).
 - `action.yml`: the GitHub Action (installs Hexapla from its own checkout, builds, deploys to Pages).
 - `tests/`: pytest; `tests/data/project/` is a small complete project used by the end-to-end tests.
 

@@ -1,25 +1,46 @@
-=======
-Hexapla
-=======
+.. image:: docs/_static/hexapla-banner.svg
+   :alt: Hexapla: read between the columns
+   :width: 640px
+   :align: center
 
-Static websites for reading and exploring word-aligned manuscript texts.
+.. start-summary
 
-Named after Origen's Hexapla, which set versions of the Old Testament side by side in columns, Hexapla builds a
-site from a project's TEI transcriptions, CoNLL-U parses (mcparser) and alignment links (mcaligner): verse-by-verse
-reading with dependency trees, an interlinear and an alignment matrix, a bilingual lexicon, translation insights and
-a review queue, and a page for each manuscript described from its TEI header.
+Hexapla builds static websites for reading and exploring word-aligned manuscript texts.
+
+It takes a project's TEI transcriptions, CoNLL-U parses and word-alignment links and builds a site with:
+
+- **verse-by-verse reading**, with dependency trees, an interlinear and an alignment matrix for each verse;
+- a **bilingual lexicon** of every lemma and its translation equivalents;
+- **translation insights**: how grammar carries over between the languages, and what each text leaves out;
+- a **review queue** of the least confident links and parses;
+- a **page for each manuscript**, described from its TEI header.
+
+The name comes from Origen's Hexapla, which set versions of the Old Testament side by side in columns.
+
+.. end-summary
+
+Documentation: https://rbturnbull.github.io/hexapla/
+
+.. start-installation
 
 Installation
 ============
+
+Hexapla needs Python 3.11 or later.
 
 .. code-block:: bash
 
     pip install git+https://github.com/rbturnbull/hexapla
 
+.. end-installation
+
+.. start-usage
+
 Usage
 =====
 
-A project is a folder (usually its own repository) with a config file. Paths are relative to the config file:
+A project is a folder, usually its own repository, with a config file. Paths in the config are relative to the
+config file:
 
 .. code-block:: yaml
 
@@ -46,20 +67,56 @@ A project is a folder (usually its own repository) with a config file. Paths are
         links: bezae/Bezae-John20-aligned.jsonl
         licence: CC-BY-4.0            # optional: overrides the site licence for these links
 
-Everything about a manuscript comes from the TEI header of its transcription (TEI P5, chapter 10):
-the language (``<text xml:lang>``, required), ``msName``, the shelfmark, ``altIdentifier`` numbers
-(``GA``, ``VL``, ``TM`` for Trismegistos), ``origDate``, the ``msContents/summary``, the transcribers and the licence.
-A TEI file's own licence overrides the site's for that transcription.
+Everything about a manuscript comes from the TEI header of its transcription (TEI P5, chapter 10): the language
+(``<text xml:lang>``, required), ``msName``, the shelfmark, ``altIdentifier`` numbers (``GA``, ``VL``, ``TM`` for
+Trismegistos), ``origDate``, the ``msContents/summary``, the transcribers and the licence. A TEI file's own licence
+overrides the site's for that transcription.
+
+Check the project, then build the site:
 
 .. code-block:: bash
 
     hexapla validate project-config.yaml
     hexapla build project-config.yaml --output site
+    python -m http.server --directory site 8000     # then open http://localhost:8000
+
+.. end-usage
+
+.. start-files
+
+Making the CoNLL-U and links files
+==================================
+
+Hexapla reads standard formats, so the parses and alignments can come from any tool: CoNLL-U files with one sentence
+per verse, and links in JSON Lines (or Ugarit-style YAML) between the words of two parses with the same ``sent_id``.
+Two tools written for this work make them conveniently with LLM agents:
+
+- `MCParser <https://github.com/rbturnbull/llmparser>`_ lemmatises and parses each text into CoNLL-U:
+
+  .. code-block:: bash
+
+      pip install --pre mcparser
+      mcparser init bezae-john20-grc.yaml -o Bezae-Greek-John20.conllu -s greek-treebank.conllu
+      mcparser run Bezae-Greek-John20.conllu -s greek-treebank.conllu
+
+- `MCAligner <https://github.com/rbturnbull/llmaligner>`_ links the words of two parses:
+
+  .. code-block:: bash
+
+      pip install git+https://github.com/rbturnbull/llmaligner
+      mcaligner run -s grc=Bezae-Greek-John20.conllu -s lat=Bezae-Latin-John20.conllu \
+          -a pred=grc,lat,Bezae-John20-aligned.jsonl --target pred --guidelines grc-lat
+
+The docs explain the input formats and how the pieces fit together.
+
+.. end-files
+
+.. start-github-pages
 
 GitHub Pages
 ============
 
-Build and deploy a project's site on every push:
+Build and deploy a project's site on every push with the Hexapla GitHub Action:
 
 .. code-block:: yaml
 
@@ -79,7 +136,11 @@ Build and deploy a project's site on every push:
               config: project-config.yaml
 
 Set the repository's Pages source to "GitHub Actions". The action installs Hexapla from its own checkout, builds the
-site and deploys it; ``deploy: "false"`` only builds it (e.g. to check a pull request).
+site and deploys it. With ``deploy: "false"`` it only builds the site, for example to check a pull request.
+
+.. end-github-pages
+
+.. start-development
 
 Development
 ===========
@@ -87,7 +148,11 @@ Development
 .. code-block:: bash
 
     pip install -e . pytest pytest-cov
-    pytest            # 100% coverage is required
+    pytest                                    # 100% coverage is required
+    pip install sphinx furo sphinx-copybutton
+    sphinx-build docs docs/_build/html        # the documentation
+
+.. end-development
 
 Author
 ======

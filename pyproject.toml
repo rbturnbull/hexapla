@@ -32,6 +32,11 @@ packages = [{include = "hexapla"}]
 pytest = "^9.0.2"
 pytest-cov = "^7.0.0"
 
+[tool.poetry.group.docs.dependencies]
+sphinx = ">=8"
+furo = ">=2024"
+sphinx-copybutton = ">=0.5"
+
 [tool.pytest.ini_options]
 addopts = "--cov=hexapla --cov-report=term-missing"
 
