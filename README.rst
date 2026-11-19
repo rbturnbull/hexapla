@@ -58,7 +58,7 @@ Example
    :target: https://rbturnbull.github.io/bilingual-navigator/
 
 The `Bilingual Navigator <https://rbturnbull.github.io/bilingual-navigator/>`_ is a Hexapla site of bilingual New
-Testament manuscripts from the BICROSS project: Greek with Latin, Coptic, Arabic and Gothic. Its project, with the
+Testament manuscripts from the BICROSS project: Greek, Latin, Coptic, Arabic and Gothic. Its project, with the
 config, TEI transcriptions, parses and alignments it is built from, is at
 https://github.com/rbturnbull/bilingual-navigator.
 
@@ -152,6 +152,11 @@ Two tools written for this work make them conveniently with LLM agents:
 
 - `MCParser <https://github.com/rbturnbull/llmparser>`_ lemmatises and parses each text into CoNLL-U:
 
+  .. image:: https://raw.githubusercontent.com/rbturnbull/hexapla/main/docs/_static/mcparser-logo.svg
+     :alt: MCParser
+     :width: 240px
+     :target: https://github.com/rbturnbull/llmparser
+
   .. code-block:: bash
 
       pip install --pre mcparser
@@ -159,6 +164,11 @@ Two tools written for this work make them conveniently with LLM agents:
       mcparser run Bezae-Greek-John20.conllu -s greek-treebank.conllu
 
 - `MCAligner <https://github.com/rbturnbull/llmaligner>`_ links the words of two parses:
+
+  .. image:: https://raw.githubusercontent.com/rbturnbull/hexapla/main/docs/_static/mcaligner-logo.svg
+     :alt: MCAligner
+     :width: 240px
+     :target: https://github.com/rbturnbull/llmaligner
 
   .. code-block:: bash
 
