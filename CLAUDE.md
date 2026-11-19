@@ -31,7 +31,8 @@ hexapla validate path/to/project-config.yaml
 
 - `hexapla/`: the package. `config.py` (pydantic `Config`, `Theme`, `Manuscript`, `Alignment`),
   `transcription.py` (TEI), `conllu.py`, `links.py`, `corpus.py` (loads witnesses and aligned pairs),
-  `analysis.py`, `theme.py` (SCSS compile), `build.py` (pages), `main.py` (CLI).
+  `analysis.py`, `theme.py` (SCSS compile), `about.py` (about page Markdown and its asset links),
+  `build.py` (pages), `main.py` (CLI).
 - `hexapla/templates/`: Jinja2 templates. `hexapla/static/`: JS, images, SCSS (incl. vendored Bootstrap).
 - `docs/`: Sphinx docs (furo). They include sections of `README.rst` between `.. start-<name>` /
   `.. end-<name>` markers, so edit shared text in the README. Build with `sphinx-build -W docs docs/_build/html`;

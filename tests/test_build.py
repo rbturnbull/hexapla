@@ -199,3 +199,22 @@ def test_attribution_credits():
     ])
     assert [line["credit"] for line in lines] == ["Project Wulfila", "ITSEE, Wulfila", "transcriber not named in the file"]
     assert lines[0]["licence"] == "no licence stated"
+
+
+def test_assets_are_copied_and_the_about_page_links_to_them(site):
+    assert (site / "assets/badge.svg").exists() and (site / "assets/docs/guide.txt").exists()
+    about = read(site, "about/index.html")
+    assert 'src="../assets/badge.svg"' in about and 'alt="A badge"' in about
+    assert 'href="../assets/docs/guide.txt"' in about
+    assert 'href="https://example.org/"' in about and 'href="#funding"' in about
+
+
+def test_about_links_from_a_nested_about_file(project_dir, tmp_path):
+    """ Links are relative to the about file, wherever it is. """
+    (project_dir / "pages").mkdir()
+    (project_dir / "pages" / "about.md").write_text("![Badge](../theme/assets/badge.svg)\n")
+    data = read_config(project_dir)
+    data["theme"]["about"] = "pages/about.md"
+    write_config(project_dir, data)
+    output = build(project_dir, tmp_path / "site")
+    assert 'src="../assets/badge.svg"' in read(output, "about/index.html")

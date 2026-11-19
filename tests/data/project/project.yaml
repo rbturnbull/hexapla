@@ -4,6 +4,7 @@ theme:
   logo: theme/logo.svg
   variables: theme/variables.scss
   about: theme/about.md
+  assets: theme/assets
   licence: CC-BY-NC-SA-4.0
 
 manuscripts:

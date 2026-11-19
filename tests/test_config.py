@@ -122,6 +122,40 @@ def test_config_can_be_built_in_python(tmp_path):
         alignments=[Alignment(id="ab", manuscripts=["a", "b"], links=Path("ab.jsonl"))],
     )
     assert config.path is None and config.root is None
+    assert Theme(about=Path("about.md"), assets=Path("assets")).about == Path("about.md")
     assert config.manuscripts[0].tei == Path("a.xml")
     with pytest.raises(KeyError):
         config.manuscript("missing")
+
+
+def test_assets_folder(project_dir):
+    config = load_config(project_dir / CONFIG_NAME)
+    assert config.theme.assets == (project_dir / "theme" / "assets").resolve()
+
+
+@pytest.mark.parametrize("change, message", [
+    (lambda d: d["theme"].update(assets="theme/missing"), "folder not found"),
+    (lambda d: d["theme"].update(assets="theme/about.md"), "folder not found"),
+])
+def test_assets_errors(project_dir, change, message):
+    data = read_config(project_dir)
+    change(data)
+    with pytest.raises(ConfigError) as caught:
+        load_config(write_config(project_dir, data))
+    assert message in str(caught.value)
+
+
+def test_about_page_can_only_link_to_assets(project_dir):
+    about = project_dir / "theme" / "about.md"
+    about.write_text(about.read_text() + "\n![Missing](assets/nope.png) [Elsewhere](../claro/claro-greek.xml)\n")
+    with pytest.raises(ConfigError) as caught:
+        load_config(project_dir / CONFIG_NAME)
+    assert "theme.about: assets/nope.png is not in the assets folder" in str(caught.value)
+    assert "../claro/claro-greek.xml is not in the assets folder" in str(caught.value)
+
+
+def test_about_page_links_need_an_assets_folder(project_dir):
+    data = read_config(project_dir)
+    del data["theme"]["assets"]
+    with pytest.raises(ConfigError, match="assets/badge.svg is not in the assets folder"):
+        load_config(write_config(project_dir, data))

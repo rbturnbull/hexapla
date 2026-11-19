@@ -295,3 +295,11 @@ svg.tree { display: block; width: 100%; margin-bottom: 1.5rem; }
 @media (max-width: 575px) { .tei-dl { grid-template-columns: 1fr; } .tei-dl dt { margin-top: 0.3rem; } }
 .chip-multi a { color: inherit; text-decoration: none; }
 .chip-multi a:hover { color: var(--series-1); text-decoration: underline; }
+
+/* ---------- About page ---------- */
+.about { max-width: 900px; }
+.about img { max-width: 100%; height: auto; }
+.about::after { content: ""; display: block; clear: both; }
+.about h1 { font-family: var(--serif); font-size: 1.9rem; margin-bottom: 1rem; }
+.panel.about h2 { font-family: var(--serif); font-size: 1.35rem; font-weight: 600; margin: 1.6rem 0 0.7rem; }
+.about p, .about li { line-height: 1.6; }

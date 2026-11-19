@@ -35,3 +35,4 @@ Start with :doc:`installation` and :doc:`quickstart`, then see :doc:`project` fo
    _generated/cli
    api
    development
+   acknowledgements

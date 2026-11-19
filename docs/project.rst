@@ -31,6 +31,7 @@ Misspelt or unknown keys are reported as errors.
     ``logo``       An image for the sidebar and the home page (default: the Hexapla logo).
     ``variables``  A ``.scss`` file of Bootstrap and Hexapla variables, or a ``.css`` file added to the styles.
     ``about``      A Markdown file for an About page.
+    ``assets``     A folder copied into the site, for images and files the about page links to.
     ``licence``    The licence of the site, as an SPDX id such as ``CC-BY-NC-SA-4.0``. It covers the parses, the
                    links, and any transcription whose TEI header gives no licence.
     =============  ==========================================================================================

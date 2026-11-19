@@ -48,7 +48,8 @@ config file:
       name: BICROSS Navigator
       logo: theme/logo.svg            # optional: the Hexapla logo by default
       variables: theme/variables.scss # optional: Bootstrap variables (.scss) or extra CSS (.css)
-      about: theme/about.md           # optional: an about page
+      about: theme/about.md           # optional: an about page (Markdown)
+      assets: theme/assets            # optional: images and files for the about page
       licence: CC-BY-NC-SA-4.0        # SPDX id: the site, parses and links
 
     manuscripts:
@@ -153,6 +154,25 @@ Development
     sphinx-build docs docs/_build/html        # the documentation
 
 .. end-development
+
+Acknowledgements
+================
+
+.. image:: docs/_static/erc-logo.jpg
+   :alt: European Research Council
+   :width: 160px
+   :align: right
+
+.. start-acknowledgements
+
+Hexapla was developed as part of the BICROSS project (‘The Significance of Bilingual Manuscripts for Detecting
+Cross-Language Interaction in the New Testament Tradition’), which has received funding from the European Research
+Council (ERC) under the European Union’s Horizon Europe Research and Innovation Programme (Grant Agreement
+No. 101043730 – BICROSS – ERC-2021-COG). Funded by the European Union. Views and opinions expressed are however those
+of the author only and do not necessarily reflect those of the European Union or the European Education and Culture
+Executive Agency (EACEA). Neither the European Union nor EACEA can be held responsible for them.
+
+.. end-acknowledgements
 
 Author
 ======

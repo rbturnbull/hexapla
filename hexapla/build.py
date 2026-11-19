@@ -6,6 +6,7 @@ site/
   about/index.html                                 the theme's about page (Markdown), if any
   css/hexapla.css                                  Bootstrap and Hexapla's styles, with the theme's variables
   js/, img/                                        scripts and the logo
+  assets/                                          the theme's assets folder (images and files for the about page)
   manuscripts/<ms>/index.html                      a manuscript: its TEI header and transcription summary
   manuscripts/<ms>/<file>.xml                      the TEI transcription, for download
   alignments/<id>/index.html                       overview: statistics, verse table
@@ -30,9 +31,8 @@ from pathlib import Path
 from urllib.parse import quote
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from markdown_it import MarkdownIt
-
 from . import analysis
+from .about import render_about
 from .bible import read_verse_ref
 from .conllu import Sentence
 from .corpus import AlignedPair, Language, Project, Verse, Witness
@@ -484,6 +484,8 @@ def build_site(project: Project, output: Path | str):
     logo_name = f"logo{logo.suffix}" if theme.logo else DEFAULT_LOGO.name
     (output / "img").mkdir()
     shutil.copyfile(logo, output / "img" / logo_name)
+    if theme.assets:
+        shutil.copytree(theme.assets, output / "assets")
 
     site = {"name": theme.name, "logo": logo_name, "about": theme.about is not None, "licence": project.site_licence}
     sidebar_sections = build_sidebar_sections(pairs)
@@ -492,7 +494,7 @@ def build_site(project: Project, output: Path | str):
         root="./", page="home", title="Home", site=site, siglum=None, sidebar_sections=sidebar_sections, cards=sections,
     ))
     if theme.about:
-        about = MarkdownIt().render(theme.about.read_text(encoding="utf-8"))
+        about = render_about(theme.about, theme.assets, root="../")
         write(output / "about" / "index.html", env.get_template("about.html").render(
             root="../", page="about", title="About", site=site, siglum=None, sidebar_sections=sidebar_sections,
             about_html=about,

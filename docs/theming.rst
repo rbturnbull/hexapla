@@ -11,6 +11,7 @@ optional: without it, the site has Hexapla's look and logo.
       logo: theme/logo.svg
       variables: theme/variables.scss
       about: theme/about.md
+      assets: theme/assets
       licence: CC-BY-NC-SA-4.0
 
 Colours and fonts
@@ -49,13 +50,41 @@ compiler's message, and the last build is left as it was.
 
 A ``.css`` file is added after the compiled styles instead, for rules of your own.
 
-Logo and about page
--------------------
+Logo
+----
 
 ``logo`` can be any image (SVG, PNG or JPEG). It is shown at the top of the sidebar and on the home page.
 
+About page and assets
+---------------------
+
 ``about`` is a Markdown file. It becomes an About page, linked from the sidebar and the home page: a good place for
 the project, its funders, and how its texts were prepared.
+
+``assets`` is a folder copied into the site as ``assets/``, for the images and files the about page shows or links
+to: a funder's logo, a PDF, a diagram. Write their links relative to the Markdown file, as you would for it to
+preview on GitHub, and Hexapla points them at the copies in the site::
+
+    theme/
+      about.md
+      assets/
+        erc-logo.jpg
+        guidelines.pdf
+
+.. code-block:: markdown
+
+    ## Funding
+
+    ![European Research Council](assets/erc-logo.jpg){width=160 .float-end .ms-4}
+
+    The research leading to this contribution ... Read our [transcription guidelines](assets/guidelines.pdf).
+
+Attributes in braces after an image set its size, or add `Bootstrap classes
+<https://getbootstrap.com/docs/5.3/utilities/float/>`_ such as ``.float-end`` (float right) and ``.ms-4`` (a margin
+on its left).
+
+A local image or link that is not in the assets folder would be broken on the site, so ``hexapla validate`` reports
+it as an error. Links to web pages (``https://...``) and to headings on the page (``#funding``) are left as they are.
 
 Licences
 --------

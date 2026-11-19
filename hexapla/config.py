@@ -7,6 +7,7 @@ and the alignments between them. Paths are relative to the config file::
       logo: theme/logo.svg
       variables: theme/variables.scss
       about: theme/about.md
+      assets: theme/assets
       licence: CC-BY-NC-SA-4.0
 
     manuscripts:
@@ -28,6 +29,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from .about import asset_path, local_links
 from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, ValidationError, ValidationInfo, field_validator, model_validator
 
 ID_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._-]*$"
@@ -40,15 +42,31 @@ class ConfigError(Exception):
         super().__init__(f"{source}:\n" + "\n".join(f"  - {error}" for error in errors))
 
 
-def _resolve(value: Path | None, info: ValidationInfo) -> Path | None:
-    """ Makes a path absolute against the config file's folder and checks it exists (only when loading a file). """
+def _locate(value: Path | None, info: ValidationInfo) -> Path | None:
+    """ A path made absolute against the config file's folder; None when not loading a file (paths are kept as given). """
     root = (info.context or {}).get("root")
     if value is None or root is None:
-        return value
+        return None
     path = value.expanduser()
-    path = (path if path.is_absolute() else root / path).resolve()
+    return (path if path.is_absolute() else root / path).resolve()
+
+
+def _resolve(value: Path | None, info: ValidationInfo) -> Path | None:
+    """ Makes a path absolute against the config file's folder and checks the file exists (only when loading a file). """
+    path = _locate(value, info)
+    if path is None:
+        return value
     if not path.is_file():
         raise ValueError(f"file not found: {path}")
+    return path
+
+
+def _resolve_folder(value: Path | None, info: ValidationInfo) -> Path | None:
+    path = _locate(value, info)
+    if path is None:
+        return value
+    if not path.is_dir():
+        raise ValueError(f"folder not found: {path}")
     return path
 
 
@@ -60,7 +78,8 @@ class Theme(Model):
     name: str = "Hexapla"
     logo: Path | None = None
     variables: Path | None = None  # Bootstrap variables (.scss) or extra CSS (.css)
-    about: Path | None = None  # Markdown for the about page
+    assets: Path | None = None  # a folder copied into the site as assets/, for the about page's images and files
+    about: Path | None = None  # Markdown for the about page; its links into the assets folder work on the site
     licence: str | None = None  # SPDX id; covers the site, CoNLL-U and links unless overridden
 
     @field_validator("variables")
@@ -70,7 +89,21 @@ class Theme(Model):
             raise ValueError(f"must be a .scss or .css file, not {value.name}")
         return value
 
-    _paths = field_validator("logo", "variables", "about")(_resolve)
+    _paths = field_validator("logo", "variables")(_resolve)
+    _folders = field_validator("assets")(_resolve_folder)
+
+    @field_validator("about")
+    @classmethod
+    def _about(cls, value: Path | None, info: ValidationInfo) -> Path | None:
+        """ The about file, whose local images and links must all be in the assets folder (else broken on the site). """
+        value = _resolve(value, info)
+        if value is None or (info.context or {}).get("root") is None:
+            return value
+        assets = info.data.get("assets")
+        missing = [link for link in local_links(value.read_text(encoding="utf-8")) if not asset_path(link, value, assets)]
+        if missing:
+            raise ValueError("; ".join(f"{link} is not in the assets folder" for link in missing))
+        return value
 
 
 class Manuscript(Model):
