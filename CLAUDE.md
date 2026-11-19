@@ -12,7 +12,7 @@ hexapla validate path/to/project-config.yaml
 ## Priorities
 
 1. **Tests first.** Write or update the tests before the code that makes them pass.
-2. **100% test coverage.** `pytest --cov=hexapla --cov-report=term-missing` must report 100%.
+2. **100% test coverage.** `uv run pytest` must report 100% (coverage is configured in `pyproject.toml`).
    Untested code is removed or tested, not excluded. Use `# pragma: no cover` only for lines
    that cannot run under test, and say why in a comment.
 3. **The TEI is the source of truth for manuscripts.** Language (`<text xml:lang>`), names, shelfmarks,
@@ -44,7 +44,9 @@ hexapla validate path/to/project-config.yaml
 
 ## Conventions
 
-- Python at `.venv/bin/python`; run tests with `.venv/bin/python -m pytest`.
+- The project uses uv: `uv sync --all-groups` once, then `uv run pytest`, `uv run hexapla ...` and
+  `uv run sphinx-build -W docs docs/_build/html`. Add dependencies with `uv add` (or `uv add --group dev`), which
+  updates `uv.lock`; commit the lock file. Build the package with `uv build`.
 - Paths in a config file are relative to the config file.
 - Config `licence` fields take SPDX ids (`CC-BY-NC-SA-4.0`). A TEI licence overrides the site licence
   for that transcription; `parsing_licence` and an alignment's `licence` override it for those files.
@@ -55,5 +57,5 @@ hexapla validate path/to/project-config.yaml
 1. Set the version in both `pyproject.toml` and `hexapla/__init__.py` (a test checks they match), and in `CITATION.cff`.
 2. Give the version a section in `CHANGELOG.rst` (a test checks it is there) with its date.
 3. Commit, then tag and push: `git tag v0.1.0 && git push origin v0.1.0`. `.github/workflows/publish.yml` tests,
-   builds (`pyproject-build`, not `python -m build`) and uploads to PyPI with the `PYPI_TOKEN` secret.
+   builds (`uv build`) and publishes (`uv publish`) to PyPI with the `PYPI_TOKEN` secret.
 4. Move the action's major tag: `git tag -f v1 && git push -f origin v1`.

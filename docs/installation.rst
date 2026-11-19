@@ -2,7 +2,7 @@
    :start-after: start-installation
    :end-before: end-installation
 
-To upgrade to the latest release, run ``pip install --upgrade hexapla``.
+To upgrade to the latest release, run ``pip install --upgrade hexapla`` (or ``uv tool upgrade hexapla``).
 
 To build a site on GitHub instead of your own computer, you do not need to install anything: the
 :doc:`GitHub Action <github-pages>` installs Hexapla itself.

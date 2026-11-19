@@ -64,6 +64,13 @@ or the latest version from GitHub:
 
     pip install git+https://github.com/rbturnbull/hexapla
 
+With `uv <https://docs.astral.sh/uv/>`_, install it as a command-line tool, or run it without installing:
+
+.. code-block:: bash
+
+    uv tool install hexapla
+    uvx hexapla build project-config.yaml --output site
+
 Check that it works with ``hexapla --version``.
 
 .. end-installation
@@ -180,12 +187,16 @@ site and deploys it. With ``deploy: "false"`` it only builds the site, for examp
 Development
 ===========
 
+Hexapla uses `uv <https://docs.astral.sh/uv/>`_:
+
 .. code-block:: bash
 
-    pip install -e . pytest pytest-cov
-    pytest                                    # 100% coverage is required
-    pip install sphinx furo sphinx-copybutton
-    sphinx-build docs docs/_build/html        # the documentation
+    git clone https://github.com/rbturnbull/hexapla.git
+    cd hexapla
+    uv sync --all-groups                                  # the package, and the dev and docs dependencies
+    uv run pytest                                         # 100% coverage is required
+    uv run sphinx-build -W docs docs/_build/html          # the documentation
+    uv run hexapla build tests/data/project/project.yaml --output site    # the test project's site
 
 .. end-development
 

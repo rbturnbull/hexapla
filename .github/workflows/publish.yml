@@ -10,23 +10,22 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
         with:
+          enable-cache: true
           python-version: "3.13"
       - name: Test (100% coverage required)
         run: |
-          python -m pip install . pytest pytest-cov
-          python -m pytest
+          uv sync --locked --group dev
+          uv run --locked pytest
       - name: Check the tag matches the version
-        run: test "v$(python -c 'import hexapla; print(hexapla.__version__)')" = "${GITHUB_REF_NAME}"
-      - name: Build
+        run: test "v$(uv run --locked python -c 'import hexapla; print(hexapla.__version__)')" = "${GITHUB_REF_NAME}"
+      - name: Build and check
         run: |
-          python -m pip install build twine
-          pyproject-build   # not "python -m build", which an old build.py at the root would shadow
-          python -m twine check --strict dist/*
+          uv build
+          uvx twine check --strict dist/*
       - name: Publish to PyPI
         env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: python -m twine upload dist/*
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: uv publish
