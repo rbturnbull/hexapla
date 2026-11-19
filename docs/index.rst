@@ -15,6 +15,10 @@ A Hexapla *project* is a folder with a YAML config file, the TEI transcriptions 
 of each text, and the word links between pairs of texts. ``hexapla build`` turns it into a site you can put on any
 web server, or publish on GitHub Pages with the Hexapla GitHub Action.
 
+.. include:: ../README.rst
+   :start-after: start-example
+   :end-before: end-example
+
 Start with :doc:`installation` and :doc:`quickstart`, then see :doc:`project` for what each file needs and
 :doc:`generating` for making the parses and links with MCParser and MCAligner.
 

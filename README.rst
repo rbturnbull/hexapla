@@ -47,6 +47,23 @@ The name comes from Origen's Hexapla, which set versions of the Old Testament si
 
 Documentation: https://rbturnbull.github.io/hexapla/
 
+.. start-example
+
+Example
+=======
+
+.. image:: https://raw.githubusercontent.com/rbturnbull/bilingual-navigator/main/theme/bicross-navigator-logo.jpg
+   :alt: The Bilingual Navigator
+   :width: 220px
+   :target: https://rbturnbull.github.io/bilingual-navigator/
+
+The `Bilingual Navigator <https://rbturnbull.github.io/bilingual-navigator/>`_ is a Hexapla site of bilingual New
+Testament manuscripts from the BICROSS project: Greek with Latin, Coptic, Arabic and Gothic. Its project, with the
+config, TEI transcriptions, parses and alignments it is built from, is at
+https://github.com/rbturnbull/bilingual-navigator.
+
+.. end-example
+
 .. start-installation
 
 Installation
@@ -203,10 +220,6 @@ Hexapla uses `uv <https://docs.astral.sh/uv/>`_:
 Acknowledgements
 ================
 
-.. image:: https://raw.githubusercontent.com/rbturnbull/hexapla/main/docs/_static/erc-logo.jpg
-   :alt: European Research Council
-   :width: 160px
-   :align: right
 
 .. start-acknowledgements
 
@@ -218,6 +231,11 @@ of the author only and do not necessarily reflect those of the European Union or
 Executive Agency (EACEA). Neither the European Union nor EACEA can be held responsible for them.
 
 .. end-acknowledgements
+
+.. image:: https://raw.githubusercontent.com/rbturnbull/hexapla/main/docs/_static/erc-logo.jpg
+   :alt: European Research Council
+   :width: 160px
+   :align: right
 
 Author
 ======
