@@ -42,6 +42,8 @@ PACKAGE_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = PACKAGE_DIR / "templates"
 STATIC_DIR = PACKAGE_DIR / "static"
 DEFAULT_LOGO = STATIC_DIR / "img" / "hexapla-logo.svg"
+SMALL_LOGO = STATIC_DIR / "img" / "hexapla-small.svg"  # "Built with Hexapla" in every page's footer
+HEXAPLA_URL = "https://github.com/rbturnbull/hexapla"
 MARKER = ".hexapla"
 RESERVED_NAMES = {"lexicon", "insights", "review", "corpus.js", "verses.js"}
 
@@ -484,10 +486,12 @@ def build_site(project: Project, output: Path | str):
     logo_name = f"logo{logo.suffix}" if theme.logo else DEFAULT_LOGO.name
     (output / "img").mkdir()
     shutil.copyfile(logo, output / "img" / logo_name)
+    shutil.copyfile(SMALL_LOGO, output / "img" / SMALL_LOGO.name)
     if theme.assets:
         shutil.copytree(theme.assets, output / "assets")
 
-    site = {"name": theme.name, "logo": logo_name, "about": theme.about is not None, "licence": project.site_licence}
+    site = {"name": theme.name, "logo": logo_name, "about": theme.about is not None, "licence": project.site_licence,
+            "hexapla_url": HEXAPLA_URL, "hexapla_logo": SMALL_LOGO.name}
     sidebar_sections = build_sidebar_sections(pairs)
     sections = build_sidebar_sections(pairs, summaries)
     write(output / "index.html", env.get_template("home.html").render(

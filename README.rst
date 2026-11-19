@@ -1,7 +1,33 @@
-.. image:: docs/_static/hexapla-banner.svg
+.. image:: https://raw.githubusercontent.com/rbturnbull/hexapla/main/docs/_static/hexapla-banner.svg
    :alt: Hexapla: read between the columns
    :width: 640px
    :align: center
+
+.. start-badges
+
+|pypi| |tests| |docs| |python| |license|
+
+.. |pypi| image:: https://img.shields.io/pypi/v/hexapla?color=blue
+   :alt: PyPI
+   :target: https://pypi.org/project/hexapla/
+
+.. |tests| image:: https://github.com/rbturnbull/hexapla/actions/workflows/tests.yml/badge.svg
+   :alt: Tests
+   :target: https://github.com/rbturnbull/hexapla/actions/workflows/tests.yml
+
+.. |docs| image:: https://github.com/rbturnbull/hexapla/actions/workflows/docs.yml/badge.svg
+   :alt: Docs
+   :target: https://rbturnbull.github.io/hexapla/
+
+.. |python| image:: https://img.shields.io/pypi/pyversions/hexapla
+   :alt: Python versions
+   :target: https://pypi.org/project/hexapla/
+
+.. |license| image:: https://img.shields.io/badge/license-Apache%202.0-blue
+   :alt: Licence: Apache 2.0
+   :target: https://github.com/rbturnbull/hexapla/blob/main/LICENSE
+
+.. end-badges
 
 .. start-summary
 
@@ -26,11 +52,19 @@ Documentation: https://rbturnbull.github.io/hexapla/
 Installation
 ============
 
-Hexapla needs Python 3.11 or later.
+Hexapla needs Python 3.11 or later. Install it from PyPI:
+
+.. code-block:: bash
+
+    pip install hexapla
+
+or the latest version from GitHub:
 
 .. code-block:: bash
 
     pip install git+https://github.com/rbturnbull/hexapla
+
+Check that it works with ``hexapla --version``.
 
 .. end-installation
 
@@ -158,7 +192,7 @@ Development
 Acknowledgements
 ================
 
-.. image:: docs/_static/erc-logo.jpg
+.. image:: https://raw.githubusercontent.com/rbturnbull/hexapla/main/docs/_static/erc-logo.jpg
    :alt: European Research Council
    :width: 160px
    :align: right

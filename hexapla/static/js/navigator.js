@@ -134,7 +134,7 @@ function renderSentence(sentence) {
   if (sentence.rtl) svg.attr("direction", "rtl");
 
   const defs = svg.append("defs");
-  [["arrowhead", "#d8dbe3"], ["arrowhead-red", "#d03b3b"], ["arrowhead-blue", "#1c3fae"]].forEach(([id, color]) => {
+  [["arrowhead", "#d8dbe3"], ["arrowhead-red", "#d03b3b"], ["arrowhead-blue", NAV.cssColor("--accent")]].forEach(([id, color]) => {
     defs.append("marker").attr("id", `${sentence.svgId}-${id}`).attr("viewBox", "0 -5 10 10")
       .attr("refX", 8).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto")
       .append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", color);

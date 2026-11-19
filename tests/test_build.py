@@ -218,3 +218,34 @@ def test_about_links_from_a_nested_about_file(project_dir, tmp_path):
     write_config(project_dir, data)
     output = build(project_dir, tmp_path / "site")
     assert 'src="../assets/badge.svg"' in read(output, "about/index.html")
+
+
+@pytest.mark.parametrize("path, root", [
+    ("index.html", "./"),
+    ("about/index.html", "../"),
+    ("manuscripts/claro-greek/index.html", "../../"),
+    ("alignments/claro/index.html", "../../"),
+    ("alignments/claro/lexicon/index.html", "../../../"),
+    ("alignments/claro/B06K01V07/index.html", "../../../"),
+    ("alignments/claro/greek/χάρις/index.html", "../../../../"),
+])
+def test_every_page_links_to_hexapla(site, path, root):
+    footer = read(site, path).split('class="site-footer"')[1]
+    assert 'href="https://github.com/rbturnbull/hexapla"' in footer
+    assert f'src="{root}img/hexapla-small.svg"' in footer and 'alt="Hexapla"' in footer
+
+
+def test_small_logo_has_a_transparent_background(site):
+    logo = read(site, "img/hexapla-small.svg")
+    assert logo.startswith("<?xml") and "fill:white" not in logo
+
+
+def test_pages_do_not_name_tools_the_project_may_not_use(site):
+    for path in ("alignments/claro/index.html", "alignments/claro/review/index.html"):
+        text = read(site, path)
+        assert "aligned with mcaligner" not in text and "confidences from mcparser" not in text
+
+
+def test_the_favicon_is_the_site_logo(site):
+    assert '<link rel="icon" href="./img/logo.svg">' in read(site, "index.html")
+    assert '<link rel="icon" href="../../img/logo.svg">' in read(site, "alignments/claro/index.html")

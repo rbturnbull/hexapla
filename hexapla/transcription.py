@@ -22,6 +22,8 @@ from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .licences import licence_info
+
 TEI_NS = "http://www.tei-c.org/ns/1.0"
 XML_ID = "{http://www.w3.org/XML/1998/namespace}id"
 XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
@@ -177,6 +179,10 @@ def _read_header(header) -> dict:
         licence_name = match.group(1)
     elif cc_short := re.search(r"Creative Commons \(?(by(?:-n[cd])*(?:-sa)?)\b", licence_text, re.I):  # "(Creative Commons by-nc-sa)"
         licence_name = f"CC {cc_short.group(1).upper()}"
+    elif words := CC_WORDS.search(licence_text):  # "Creative Commons Attribution-NonCommercial 4.0 International"
+        parts = "".join(f"-{CC_TERMS[term.lower()]}" for term in re.findall(r"[A-Za-z]+", words.group(1)))
+        licence = licence_info(f"CC-BY{parts}-{words.group(2)}")
+        licence_name, licence_url = licence["name"], licence_url or licence["url"]
     elif cc_url:
         licence_name = f"CC {cc_url.group(1).upper()} {cc_url.group(2)}"
     elif re.search(r"non-?commercial", licence_text, re.I):
@@ -260,6 +266,8 @@ def _read_header(header) -> dict:
 
 
 FOLIO_NOTE = re.compile(r"\d+[rv]")
+CC_WORDS = re.compile(r"Creative Commons Attribution((?:[- ](?:NonCommercial|NoDerivatives|NoDerivs|ShareAlike))*) (\d\.\d)", re.I)
+CC_TERMS = {"noncommercial": "NC", "noderivatives": "ND", "noderivs": "ND", "sharealike": "SA"}
 
 
 def _has_text(ab, has_words: bool) -> bool:

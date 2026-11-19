@@ -188,7 +188,12 @@ def load_witness(manuscript: Manuscript, errors: list[str]) -> Witness | None:
         transcription.verses = _key_by_verse_id(transcription.verses)
 
     sentences: dict[str, Sentence] = {}
-    for sentence in read_conllu(manuscript.parsing):
+    try:
+        parsed = read_conllu(manuscript.parsing)
+    except ValueError as err:  # the message names the file and line
+        found.append(str(err))
+        parsed = []
+    for sentence in parsed:
         if sentence.sent_id in sentences:
             found.append(f"{manuscript.parsing}: duplicate sent_id {sentence.sent_id!r}")
         sentences[sentence.sent_id] = sentence

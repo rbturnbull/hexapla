@@ -15,12 +15,27 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
+from . import __version__
 from .build import OutputDirError, build_site
 from .config import ConfigError, load_config
 from .corpus import CorpusError, Project, load_project
 from .theme import ThemeError
 
 app = typer.Typer(help="Static websites for reading and exploring word-aligned manuscript texts.", no_args_is_help=True)
+
+
+def show_version(value: bool):
+    if value:
+        typer.echo(f"hexapla {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def main(
+    version: bool = typer.Option(False, "--version", callback=show_version, is_eager=True,
+                                 help="Show Hexapla's version and exit."),
+):
+    """ Static websites for reading and exploring word-aligned manuscript texts. """
 
 
 def make_console() -> Console:

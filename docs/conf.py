@@ -22,8 +22,8 @@ exclude_patterns = ["_build"]
 html_theme = "furo"
 html_title = "Hexapla"
 html_static_path = ["_static"]
-html_logo = "_static/hexapla-logo.svg"
-html_favicon = "_static/hexapla-logo.svg"
+html_logo = "_static/hexapla-logo-transparent.svg"  # the logo without its white background
+html_favicon = "_static/hexapla-logo-transparent.svg"
 html_theme_options = {
     "sidebar_hide_name": True,
     "light_css_variables": {"color-brand-primary": "#9c3d2a", "color-brand-content": "#9c3d2a"},

@@ -28,7 +28,10 @@ styles when the site is built. A ``.scss`` file can set any
     $hexapla-page-bg: #faf8f5;
     $hexapla-serif: "Gentium Plus", Georgia, serif;
 
-The site's brand colour (links and the sidebar) follows ``$primary`` when the theme sets it. Hexapla's variables:
+The site's brand colour (links and the sidebar) follows ``$primary`` when the theme sets it, and so do the colours made
+from it: the highlighted words and arcs, the bars and dots of the charts, the heatmap scale and the light hover
+backgrounds. Without a theme, the site keeps Hexapla's blues. Hexapla's variables, which a theme can also set one by
+one:
 
 =============================  ======================================================================
 ``$hexapla-brand``             The brand colour, if it should differ from ``$primary``.
@@ -39,6 +42,11 @@ The site's brand colour (links and the sidebar) follows ``$primary`` when the th
 ``$hexapla-text``              Text.
 ``$hexapla-text-secondary``    Secondary text, such as explanations under headings.
 ``$hexapla-text-muted``        Muted text, such as labels.
+``$hexapla-accent``            Highlighted words, arcs and aligned words (a shade of the brand colour).
+``$hexapla-series``            The bars, dots and meters of the charts (the brand colour).
+``$hexapla-series-soft``       A light version of the series colour.
+``$hexapla-tint``              Light backgrounds, such as the language labels (a tint of the brand colour).
+``$hexapla-ramp``              The heatmap scale: a list of seven colours, light to dark.
 ``$hexapla-sidebar-width``     The sidebar's width.
 ``$hexapla-serif``             The font for manuscript text and headings.
 ``$hexapla-sans``              The font for everything else.

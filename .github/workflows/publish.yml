@@ -1,0 +1,32 @@
+# Publishes Hexapla to PyPI when a version tag (v0.1.0) is pushed. Needs a PYPI_TOKEN secret in the repository.
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Test (100% coverage required)
+        run: |
+          python -m pip install . pytest pytest-cov
+          python -m pytest
+      - name: Check the tag matches the version
+        run: test "v$(python -c 'import hexapla; print(hexapla.__version__)')" = "${GITHUB_REF_NAME}"
+      - name: Build
+        run: |
+          python -m pip install build twine
+          pyproject-build   # not "python -m build", which an old build.py at the root would shadow
+          python -m twine check --strict dist/*
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: python -m twine upload dist/*

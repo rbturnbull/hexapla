@@ -215,3 +215,11 @@ def test_word_map_many_to_many():
     partners = mapping[f"greek-{source}"]
     assert {p["svgId"] for p in partners} == {"latin"}
     assert sum(len(v) for k, v in mapping.items() if k.startswith("greek-")) == len(verse.links)
+
+
+def test_unreadable_parse_is_reported(project_dir):
+    greek = project_dir / "claro" / "claro-greek.conllu"
+    greek.write_text("conll-u\n" + greek.read_text())
+    with pytest.raises(CorpusError) as caught:
+        load(project_dir)
+    assert "claro-greek.conllu:1: expected tab-separated CoNLL-U columns" in str(caught.value)

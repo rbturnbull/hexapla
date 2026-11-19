@@ -14,7 +14,10 @@
   NAV.linkableLemma = lemma => lemma && !["_", ".", ".."].includes(lemma) && !/[\/\\]/.test(lemma);
 
   // ----- Sequential colour (one hue, light -> dark), for heatmaps -----
-  const RAMP = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"];
+  // The theme's sequential ramp, light to dark (--ramp-0 ... --ramp-6 in hexapla.css).
+  const rootStyle = getComputedStyle(document.documentElement);
+  NAV.cssColor = name => rootStyle.getPropertyValue(name).trim();
+  const RAMP = [0, 1, 2, 3, 4, 5, 6].map(i => NAV.cssColor(`--ramp-${i}`));
   NAV.rampColor = t => {
     const x = Math.max(0, Math.min(1, t)) * (RAMP.length - 1);
     const i = Math.min(RAMP.length - 2, Math.floor(x));

@@ -37,7 +37,8 @@ hexapla validate path/to/project-config.yaml
 - `docs/`: Sphinx docs (furo). They include sections of `README.rst` between `.. start-<name>` /
   `.. end-<name>` markers, so edit shared text in the README. Build with `sphinx-build -W docs docs/_build/html`;
   update the docs whenever behaviour or the config changes.
-- `docs/_static/`: the Hexapla banner and logo (the logo is also the sites' default, `hexapla/static/img/hexapla-logo.svg`).
+- `docs/_static/`: the Hexapla banner, logo and small logo. Sites use copies in `hexapla/static/img/`: the logo as the
+  default theme logo, and the small logo (background made transparent) in every page's "Built with" footer link.
 - `action.yml`: the GitHub Action (installs Hexapla from its own checkout, builds, deploys to Pages).
 - `tests/`: pytest; `tests/data/project/` is a small complete project used by the end-to-end tests.
 
@@ -48,3 +49,11 @@ hexapla validate path/to/project-config.yaml
 - Config `licence` fields take SPDX ids (`CC-BY-NC-SA-4.0`). A TEI licence overrides the site licence
   for that transcription; `parsing_licence` and an alignment's `licence` override it for those files.
 - Alignments pair exactly two manuscripts for now; the config format allows more for later.
+
+## Releasing
+
+1. Set the version in both `pyproject.toml` and `hexapla/__init__.py` (a test checks they match), and in `CITATION.cff`.
+2. Give the version a section in `CHANGELOG.rst` (a test checks it is there) with its date.
+3. Commit, then tag and push: `git tag v0.1.0 && git push origin v0.1.0`. `.github/workflows/publish.yml` tests,
+   builds (`pyproject-build`, not `python -m build`) and uploads to PyPI with the `PYPI_TOKEN` secret.
+4. Move the action's major tag: `git tag -f v1 && git push -f origin v1`.

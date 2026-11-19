@@ -4,8 +4,9 @@
 
 {% block content %}
 <p class="text-secondary" style="max-width:900px">
-    The places where the models were least sure, to check first. Link confidences come from mcaligner
-    and word confidences from mcparser (the lowest of the lemma, part of speech, features, head and relation scores).
+    The places where the parse and the alignment are least sure, to check first. Link confidences come from the links
+    file, and word confidences from the parse (the lowest of the scores in the MISC column's <code>Conf=</code> entry,
+    as MCParser writes them).
 </p>
 <div class="row g-3">
     <div class="col-12">

@@ -47,3 +47,30 @@ def test_hexapla_variables_can_be_set_on_their_own(tmp_path):
     css = compile_css(theme)
     assert "--brand: #2e7d32" in css and "--page-bg: #fafafa" in css
     assert "--bs-primary: #0d6efd" in css
+
+
+BLUES = ["#1c3fae", "#2a78d6", "#cde2fb", "#0d366b", "#eef2fd", "#f7f9ff", "#f1f5fd", "#e4e9f3"]
+
+
+def test_default_theme_keeps_its_blues():
+    css = compile_css(None)
+    for name, value in [("accent", "#1c3fae"), ("series-1", "#2a78d6"), ("series-1-soft", "#cde2fb"),
+                        ("tint", "#eef2fd"), ("tint-faint", "#f7f9ff"), ("tint-hover", "#f1f5fd"),
+                        ("tint-track", "#e4e9f3"), ("ramp-0", "#cde2fb"), ("ramp-6", "#0d366b")]:
+        assert f"--{name}: {value}" in css
+
+
+def test_a_themed_primary_replaces_every_blue(tmp_path):
+    theme = tmp_path / "theme.scss"
+    theme.write_text("$primary: #226318;\n")
+    hexapla_css = compile_css(theme).split(":root{--brand:")[1]  # Hexapla's part, after Bootstrap
+    assert "--series-1: #226318" in hexapla_css and "--accent: #1d5414" in hexapla_css
+    for blue in BLUES:
+        assert blue not in hexapla_css
+
+
+def test_scripts_take_their_colours_from_the_theme():
+    from hexapla.build import STATIC_DIR
+    for script in ("common.js", "navigator.js", "pages.js"):
+        text = (STATIC_DIR / "js" / script).read_text(encoding="utf-8")
+        assert not any(blue in text for blue in BLUES), script

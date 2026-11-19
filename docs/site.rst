@@ -42,6 +42,9 @@ Review queue (``alignments/<id>/review/``)
 About (``about/``)
     The theme's about page, if it has one.
 
+Every page ends with a footer that credits the transcribers and lists the licences that apply, with a small
+"Built with Hexapla" logo linking to Hexapla on GitHub.
+
 Files
 -----
 

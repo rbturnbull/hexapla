@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use Hexapla, please cite it as below."
+title: "Hexapla: static websites for reading and exploring word-aligned manuscript texts"
+type: software
+authors:
+  - family-names: Turnbull
+    given-names: Robert
+    affiliation: "Melbourne Data Analytics Platform, University of Melbourne"
+    website: "https://robturnbull.com"
+version: 0.1.0
+license: Apache-2.0
+repository-code: "https://github.com/rbturnbull/hexapla"
+url: "https://rbturnbull.github.io/hexapla/"
+keywords:
+  - digital humanities
+  - manuscripts
+  - TEI
+  - CoNLL-U
+  - word alignment
+  - parallel texts
+  - static site generator

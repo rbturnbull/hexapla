@@ -87,3 +87,9 @@ def test_build_errors_exit_with_a_message(project_dir, tmp_path):
     (output / "keep.txt").write_text("x")
     result = invoke("build", PROJECT / CONFIG_NAME, "--output", output)
     assert result.exit_code == 1 and row(result.output, "✗", "not built by Hexapla")
+
+
+def test_version():
+    from hexapla import __version__
+    result = invoke("--version")
+    assert result.exit_code == 0 and result.output.strip() == f"hexapla {__version__}"

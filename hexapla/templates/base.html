@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M4 24 A8 10 0 0 1 20 24 M12 24 A8 10 0 0 1 28 24' fill='none' stroke='%23224abe' stroke-width='3'/%3E%3C/svg%3E">
+    <link rel="icon" href="{{ root }}img/{{ site.logo }}">
     {% block head %}{% endblock %}
 </head>
 <body data-page="{{ page }}">
@@ -49,18 +49,20 @@
         <main class="content">
             {% block content %}{% endblock %}
         </main>
-        {% if attribution %}
         <footer class="site-footer">
+            <div class="credits">
+            {% if attribution %}
             Transcriptions:
             {% for a in attribution %}<span>{{ a.language }}, {{ a.credit }} ({% if a.licence_url %}<a href="{{ a.licence_url }}" target="_blank" rel="noopener">{{ a.licence }}</a>{% else %}{{ a.licence }}{% endif %})</span>{{ "; " if not loop.last }}{% endfor %}.
             {% for l in licences %}<span>{{ l.label }}: {% if l.url %}<a href="{{ l.url }}" target="_blank" rel="noopener">{{ l.name }}</a>{% else %}{{ l.name }}{% endif %}</span>{{ "; " if not loop.last else "." }} {% endfor %}
-            Parsed with mcparser and aligned with mcaligner. Built with Hexapla.
+            {% elif site.licence %}
+            {{ site.name }}: {% if site.licence.url %}<a href="{{ site.licence.url }}" target="_blank" rel="noopener">{{ site.licence.name }}</a>{% else %}{{ site.licence.name }}{% endif %}.
+            {% endif %}
+            </div>
+            <a class="built-with" href="{{ site.hexapla_url }}" target="_blank" rel="noopener" title="Hexapla on GitHub">
+                <span>Built with</span><img src="{{ root }}img/{{ site.hexapla_logo }}" alt="Hexapla">
+            </a>
         </footer>
-        {% elif site.licence %}
-        <footer class="site-footer">
-            {{ site.name }}: {% if site.licence.url %}<a href="{{ site.licence.url }}" target="_blank" rel="noopener">{{ site.licence.name }}</a>{% else %}{{ site.licence.name }}{% endif %}. Built with Hexapla.
-        </footer>
-        {% endif %}
     </div>
 </div>
 <div class="chart-tooltip" id="tooltip" role="tooltip"></div>

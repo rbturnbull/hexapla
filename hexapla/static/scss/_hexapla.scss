@@ -13,9 +13,30 @@ $hexapla-sidebar-width: 240px !default;
 $hexapla-serif: "Gentium Plus", "Gentium Book Plus", Georgia, serif !default;
 $hexapla-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !default;
 
+// Colours derived from the brand: Hexapla's own blue keeps its original palette, any other brand gets one made from it.
+$hexapla-is-default: $hexapla-brand == #224abe;
+$hexapla-accent: if($hexapla-is-default, #1c3fae, shade-color($hexapla-brand, 15%)) !default;  // highlighted words and arcs
+$hexapla-series: if($hexapla-is-default, #2a78d6, $hexapla-brand) !default;                    // bars, dots and meters
+$hexapla-series-soft: if($hexapla-is-default, #cde2fb, tint-color($hexapla-series, 80%)) !default;
+$hexapla-tint: if($hexapla-is-default, #eef2fd, tint-color($hexapla-brand, 92%)) !default;        // language chips
+$hexapla-tint-faint: if($hexapla-is-default, #f7f9ff, tint-color($hexapla-brand, 96%)) !default;  // table rows on hover
+$hexapla-tint-hover: if($hexapla-is-default, #f1f5fd, tint-color($hexapla-brand, 94%)) !default;  // matrix cells on hover
+$hexapla-tint-track: if($hexapla-is-default, #e4e9f3, tint-color($hexapla-brand, 88%)) !default;  // bar tracks on hover
+
 @if $hexapla-brand-light == null {
-  // Hexapla's own blue keeps its original lighter partner; any other brand colour gets a tint of itself.
-  $hexapla-brand-light: if($hexapla-brand == #224abe, #4e73df, tint-color($hexapla-brand, 20%));
+  $hexapla-brand-light: if($hexapla-is-default, #4e73df, tint-color($hexapla-brand, 20%));
+}
+
+// The sequential ramp of the heatmaps (common.js reads it), light to dark.
+$hexapla-ramp: null !default;
+@if $hexapla-ramp == null {
+  @if $hexapla-is-default {
+    $hexapla-ramp: (#cde2fb, #9ec5f4, #6da7ec, #3987e5, #256abf, #184f95, #0d366b);
+  } @else {
+    $hexapla-ramp: (tint-color($hexapla-series, 80%), tint-color($hexapla-series, 60%), tint-color($hexapla-series, 40%),
+                    tint-color($hexapla-series, 20%), $hexapla-series, shade-color($hexapla-series, 20%),
+                    shade-color($hexapla-series, 45%));
+  }
 }
 
 :root {
@@ -27,8 +48,16 @@ $hexapla-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !default
   --text-primary: #{$hexapla-text};
   --text-secondary: #{$hexapla-text-secondary};
   --text-muted: #{$hexapla-text-muted};
-  --series-1: #2a78d6;            /* the single data series colour */
-  --series-1-soft: #cde2fb;
+  --accent: #{$hexapla-accent};
+  --series-1: #{$hexapla-series};            /* the single data series colour */
+  --series-1-soft: #{$hexapla-series-soft};
+  --tint: #{$hexapla-tint};
+  --tint-faint: #{$hexapla-tint-faint};
+  --tint-hover: #{$hexapla-tint-hover};
+  --tint-track: #{$hexapla-tint-track};
+  @for $i from 1 through length($hexapla-ramp) {
+    --ramp-#{$i - 1}: #{nth($hexapla-ramp, $i)};
+  }
   --link-sure: rgba(255, 221, 0, 0.55);
   --link-probable: rgba(245, 140, 40, 0.28);
   --link-probable-edge: #e07a1f;
@@ -139,7 +168,7 @@ a { color: var(--brand); }
 .data-table th.sorted-asc::after { content: " ↑"; color: var(--text-primary); }
 .data-table th.sorted-desc::after { content: " ↓"; color: var(--text-primary); }
 .data-table td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #f0f1f5; vertical-align: middle; }
-.data-table tr:hover td { background: #f7f9ff; }
+.data-table tr:hover td { background: var(--tint-faint); }
 .data-table td.num, .data-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .table-scroll { max-height: 70vh; overflow: auto; }
 .data-table td:has(.meter) { white-space: nowrap; }
@@ -192,10 +221,10 @@ a { color: var(--brand); }
 .heatmap .total { color: var(--text-muted); font-weight: 400; font-size: 0.75rem; }
 .heatmap .axis-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
 .legend-ramp { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; color: var(--text-secondary); }
-.legend-ramp .bar { width: 120px; height: 10px; border-radius: 3px; background: linear-gradient(90deg, #cde2fb, #2a78d6, #0d366b); }
+.legend-ramp .bar { width: 120px; height: 10px; border-radius: 3px; background: linear-gradient(90deg, var(--ramp-0), var(--series-1), var(--ramp-6)); }
 
 .hbar-row { display: grid; grid-template-columns: 70px 1fr 90px; align-items: center; gap: 0.6rem; font-size: 0.85rem; padding: 2px 0; cursor: pointer; }
-.hbar-row:hover .hbar-track { background: #e4e9f3; }
+.hbar-row:hover .hbar-track { background: var(--tint-track); }
 .hbar-track { background: #f0f2f7; height: 14px; border-radius: 4px; overflow: hidden; }
 .hbar-fill { background: var(--series-1); height: 100%; border-radius: 0 4px 4px 0; }
 .hbar-row .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
@@ -221,13 +250,13 @@ a { color: var(--brand); }
 .tree-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); text-align: center; margin: 0; }
 svg.tree { display: block; width: 100%; margin-bottom: 1.5rem; }
 .token { font-family: var(--serif); font-size: 24px; fill: var(--text-primary); }
-.token.root { fill: #1c3fae; font-weight: 700; }
+.token.root { fill: var(--accent); font-weight: 700; }
 .token.low-conf { text-decoration: underline wavy #e07a1f; }
 .arc { fill: none; stroke: #d8dbe3; stroke-width: 1.5px; }
 .arc.cross { stroke: #eceef3; stroke-width: 1px; }
 .arc-highlight-in { stroke: #d03b3b; stroke-width: 2.5px; }
-.arc-highlight-out { stroke: #1c3fae; stroke-width: 2.5px; }
-.arc-label { font-size: 14px; text-anchor: middle; fill: #1c3fae; font-style: italic; font-family: var(--serif); }
+.arc-highlight-out { stroke: var(--accent); stroke-width: 2.5px; }
+.arc-label { font-size: 14px; text-anchor: middle; fill: var(--accent); font-style: italic; font-family: var(--serif); }
 .features { font-size: 12px; fill: #2c6e2f; text-anchor: middle; font-family: var(--sans); }
 .features.lemma-line { font-family: var(--serif); font-size: 14px; fill: var(--text-primary); }
 .token-bg { fill: var(--link-sure); }
@@ -239,20 +268,20 @@ svg.tree { display: block; width: 100%; margin-bottom: 1.5rem; }
   border: 1px solid var(--border); border-radius: 8px; padding: 0.35rem 0.55rem; min-width: 64px;
   text-align: center; background: var(--surface); cursor: pointer;
 }
-.il-word:hover { border-color: var(--series-1); box-shadow: 0 1px 4px rgba(42, 120, 214, 0.18); }
+.il-word:hover { border-color: var(--series-1); box-shadow: 0 1px 4px #{rgba($hexapla-series, 0.18)}; }
 .il-word.unaligned { background: #fafafa; border-style: dashed; }
 .il-word .form { font-family: var(--serif); font-size: 1.3rem; }
 .il-word .lemma { font-size: 0.85rem; color: var(--text-secondary); }
-.il-word .partners { border-top: 1px solid #eef0f4; margin-top: 0.25rem; padding-top: 0.2rem; font-family: var(--serif); font-size: 1.05rem; color: #1c3fae; min-height: 1.4em; }
+.il-word .partners { border-top: 1px solid #eef0f4; margin-top: 0.25rem; padding-top: 0.2rem; font-family: var(--serif); font-size: 1.05rem; color: var(--accent); min-height: 1.4em; }
 .il-word .partners .probable { color: var(--link-probable-edge); border-bottom: 1px dashed var(--link-probable-edge); }
 .il-word .partners .none { color: #c5c7d0; }
 
 .matrix-wrap { overflow: auto; }
 .verse-layout > * { min-width: 0; }  /* a wide matrix or tree scrolls inside its panel instead of widening the page */
 .matrix .lbl { font-family: var(--serif); font-size: var(--matrix-font, 15px); fill: var(--text-primary); }
-.matrix .lbl.active { font-weight: 700; fill: #1c3fae; }
+.matrix .lbl.active { font-weight: 700; fill: var(--accent); }
 .matrix .gridcell { fill: transparent; stroke: #eef0f4; }
-.matrix .gridcell.hover { fill: #f1f5fd; }
+.matrix .gridcell.hover { fill: var(--tint-hover); }
 .matrix .diag { stroke: #e3e6ef; stroke-dasharray: 3 3; }
 .matrix .dot.sure { fill: var(--series-1); stroke: var(--surface); stroke-width: 2px; }
 .matrix .dot.probable { fill: var(--surface); stroke: var(--link-probable-edge); stroke-width: 2px; }
@@ -263,7 +292,7 @@ svg.tree { display: block; width: 100%; margin-bottom: 1.5rem; }
 .home-hero p { color: var(--text-secondary); max-width: 640px; margin: 0.8rem auto 0; }
 .ms-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; max-width: 1200px; margin: 1.5rem auto; padding: 0 1rem; }
 .ms-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem 1.2rem; text-decoration: none; color: inherit; display: block; transition: box-shadow 0.1s, border-color 0.1s; }
-.ms-card:hover { border-color: var(--series-1); box-shadow: 0 4px 16px rgba(34, 74, 190, 0.1); }
+.ms-card:hover { border-color: var(--series-1); box-shadow: 0 4px 16px #{rgba($hexapla-brand, 0.1)}; }
 .ms-card .siglum { font-size: 0.8rem; color: var(--text-muted); }
 .ms-card h3 { font-family: var(--serif); font-size: 1.35rem; margin: 0.1rem 0 0.3rem; }
 .ms-card .langs { font-size: 0.82rem; color: var(--text-secondary); }
@@ -271,7 +300,7 @@ svg.tree { display: block; width: 100%; margin-bottom: 1.5rem; }
 .ms-card .nums b { display: block; font-size: 1.1rem; color: var(--text-primary); font-variant-numeric: tabular-nums; }
 
 /* Transcriptions (TEI header and apparatus) */
-.lang-chip { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--brand); background: #eef2fd; border-radius: 999px; padding: 0.1rem 0.55rem; }
+.lang-chip { display: inline-block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--brand); background: var(--tint); border-radius: 999px; padding: 0.1rem 0.55rem; }
 .tei-card { border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; height: 100%; }
 .tei-head { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
 .tei-card h3 { font-family: var(--serif); font-size: 1.25rem; margin: 0 0 0.1rem; }
@@ -292,6 +321,11 @@ svg.tree { display: block; width: 100%; margin-bottom: 1.5rem; }
 .tei-flags { list-style: none; padding: 0; margin: 0.2rem 0 0; color: var(--text-secondary); }
 .tei-flags i { width: 1.2em; color: var(--text-muted); margin-right: 0.3rem; }
 .site-footer { padding: 1rem 1.5rem 1.5rem; font-size: 0.8rem; color: var(--text-muted); max-width: 1500px; }
+.site-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 2rem; }
+.site-footer .credits { flex: 1 1 420px; }
+.built-with { display: inline-flex; align-items: center; gap: 0.45rem; margin-left: auto; color: var(--text-muted); text-decoration: none; opacity: 0.85; }
+.built-with:hover { opacity: 1; color: var(--text-secondary); }
+.built-with img { height: 18px; width: auto; display: block; }
 @media (max-width: 575px) { .tei-dl { grid-template-columns: 1fr; } .tei-dl dt { margin-top: 0.3rem; } }
 .chip-multi a { color: inherit; text-decoration: none; }
 .chip-multi a:hover { color: var(--series-1); text-decoration: underline; }

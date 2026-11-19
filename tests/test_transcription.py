@@ -1,3 +1,4 @@
+import pytest
 from pathlib import Path
 
 from hexapla.transcription import read_transcription
@@ -197,3 +198,18 @@ def test_document_title_is_a_ga_number_only_when_it_looks_like_one(tmp_path):
     path.write_text('<TEI><teiHeader><fileDesc><titleStmt><title type="document" n="0278">A transcription of Ephesians in 0278'
                     '</title></titleStmt></fileDesc></teiHeader><text xml:lang="grc"/></TEI>')
     assert read_transcription(path).header["title"] == "A transcription of Ephesians in 0278"
+
+
+@pytest.mark.parametrize("text, name, url", [
+    ("This is an open access work licensed under a Creative Commons Attribution 4.0 International license.",
+     "CC BY 4.0", "https://creativecommons.org/licenses/by/4.0/"),
+    ("Licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License.",
+     "CC BY-NC-SA 3.0", "https://creativecommons.org/licenses/by-nc-sa/3.0/"),
+    ("Creative Commons Attribution-NoDerivatives 4.0", "CC BY-ND 4.0", "https://creativecommons.org/licenses/by-nd/4.0/"),
+])
+def test_licence_written_out_in_words(tmp_path, text, name, url):
+    path = tmp_path / "words.xml"
+    path.write_text(f'<TEI><teiHeader><fileDesc><publicationStmt><availability><p>{text}</p></availability>'
+                    '</publicationStmt></fileDesc></teiHeader><text xml:lang="ar"/></TEI>')
+    header = read_transcription(path).header
+    assert (header["licence_name"], header["licence_url"]) == (name, url)

@@ -12,3 +12,4 @@ _site/
 __pycache__/
 docs/_build/
 docs/_generated/
+dist/

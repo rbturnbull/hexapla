@@ -4,6 +4,10 @@
    :align: center
 
 .. include:: ../README.rst
+   :start-after: start-badges
+   :end-before: end-badges
+
+.. include:: ../README.rst
    :start-after: start-summary
    :end-before: end-summary
 
@@ -35,4 +39,6 @@ Start with :doc:`installation` and :doc:`quickstart`, then see :doc:`project` fo
    _generated/cli
    api
    development
+   changelog
+   citing
    acknowledgements
