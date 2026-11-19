@@ -5,7 +5,7 @@ site/
   index.html                                       home page
   about/index.html                                 the theme's about page (Markdown), if any
   css/hexapla.css                                  Bootstrap and Hexapla's styles, with the theme's variables
-  js/, img/                                        scripts and the logo
+  js/, img/                                        scripts, the logo and the favicon
   assets/                                          the theme's assets folder (images and files for the about page)
   manuscripts/<ms>/index.html                      a manuscript: its TEI header and transcription summary
   manuscripts/<ms>/<file>.xml                      the TEI transcription, for download
@@ -34,6 +34,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from . import analysis
 from .about import render_about
 from .bible import read_verse_ref
+from .config import FAVICON_TYPES
 from .conllu import Sentence
 from .corpus import AlignedPair, Language, Project, Verse, Witness
 from .theme import compile_css
@@ -487,10 +488,15 @@ def build_site(project: Project, output: Path | str):
     (output / "img").mkdir()
     shutil.copyfile(logo, output / "img" / logo_name)
     shutil.copyfile(SMALL_LOGO, output / "img" / SMALL_LOGO.name)
+    favicon = None
+    if theme.favicon:
+        suffix = theme.favicon.suffix.lower()
+        favicon = {"name": f"favicon{suffix}", "type": FAVICON_TYPES[suffix]}
+        shutil.copyfile(theme.favicon, output / "img" / favicon["name"])
     if theme.assets:
         shutil.copytree(theme.assets, output / "assets")
 
-    site = {"name": theme.name, "logo": logo_name, "about": theme.about is not None, "licence": project.site_licence,
+    site = {"name": theme.name, "logo": logo_name, "favicon": favicon, "about": theme.about is not None, "licence": project.site_licence,
             "hexapla_url": HEXAPLA_URL, "hexapla_logo": SMALL_LOGO.name}
     sidebar_sections = build_sidebar_sections(pairs)
     sections = build_sidebar_sections(pairs, summaries)

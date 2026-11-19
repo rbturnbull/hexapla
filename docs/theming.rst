@@ -1,7 +1,7 @@
 Theming
 =======
 
-The ``theme`` section of the config sets the site's name, logo, colours, about page and licence. Everything in it is
+The ``theme`` section of the config sets the site's name, logo, favicon, colours, about page and licence. Everything in it is
 optional: without it, the site has Hexapla's look and logo.
 
 .. code-block:: yaml
@@ -9,6 +9,7 @@ optional: without it, the site has Hexapla's look and logo.
     theme:
       name: BICROSS Navigator
       logo: theme/logo.svg
+      favicon: theme/favicon.svg
       variables: theme/variables.scss
       about: theme/about.md
       assets: theme/assets
@@ -62,6 +63,10 @@ Logo
 ----
 
 ``logo`` can be any image (SVG, PNG or JPEG). It is shown at the top of the sidebar and on the home page.
+
+``favicon`` is the icon browsers show in the tab and in bookmarks: a ``.png``, ``.ico`` or ``.svg`` file. Make it
+square, and keep it simple enough to read at 16 pixels: a logo's shape without its text works well. Without a
+favicon, the logo is used.
 
 About page and assets
 ---------------------

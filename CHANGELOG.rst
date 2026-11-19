@@ -13,6 +13,6 @@ The first release.
   lexicon, translation insights and review queue) and for each manuscript (described from its TEI header).
 - Manuscript metadata from the TEI header: language, name, shelfmarks, GA, VL and Trismegistos numbers, date,
   summary, transcribers and licence.
-- Themes: a logo, Bootstrap and Hexapla variables in SCSS (or extra CSS), an About page in Markdown with its own
+- Themes: a logo, a favicon, Bootstrap and Hexapla variables in SCSS (or extra CSS), an About page in Markdown with its own
   images and files, and the site licence. Licences of transcriptions, parses and links are shown on every page.
 - A GitHub Action that builds a project's site and deploys it to GitHub Pages.

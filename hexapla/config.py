@@ -5,6 +5,7 @@ and the alignments between them. Paths are relative to the config file::
     theme:
       name: BICROSS Navigator
       logo: theme/logo.svg
+      favicon: theme/favicon.svg
       variables: theme/variables.scss
       about: theme/about.md
       assets: theme/assets
@@ -70,6 +71,9 @@ def _resolve_folder(value: Path | None, info: ValidationInfo) -> Path | None:
     return path
 
 
+FAVICON_TYPES = {".png": "image/png", ".ico": "image/x-icon", ".svg": "image/svg+xml"}
+
+
 class Model(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -77,6 +81,7 @@ class Model(BaseModel):
 class Theme(Model):
     name: str = "Hexapla"
     logo: Path | None = None
+    favicon: Path | None = None  # the browser tab icon (.png, .ico or .svg); the logo by default
     variables: Path | None = None  # Bootstrap variables (.scss) or extra CSS (.css)
     assets: Path | None = None  # a folder copied into the site as assets/, for the about page's images and files
     about: Path | None = None  # Markdown for the about page; its links into the assets folder work on the site
@@ -89,7 +94,14 @@ class Theme(Model):
             raise ValueError(f"must be a .scss or .css file, not {value.name}")
         return value
 
-    _paths = field_validator("logo", "variables")(_resolve)
+    @field_validator("favicon")
+    @classmethod
+    def _icon(cls, value: Path | None) -> Path | None:
+        if value is not None and value.suffix.lower() not in FAVICON_TYPES:
+            raise ValueError(f"must be a .png, .ico or .svg file, not {value.name}")
+        return value
+
+    _paths = field_validator("logo", "favicon", "variables")(_resolve)
     _folders = field_validator("assets")(_resolve_folder)
 
     @field_validator("about")

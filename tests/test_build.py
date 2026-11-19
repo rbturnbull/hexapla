@@ -1,5 +1,6 @@
 import json
 import re
+from pathlib import Path
 
 import pytest
 
@@ -249,3 +250,18 @@ def test_pages_do_not_name_tools_the_project_may_not_use(site):
 def test_the_favicon_is_the_site_logo(site):
     assert '<link rel="icon" href="./img/logo.svg">' in read(site, "index.html")
     assert '<link rel="icon" href="../../img/logo.svg">' in read(site, "alignments/claro/index.html")
+
+
+@pytest.mark.parametrize("name, kind", [("icon.svg", "image/svg+xml"), ("icon.PNG", "image/png"),
+                                        ("icon.ico", "image/x-icon")])
+def test_a_theme_favicon_replaces_the_logo_as_the_icon(project_dir, tmp_path, name, kind):
+    (project_dir / "theme" / name).write_bytes(b"icon")
+    data = read_config(project_dir)
+    data["theme"]["favicon"] = f"theme/{name}"
+    write_config(project_dir, data)
+    output = build(project_dir, tmp_path / "site")
+    suffix = Path(name).suffix.lower()
+    assert (output / f"img/favicon{suffix}").read_bytes() == b"icon"
+    assert f'<link rel="icon" type="{kind}" href="./img/favicon{suffix}">' in read(output, "index.html")
+    assert f'href="../../img/favicon{suffix}">' in read(output, "alignments/claro/index.html")
+    assert 'src="./img/logo.svg"' in read(output, "index.html")

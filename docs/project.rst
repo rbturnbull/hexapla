@@ -29,6 +29,7 @@ Misspelt or unknown keys are reported as errors.
     =============  ==========================================================================================
     ``name``       The site's name, shown in the title bar and on the home page (default ``Hexapla``).
     ``logo``       An image for the sidebar and the home page (default: the Hexapla logo).
+    ``favicon``    The browser tab icon: a ``.png``, ``.ico`` or ``.svg`` file (default: the logo).
     ``variables``  A ``.scss`` file of Bootstrap and Hexapla variables, or a ``.css`` file added to the styles.
     ``about``      A Markdown file for an About page.
     ``assets``     A folder copied into the site, for images and files the about page links to.

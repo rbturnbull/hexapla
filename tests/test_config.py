@@ -39,6 +39,7 @@ def test_minimal_config_uses_defaults(project_dir):
     assert config.theme == Theme()
     assert config.theme.name == "Hexapla"
     assert config.theme.logo is None and config.theme.variables is None and config.theme.about is None
+    assert config.theme.favicon is None
 
 
 def test_absolute_paths_are_kept(project_dir):
@@ -65,6 +66,8 @@ def test_config_in_a_subfolder_resolves_paths_against_itself(project_dir):
     (lambda d: d["manuscripts"]["claro-greek"].update(tei="missing.xml"), "missing.xml"),
     (lambda d: d["theme"].update(about="nowhere.md"), "nowhere.md"),
     (lambda d: d["theme"].update(variables="theme/about.md"), ".scss or .css"),
+    (lambda d: d["theme"].update(favicon="theme/about.md"), ".png, .ico or .svg"),
+    (lambda d: d["theme"].update(favicon="theme/favicon.png"), "favicon.png"),
     (lambda d: d["alignments"]["claro"].update(manuscripts=["claro-greek", "claro-coptic"]), "claro-coptic"),
     (lambda d: d["alignments"]["claro"].update(manuscripts=["claro-greek"]), "at least 2"),
     (lambda d: d["alignments"]["claro"].update(manuscripts=["claro-greek", "claro-greek"]), "more than once"),

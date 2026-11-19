@@ -105,6 +105,7 @@ config file:
     theme:
       name: BICROSS Navigator
       logo: theme/logo.svg            # optional: the Hexapla logo by default
+      favicon: theme/favicon.svg      # optional: the browser tab icon (.png, .ico or .svg); the logo by default
       variables: theme/variables.scss # optional: Bootstrap variables (.scss) or extra CSS (.css)
       about: theme/about.md           # optional: an about page (Markdown)
       assets: theme/assets            # optional: images and files for the about page

@@ -54,7 +54,7 @@ Files
       index.html                                  home page
       about/index.html                            about page
       css/hexapla.css                             styles, compiled with the theme
-      js/, img/                                   scripts and the logo
+      js/, img/                                   scripts, the logo and the favicon
       manuscripts/<ms>/index.html                 a manuscript
       manuscripts/<ms>/<file>.xml                 its TEI transcription
       alignments/<id>/index.html                  overview
